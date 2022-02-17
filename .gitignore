@@ -1,2 +1,4 @@
 /samples
-/input
+/test_data
+/lib/experiments
+/lib/__pycache__

@@ -16,6 +16,8 @@ import numpy as np
 from PIL import Image
 import tifffile as tf
 import pandas as pd
+import seaborn as sns
+import seaborn_image as isns
 
 def parse_tiff(tiff_path, summary_path):
     '''Reads and parses a multi-image tiff
@@ -56,3 +58,6 @@ def normalize_quantile(top_quantile, img, metal):
     img_normalized = np.minimum(img / max_val, 1.0)
     img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
     img_normalized.save(os.path.join('../output', metal + '.jpg'), quality = 100)
+
+def show_image(img):
+    isns.imgplot(img)
