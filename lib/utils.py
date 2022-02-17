@@ -5,6 +5,7 @@ This module contains some auxiliary functions.
 Author: José Verdú Díaz
 '''
 
+from dis import dis
 import os
 
 from lib.Colors import Color
@@ -24,11 +25,12 @@ def print_title():
 def print_menu(options):
     for key in options.keys(): print (key, ' - ', options[key] )
 
-def input_menu_option(options, cancel = True):
+def input_menu_option(options, cancel = True, display = []):
     color = Color()
 
     while True:
         print_title()
+        for d in display: print(f'{d}\n')
         print_menu(options)
 
         try:

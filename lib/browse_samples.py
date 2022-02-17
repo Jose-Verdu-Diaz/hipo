@@ -26,5 +26,5 @@ def display_sample_df(images, metals, labels, summary_df, sample_name):
 
     df = pd.DataFrame(list(zip(metals, labels, img_sizes, pixel_min, pixel_max)),columns =['Channel', 'Label', 'Image Size', 'Min Value', 'Max Value'])
 
-    print(f'Displayin sample: {sample_name}\n')
-    print(tabulate(df, headers = 'keys', tablefmt = 'github'))
+    table = tabulate(df, headers = 'keys', tablefmt = 'github')
+    return(f'Displayin sample: {sample_name}\n\n{table}')

@@ -18,6 +18,8 @@ import tifffile as tf
 import pandas as pd
 import seaborn as sns
 import seaborn_image as isns
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
 
 def parse_tiff(tiff_path, summary_path):
     '''Reads and parses a multi-image tiff
@@ -44,7 +46,9 @@ def parse_tiff(tiff_path, summary_path):
 
     for slice in range(tiff_slices.shape[0]):
         metals.append(str(summary_df['Channel'][slice]))
-        labels.append(str(summary_df['Label'][slice]))
+
+        label =str(summary_df['Label'][slice])
+        labels.append(label if not label == 'nan' else '-')
 
     return tiff_slices,metals,labels,summary_df
 
@@ -56,8 +60,12 @@ def normalize_quantile(top_quantile, img, metal):
         print(f'Channel {metal} has a {top_quantile} quantile of 0. Using max value: {max_val}')     
 
     img_normalized = np.minimum(img / max_val, 1.0)
-    img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
-    img_normalized.save(os.path.join('../output', metal + '.jpg'), quality = 100)
+    img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint32))
 
 def show_image(img):
     isns.imgplot(img)
+    plt.show()
+
+def save_image(img, channel, sample):
+    img_normalized = Image.fromarray(np.array(img, dtype = np.uint32))
+    img_normalized.save(os.path.join(f'samples/{sample}/img_raw', channel + '.png'), quality = 100)
