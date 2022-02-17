@@ -25,13 +25,14 @@ def print_title():
 def print_menu(options):
     for key in options.keys(): print (key, ' - ', options[key] )
 
-def input_menu_option(options, cancel = True, display = []):
+def input_menu_option(options, cancel = True, display = [], show_menu = True):
     color = Color()
 
     while True:
         print_title()
         for d in display: print(f'{d}\n')
-        print_menu(options)
+
+        if show_menu: print_menu(options)
 
         try:
             if cancel: prompt = '\nSelect an option (\'c\' to cancel): '
@@ -48,3 +49,20 @@ def input_menu_option(options, cancel = True, display = []):
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue
 
+def input_text(prompt, cancel = True, display = []):
+    color = Color()
+
+    while True:
+        print_title()
+        for d in display: print(f'{d}\n')
+
+        try:
+            if cancel: prompt = f'\n{prompt} (\'c\' to cancel): '
+            txt = str(input(prompt))
+
+            if  txt == 'c': return None
+            else: return txt
+
+        except: 
+            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            continue

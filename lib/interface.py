@@ -6,8 +6,6 @@ Author: José Verdú Díaz
 
 Methods
 -------
-ask_file(str, str, list(tuple)) -> str
-    Open a dialog to select a file
 '''
 
 import os

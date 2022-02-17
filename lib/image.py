@@ -7,8 +7,6 @@ Author: José Verdú Díaz
 
 Methods
 -------
-parse_tiff(str, str) -> array,array,array
-    Reads and parses a multi-image tiff
 '''
 
 import os
@@ -52,20 +50,25 @@ def parse_tiff(tiff_path, summary_path):
 
     return tiff_slices,metals,labels,summary_df
 
-def normalize_quantile(top_quantile, img, metal):
+def normalize_quantile(top_quantile, img, sample, channel):
     max_val = np.quantile(img, top_quantile)
 
     if max_val == 0: 
         max_val = img.max()
-        print(f'Channel {metal} has a {top_quantile} quantile of 0. Using max value: {max_val}')     
+        print(f'Channel {channel} has a {top_quantile} quantile of 0. Using max value: {max_val}')     
 
     img_normalized = np.minimum(img / max_val, 1.0)
-    img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint32))
+    img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
+    img_normalized.save(os.path.join(f'samples/{sample}/img_norm', channel + '.png'), quality = 100)
 
-def show_image(img):
-    isns.imgplot(img)
+def show_image(img):  
+    isns.imgplot(np.flipud(img))
     plt.show()
 
 def save_image(img, channel, sample):
     img_normalized = Image.fromarray(np.array(img, dtype = np.uint32))
     img_normalized.save(os.path.join(f'samples/{sample}/img_raw', channel + '.png'), quality = 100)
+
+def load_image(path):
+    img = Image.open(path)
+    return np.asarray(img)

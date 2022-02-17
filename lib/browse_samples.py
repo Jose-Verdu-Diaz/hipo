@@ -10,6 +10,8 @@ import pandas as pd
 from pyparsing import col
 from tabulate import tabulate
 
+from lib.Colors import Color
+
 def list_samples():
     dirs = os.listdir('samples')
     df = pd.DataFrame(list(zip(dirs)), columns=['Sample'])
@@ -20,6 +22,8 @@ def list_samples():
 
 def display_sample_df(images, metals, labels, summary_df, sample_name):
 
+    color = Color()
+
     img_sizes = [img.shape for img in images]
     pixel_min = summary_df['MinValue'].tolist()
     pixel_max = summary_df['MaxValue'].tolist()
@@ -27,4 +31,4 @@ def display_sample_df(images, metals, labels, summary_df, sample_name):
     df = pd.DataFrame(list(zip(metals, labels, img_sizes, pixel_min, pixel_max)),columns =['Channel', 'Label', 'Image Size', 'Min Value', 'Max Value'])
 
     table = tabulate(df, headers = 'keys', tablefmt = 'github')
-    return(f'Displayin sample: {sample_name}\n\n{table}')
+    return f'{color.BOLD}{color.UNDERLINE}Displaying sample:{color.ENDC} {sample_name}\n\n{table}', df
