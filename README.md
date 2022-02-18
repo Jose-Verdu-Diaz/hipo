@@ -19,7 +19,8 @@ Update conda:
 $ conda update conda
 ```
 
-Create conda environment. This project has been created for Python 3.10.2 and won't be maintained for any other version.
+Create conda environment. This project has been created for Python 3.10.2 and won't be 
+maintained for any other version.
 ```console
 $ conda create -n envname python=3.10.2
 ```
@@ -44,3 +45,13 @@ Run the tool
 ```console
 $ python main.py
 ```
+
+## Add a new sample
+
+Choones option `2 - Add new sample` from the main menu, you will be prompted to enter 
+a name for the sample. After entering a name, you will be forced to add three files
+inside `samples/<samplename>/input`:
+ - The image tiff file
+ - The summary txt file
+ - The annotation geojson file
+After including all the files, you will be able to proceed.

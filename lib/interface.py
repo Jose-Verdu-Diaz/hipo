@@ -15,6 +15,7 @@ make_sample_dirs
 import os
 import sys
 import json
+import shutil
 
 def load_input(sample):
     '''Load input tiff, summary and annotations
@@ -54,7 +55,7 @@ def load_input(sample):
 
 
 def make_sample_dirs(name):
-    '''Creates the directory structure for a new sample
+    '''Creates the directory and file structure for a new sample
 
     Parameters
     ----------
@@ -62,12 +63,30 @@ def make_sample_dirs(name):
         Name of the new sample
     '''
 
-    with open('lib/json/sample_dir_structure.json', 'r') as f: data = json.load(f)
-
     path = f'samples/{name}'
     os.makedirs(path)
-
+    with open('lib/json/sample_dir_structure.json', 'r') as f: data = json.load(f)
     for d in data['sample_name']: os.makedirs(f'{path}/{d}')
 
+    shutil.copy('lib/json/sample_parameters.json',f'{path}/{name}.json')
+
+    update_sample_json(path, name)
 
 
+def update_sample_json(path, name = None):
+    '''Updates a sample json file
+
+    Parameters
+    ----------
+    path
+        Path to json
+    name, optional
+        New name
+    '''
+
+    with open(f'{path}/{name}.json', 'r+') as f: 
+        data = json.load(f)
+        data['name'] = name
+        f.seek(0)
+        json.dump(data, f, indent=4)
+        f.truncate()
