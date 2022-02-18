@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
                             if opt == 0: break
                             elif opt == 1:
-                                print('Normalizing, wait please...')
+                                print(f'Normalizing {sample}, wait please...')
                                 for i,img in enumerate(images): normalize_quantile(0.95, img, sample, metals[i])
 
                             elif opt == 2:

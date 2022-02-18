@@ -5,7 +5,6 @@ This module contains some auxiliary functions.
 Author: José Verdú Díaz
 '''
 
-from dis import dis
 import os
 
 from lib.Colors import Color

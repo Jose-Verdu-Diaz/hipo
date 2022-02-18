@@ -17,7 +17,6 @@ import pandas as pd
 import seaborn as sns
 import seaborn_image as isns
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Button
 
 def parse_tiff(tiff_path, summary_path):
     '''Reads and parses a multi-image tiff

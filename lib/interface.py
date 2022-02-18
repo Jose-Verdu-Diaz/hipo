@@ -11,10 +11,6 @@ Methods
 import os
 import sys
 import json
-import pandas as pd
-from tabulate import tabulate
-
-from lib.utils import clear
 
 def load_input(sample):
     files = os.listdir(f'samples/{sample}/input')

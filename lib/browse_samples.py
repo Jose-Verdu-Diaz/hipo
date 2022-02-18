@@ -7,7 +7,6 @@ Author: José Verdú Díaz
 
 import os
 import pandas as pd
-from pyparsing import col
 from tabulate import tabulate
 
 from lib.Colors import Color
