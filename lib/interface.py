@@ -10,8 +10,7 @@ Methods
 
 import os
 import sys
-import tkinter as tk
-from tkinter.filedialog import askopenfilename
+import json
 import pandas as pd
 from tabulate import tabulate
 
@@ -35,5 +34,15 @@ def load_input(sample):
             sys.exit()
 
     return tiff_file, txt_file, geojson_file
+
+
+def make_sample_dirs(name):
+    with open('lib/json/sample_dir_structure.json', 'r') as f: data = json.load(f)
+
+    path = f'samples/{name}'
+    os.makedirs(path)
+
+    for d in data['sample_name']: os.makedirs(f'{path}/{d}')
+
 
 

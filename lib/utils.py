@@ -9,6 +9,7 @@ from dis import dis
 import os
 
 from lib.Colors import Color
+from lib.consistency import RepeatedNameException
 
 def clear(): 
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -49,7 +50,7 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue
 
-def input_text(prompt, cancel = True, display = []):
+def input_text(txt, cancel = True, display = [], consistency = []):
     color = Color()
 
     while True:
@@ -57,12 +58,19 @@ def input_text(prompt, cancel = True, display = []):
         for d in display: print(f'{d}\n')
 
         try:
-            if cancel: prompt = f'\n{prompt} (\'c\' to cancel): '
-            txt = str(input(prompt))
+            prompt = f'\n{txt} (\'c\' to cancel): ' if cancel else f'\n{txt}: '
 
-            if  txt == 'c': return None
-            else: return txt
+            name = str(input(prompt))
 
+
+            if  name == 'c': return None
+            else: 
+                for c in consistency: 
+                    if not c(name): raise RepeatedNameException()
+                return name
+
+        except RepeatedNameException as e:
+            input(f'{color.RED}{e} Press enter to continue...{color.ENDC}')
         except: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue

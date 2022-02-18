@@ -16,8 +16,7 @@ def list_samples():
     dirs = os.listdir('samples')
     df = pd.DataFrame(list(zip(dirs)), columns=['Sample'])
 
-    print(tabulate(df, headers = 'keys', tablefmt = 'github'))
-    return df
+    return tabulate(df, headers = 'keys', tablefmt = 'github'), df
 
 
 def display_sample_df(images, metals, labels, summary_df, sample_name):

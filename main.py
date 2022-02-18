@@ -4,10 +4,12 @@ Author: José Verdú Díaz
 
 import sys
 
-from lib.interface import load_input
+from lib.Colors import Color
+from lib.interface import load_input, make_sample_dirs
 from lib.image import parse_tiff, show_image, save_image, normalize_quantile, load_image
 from lib.utils import print_title, print_menu, input_menu_option, input_text
 from lib.browse_samples import list_samples, display_sample_df
+from lib.consistency import check_repeated_sample_name
 
 if __name__ == '__main__':
 
@@ -24,6 +26,8 @@ if __name__ == '__main__':
         3: 'View Normalized'
     }
 
+    color = Color()
+
     while True:
         print_title()
 
@@ -36,8 +40,8 @@ if __name__ == '__main__':
 
                 while True:
                     print_title()
-                    df = list_samples()
-                    opt = input_menu_option(dict(zip(list(df.index),list(df['Sample']))))
+                    table, df = list_samples()
+                    opt = input_menu_option(dict(zip(list(df.index),list(df['Sample']))), display = [table], show_menu = False)
 
                     if opt == None: break
                     else:
@@ -57,7 +61,7 @@ if __name__ == '__main__':
 
                             elif opt == 2:
                                 while True:
-                                    opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False )
+                                    opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False)
 
                                     if opt == None: break
                                     else: show_image(images[opt])
@@ -76,9 +80,14 @@ if __name__ == '__main__':
                         
 
             elif opt == 2:
-                print('You selected option 2')
-                input('\nPress Enter to continue...')
+                name = input_text('Enter new sample name', consistency = [check_repeated_sample_name])
 
+                if name == None: pass
+                else:
+                    make_sample_dirs(name)
+
+                    print(f'\n{color.GREEN}Sample created Successfully!{color.ENDC}')
+                    input(f'\n{color.YELLOW}Add sample files in {color.UNDERLINE}samples/{name}/input{color.ENDC}{color.YELLOW}. Press Enter to continue...{color.ENDC}')
 
             else: 
                 print('UNEXPECTED OPTION')
