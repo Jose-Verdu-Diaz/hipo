@@ -11,12 +11,15 @@ Methods
 
 import os
 import numpy as np
+from tqdm import tqdm
 from PIL import Image, ImageDraw
 import tifffile as tf
 import pandas as pd
 import seaborn as sns
 import seaborn_image as isns
 import matplotlib.pyplot as plt
+
+from lib.Colors import Color
 
 def parse_tiff(tiff_path, summary_path):
     '''Reads and parses a multi-image tiff
@@ -49,16 +52,23 @@ def parse_tiff(tiff_path, summary_path):
 
     return tiff_slices,metals,labels,summary_df
 
-def normalize_quantile(top_quantile, img, sample, channel):
-    max_val = np.quantile(img, top_quantile)
+def normalize_quantile(top_quantile, images, sample, metals):
+    color = Color()
+    warnings = []
 
-    if max_val == 0: 
-        max_val = img.max()
-        print(f'Channel {channel} has a {top_quantile} quantile of 0. Using max value: {max_val}')     
+    for i,img in enumerate(tqdm(images, postfix=False)):
 
-    img_normalized = np.minimum(img / max_val, 1.0)
-    img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
-    img_normalized.save(os.path.join(f'samples/{sample}/img_norm', channel + '.png'), quality = 100)
+        max_val = np.quantile(img, top_quantile)
+
+        if max_val == 0: 
+            max_val = img.max()
+            warnings.append(f'Channel {metals[i]} has a {top_quantile} quantile of 0. Using max value: {max_val}')     
+
+        img_normalized = np.minimum(img / max_val, 1.0)
+        img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
+        img_normalized.save(os.path.join(f'samples/{sample}/img_norm', metals[i] + '.png'), quality = 100)
+    
+    for w in warnings: print(f'{color.YELLOW}{w}{color.ENDC}')
 
 def show_image(img):  
     isns.imgplot(np.flipud(img))

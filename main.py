@@ -1,5 +1,10 @@
-'''
+'''Tool for processing and analysing hyperion imaging.
+
 Author: José Verdú Díaz
+
+This is the entry point of the application. The objective is
+to keep this module as simple as possible, using it as a menu
+system and delegating all other tasks to the other modules.
 '''
 
 import sys
@@ -24,7 +29,9 @@ if __name__ == '__main__':
         1: 'Normalize',
         2: 'View Raw',
         3: 'View Normalized',
-        4: 'Create GIF'
+        4: 'Apply ROI',
+        5: 'Create GIF'
+
     }
 
     color = Color()
@@ -58,7 +65,8 @@ if __name__ == '__main__':
                             if opt == 0: break
                             elif opt == 1:
                                 print(f'Normalizing {sample}, wait please...')
-                                for i,img in enumerate(images): normalize_quantile(0.95, img, sample, metals[i])
+                                normalize_quantile(0.95, images, sample, metals)
+                                input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
 
                             elif opt == 2:
                                 while True:
@@ -90,7 +98,7 @@ if __name__ == '__main__':
                 else:
                     make_sample_dirs(name)
 
-                    print(f'\n{color.GREEN}Sample created Successfully!{color.ENDC}')
+                    print(f'\n{color.GREEN}Sample created successfully!{color.ENDC}')
                     input(f'\n{color.YELLOW}Add sample files in {color.UNDERLINE}samples/{name}/input{color.ENDC}{color.YELLOW}. Press Enter to continue...{color.ENDC}')
 
             else: 

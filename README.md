@@ -37,6 +37,7 @@ $ conda install tifffile
 $ conda install matplotlib
 $ conda install seaborn
 $ conda install seaborn_image
+$ conda install tqdm
 ```
 
 Run the tool

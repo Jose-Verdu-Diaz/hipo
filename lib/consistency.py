@@ -20,6 +20,5 @@ def check_repeated_sample_name(name):
     table, df = list_samples()
     
     if name in list(df['Sample']):
-        #input(f'{color.RED}Repeated name! Press enter to continue...{color.ENDC}')
         return False
     else: return True
