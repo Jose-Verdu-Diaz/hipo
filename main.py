@@ -11,7 +11,7 @@ import sys
 
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs
-from lib.image import parse_tiff, show_image, save_image, normalize_quantile, load_image, create_gif
+from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif
 from lib.utils import print_title, print_menu, input_menu_option, input_text
 from lib.browse_samples import list_samples, display_sample_df
 from lib.consistency import check_repeated_sample_name

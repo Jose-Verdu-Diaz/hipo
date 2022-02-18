@@ -1,5 +1,6 @@
 {
-    "Description": null,
-    "Norm_quant": null,
-    "Threshold": null
+    "name": null,
+    "description": null,
+    "norm_quant": null,
+    "threshold": null
 }

@@ -7,6 +7,16 @@ Author: José Verdú Díaz
 
 Methods
 -------
+parse_tiff
+    Parses a hyperion tiff file with multiple images
+normalize_quantile
+    Normalize images with a quantile
+show_image
+    Displays an image
+load_image
+    Load an image
+create_gif
+    Create an animated gif
 '''
 
 import os
@@ -22,21 +32,25 @@ import matplotlib.pyplot as plt
 from lib.Colors import Color
 
 def parse_tiff(tiff_path, summary_path):
-    '''Reads and parses a multi-image tiff
+    '''Parses a hyperion tiff file with multiple images
 
     Parameters
     ----------
-    tiff_path : str
-        Path to tiff multi-image
-    summary_path : str
-        Path to tiff summary
+    tiff_path
+        Path of tiff file
+    summary_path
+        Path to summary file
 
     Returns
     -------
-    tiff_slices : array of shape (n,w,h)
-        Array of n tiff images with width w and height h
-    metals : 
-    labels : 
+    tiff_slices
+        Numpy array of images
+    metals
+        List of metals
+    labels
+        List of labels
+    summary_df
+        Pandas DataFrame with the data of the summary file
     '''
 
     tiff_slices = tf.TiffFile(tiff_path).asarray()
@@ -50,9 +64,30 @@ def parse_tiff(tiff_path, summary_path):
         label =str(summary_df['Label'][slice])
         labels.append(label if not label == 'nan' else '-')
 
-    return tiff_slices,metals,labels,summary_df
+    return tiff_slices, metals, labels, summary_df
+
 
 def normalize_quantile(top_quantile, images, sample, metals):
+    '''Normalize images with a quantile
+
+    Normalizing by a quantile instead of normalizing by the max
+    value helps avoiding the effect of high-valued artifacts.
+    However, it causes clipping in the higher values. Tune the
+    parameter top_quantile carefully.
+
+    Parameters
+    ----------
+    top_quantile
+        Top quantile to select max value. Set to 1 to use the max
+        pixel value of the image.
+    images
+        Numpy array of images
+    sample
+        Name of the sample
+    metals
+        List of metals
+    '''
+
     color = Color()
     warnings = []
 
@@ -70,29 +105,57 @@ def normalize_quantile(top_quantile, images, sample, metals):
     
     for w in warnings: print(f'{color.YELLOW}{w}{color.ENDC}')
 
-def show_image(img):  
+
+def show_image(img):
+    '''Displays an image
+
+    Parameters
+    ----------
+    img
+        image to be displayed
+    '''
+
     isns.imgplot(np.flipud(img))
     plt.show()
 
-def save_image(img, channel, sample):
-    img_normalized = Image.fromarray(np.array(img, dtype = np.uint32))
-    img_normalized.save(os.path.join(f'samples/{sample}/img_raw', channel + '.png'), quality = 100)
 
 def load_image(path):
+    '''Load an image
+
+    Parameters
+    ----------
+    path
+        Path to image file
+
+    Returns
+    -------
+        Numpy array representing the image
+    '''
+
     img = Image.open(path)
     return np.asarray(img)
 
+
 def create_gif(images, sample, channels = None):
+    '''Create an animated gif
+
+    Parameters
+    ----------
+    images
+        Numpy array of images
+    sample
+        Name of the sample
+    channels, optional
+        List of channel names, by default None
+    '''
 
     out = []
 
     for img in images:
-
         converted = Image.fromarray(img).convert('P')
         #draw = ImageDraw.Draw(converted)
         #draw.text((50, 50), "Sample Text", 150)
 
-        out.append(converted)
-        
+        out.append(converted)      
 
     out[0].save(f'samples/{sample}/image_animation.gif', save_all=True, append_images=out[1:], optimize=False, duration=1000, loop=0)
