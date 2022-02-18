@@ -1,11 +1,15 @@
 '''Auxiliary interface functions
 
-This module contains functions to provide the user with an interface to load and save data.
+This module contains functions to interact with files and directories.
 
 Author: José Verdú Díaz
 
 Methods
 -------
+load_input
+    Load input tiff, summary and annotations
+make_sample_dirs
+    Creates the directory structure for a new sample
 '''
 
 import os
@@ -13,6 +17,23 @@ import sys
 import json
 
 def load_input(sample):
+    '''Load input tiff, summary and annotations
+
+    Parameters
+    ----------
+    sample
+        Sample name to be loaded
+
+    Returns
+    -------
+    tiff_file
+        Path of the tiff image
+    txt_file
+        Path of the summary file
+    geojson_file
+        path of the annotations file
+    '''
+
     files = os.listdir(f'samples/{sample}/input')
 
     if not len(files) == 3:
@@ -33,6 +54,14 @@ def load_input(sample):
 
 
 def make_sample_dirs(name):
+    '''Creates the directory structure for a new sample
+
+    Parameters
+    ----------
+    name
+        Name of the new sample
+    '''
+
     with open('lib/json/sample_dir_structure.json', 'r') as f: data = json.load(f)
 
     path = f'samples/{name}'

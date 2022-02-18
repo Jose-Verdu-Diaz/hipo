@@ -1,9 +1,14 @@
 '''Consistency functions
 
-This module contains some functions to keep the app consistent
+This module contains some functions to perform consitency checks
 and avoid bugs.
 
 Author: José Verdú Díaz
+
+Methods
+-------
+check_repeated_sample_name
+    Check if the sample name already exists
 '''
 
 from lib.browse_samples import list_samples
@@ -15,6 +20,18 @@ class RepeatedNameException(Exception):
         super(RepeatedNameException, self).__init__(message)
 
 def check_repeated_sample_name(name):
+    '''Check if the sample name already exists
+
+    Parameters
+    ----------
+    name
+        Sample name to be checked
+
+    Returns
+    -------
+        True if the name doesn't exist
+        False if the name already exists
+    '''
     color = Color()
 
     table, df = list_samples()

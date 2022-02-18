@@ -1,8 +1,22 @@
 '''Utility functions
 
-This module contains some auxiliary functions.
+This module contains some auxiliary functions to read user input and 
+display data on the terminal
 
 Author: José Verdú Díaz
+
+Methods
+-------
+clear
+    Clear the terminal
+print_title
+    Prints the app title
+print_menu
+    Prints a menu
+input_menu_option
+    Make the user select an option from a menu
+input_text
+    Make the user enter a string
 '''
 
 import os
@@ -10,10 +24,17 @@ import os
 from lib.Colors import Color
 from lib.consistency import RepeatedNameException
 
-def clear(): 
+def clear():
+    '''Clear the terminal
+    '''
+
     os.system('cls' if os.name == 'nt' else 'clear')
 
+
 def print_title():
+    '''Prints the app title
+    '''
+
     clear()
     color = Color()
     print(f'{color.CYAN}88  88{color.RED}  88888{color.GREEN} Yb    dP{color.YELLOW} 8888b.')
@@ -22,18 +43,47 @@ def print_title():
     print(f'{color.CYAN}88  88{color.RED} \"bodP\'{color.GREEN}    YP{color.YELLOW}    8888Y\" ')
     print(color.ENDC)
 
+
 def print_menu(options):
+    '''Prints a menu
+
+    Parameters
+    ----------
+    options
+        Dictionary of options where the key is the option number and value 
+        is the option name
+    '''
+
     for key in options.keys(): print (key, ' - ', options[key] )
 
+
 def input_menu_option(options, cancel = True, display = [], show_menu = True):
+    '''Make the user select an option from a menu
+
+    Parameters
+    ----------
+    options
+        Dictionary of options where the key is the option number and value 
+        is the option name
+    cancel, optional
+        Add a cancel option, by default True
+    display, optional
+        List of strings to print between the title and the menu, by default []
+    show_menu, optional
+        Print the menu uptions, by default True
+
+    Returns
+    -------
+        None if cancel is True and the user inputs 'c'
+        Integer with the input of the user otherwise
+    '''
+
     color = Color()
 
     while True:
         print_title()
         for d in display: print(f'{d}\n')
-
         if show_menu: print_menu(options)
-
         try:
             if cancel: prompt = '\nSelect an option (\'c\' to cancel): '
             else: prompt = '\nSelect an option: '
@@ -44,23 +94,45 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
 
             if opt not in list(options.keys()): input(f'{color.RED}Option doesn\'t exist! Press enter to continue...{color.ENDC}')
             else: return opt
-
         except: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue
 
+
 def input_text(txt, cancel = True, display = [], consistency = []):
+    '''Make the user enter a string
+
+    Parameters
+    ----------
+    txt
+        String to be prompted to the user
+    cancel, optional
+        Add a cancel option, by default True
+    display, optional
+        List of strings to print between the title and the menu, by default []
+    consistency, optional
+        List of functions to pass the input text to, in order to
+        perform consitency checks, by default []
+
+    Returns
+    -------
+        _description_
+
+    Raises
+    ------
+    RepeatedNameException
+        None if cancel is True and the user inputs 'c'
+        String with the input of the user otherwise
+    '''
+    
     color = Color()
 
     while True:
         print_title()
         for d in display: print(f'{d}\n')
-
         try:
             prompt = f'\n{txt} (\'c\' to cancel): ' if cancel else f'\n{txt}: '
-
             name = str(input(prompt))
-
 
             if  name == 'c': return None
             else: 

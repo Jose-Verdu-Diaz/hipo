@@ -1,4 +1,8 @@
-'''
+'''Color codes for the terminal
+
+This module contains the class Color, used to
+obtain different terminal color codes
+
 Author: José Verdú Díaz
 '''
 class Color:
