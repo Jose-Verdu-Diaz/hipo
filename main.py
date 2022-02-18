@@ -6,7 +6,7 @@ import sys
 
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs
-from lib.image import parse_tiff, show_image, save_image, normalize_quantile, load_image
+from lib.image import parse_tiff, show_image, save_image, normalize_quantile, load_image, create_gif
 from lib.utils import print_title, print_menu, input_menu_option, input_text
 from lib.browse_samples import list_samples, display_sample_df
 from lib.consistency import check_repeated_sample_name
@@ -23,7 +23,8 @@ if __name__ == '__main__':
         0: 'Back',
         1: 'Normalize',
         2: 'View Raw',
-        3: 'View Normalized'
+        3: 'View Normalized',
+        4: 'Create GIF'
     }
 
     color = Color()
@@ -74,6 +75,9 @@ if __name__ == '__main__':
                                     else: 
                                         img = load_image(f'samples/{sample}/img_norm/{metals[opt]}.png')
                                         show_image(img)
+
+                            elif opt == 4:
+                                create_gif(sample)
 
                             else:
                                 pass

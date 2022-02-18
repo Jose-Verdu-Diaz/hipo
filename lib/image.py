@@ -11,7 +11,7 @@ Methods
 
 import os
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 import tifffile as tf
 import pandas as pd
 import seaborn as sns
@@ -71,3 +71,18 @@ def save_image(img, channel, sample):
 def load_image(path):
     img = Image.open(path)
     return np.asarray(img)
+
+def create_gif(images, sample, channels = None):
+
+    out = []
+
+    for img in images:
+
+        converted = Image.fromarray(img).convert('P')
+        #draw = ImageDraw.Draw(converted)
+        #draw.text((50, 50), "Sample Text", 150)
+
+        out.append(converted)
+        
+
+    out[0].save(f'samples/{sample}/image_animation.gif', save_all=True, append_images=out[1:], optimize=False, duration=1000, loop=0)
