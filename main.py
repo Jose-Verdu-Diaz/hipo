@@ -107,11 +107,15 @@ if __name__ == '__main__':
                                     input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
 
                             elif opt == 6:
+                                '''
                                 res = check_operation_requirements(sample, 'analysis')
                                 if not res == None:
                                     input(f'{color.YELLOW}{res} is required before applying the ROIs. Press Enter to continue...{color.ENDC}')
                                 else:
                                     input('Analysis currently not available')
+                                '''
+                                input('Analysis currently not available. Press Enter to continue...')
+
 
                             else:
                                 pass
