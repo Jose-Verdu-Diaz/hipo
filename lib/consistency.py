@@ -12,6 +12,7 @@ check_repeated_sample_name
 '''
 
 import os
+import json
 
 from lib.browse_samples import list_samples
 
@@ -88,3 +89,27 @@ def check_input_files(sample):
     if not len(unknown_file) == 0: return UnknownInputFileException(unknown_file)
 
     return None
+
+
+def check_overwrite(sample, param):
+    '''Check if directory files are going to be overwritten
+
+    Parameters
+    ----------
+    sample
+        Name of the sample
+    param
+        Sample json parameter to check. If the parameter is not None, then overwritting will occur
+
+    Returns
+    -------
+    True
+        if no overwritting
+    False
+        if overwritting
+    '''
+
+    with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
+
+    if data[param] == None: return True
+    else: return False

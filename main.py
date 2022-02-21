@@ -2,7 +2,7 @@
 
 Author: José Verdú Díaz
 
-This == the entry point of the application. The objective ==
+This is the entry point of the application. The objective is
 to keep this module as simple as possible, using it as a menu
 system and delegating all other tasks to the other modules.
 '''
@@ -12,9 +12,9 @@ import sys
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif
-from lib.utils import print_title, print_menu, input_menu_option, input_text
+from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no
 from lib.browse_samples import list_samples, display_sample_df
-from lib.consistency import check_repeated_sample_name
+from lib.consistency import check_repeated_sample_name, check_overwrite
 
 if __name__ == '__main__':
 
@@ -68,6 +68,7 @@ if __name__ == '__main__':
 
                             if opt == 0: break
                             elif opt == 1:
+                                if not check_overwrite(sample, 'norm_quant') and not input_yes_no(f'{color.YELLOW}Sample already normalized. Overwrite?', display=[table]): continue
                                 print(f'Normalizing {sample}, wait please...')
                                 normalize_quantile(0.95, images, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')

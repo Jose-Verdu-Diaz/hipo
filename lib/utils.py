@@ -145,3 +145,39 @@ def input_text(txt, cancel = True, display = [], consistency = []):
         except: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue
+
+
+def input_yes_no(txt, display = []):
+    '''Make the user input 'y' (yes) or 'n' (no)
+
+    Parameters
+    ----------
+    txt
+        String to be prompted to the user
+    display, optional
+        List of strings to print between the title and the menu, by default []
+
+    Returns
+    -------
+    True
+        if user enters 'y'
+    False
+        if user enters 'n'
+    '''
+
+    color = Color()
+
+    while True:
+        print_title()
+        for d in display: print(f'{d}\n')
+        try:
+            txt = f'\n{txt} (Enter \'y\' or \'n\'): {color.ENDC}'
+            opt = str(input(txt))
+            
+            if opt == 'y': return True
+            elif opt == 'n': return False
+            else: input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+
+        except: 
+            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            continue
