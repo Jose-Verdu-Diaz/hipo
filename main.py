@@ -10,7 +10,7 @@ system and delegating all other tasks to the other modules.
 import sys
 
 from lib.Colors import Color
-from lib.interface import load_input, make_sample_dirs, delete_sample
+from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI
 from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no, input_number
 from lib.browse_samples import list_samples, display_sample_df
@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
                         (tiff_file, txt_file, geojson_file) = sample_input
                         images, metals, labels, summary_df = parse_tiff(tiff_file, txt_file)
+                        populate_channels_json(sample, metals)
                         table, df = display_sample_df(images, metals, labels, summary_df, sample)
 
                         while True:

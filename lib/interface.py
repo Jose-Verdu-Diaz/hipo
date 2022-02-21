@@ -69,6 +69,26 @@ def load_input(sample):
             return None
 
 
+def populate_channels_json(sample, channels):
+    '''_summary_
+
+    Parameters
+    ----------
+    sample
+        Name of the sample to populate
+    channels
+        Channels of the sample to populate
+    '''
+
+    with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
+    if data['channels'] == None:
+        channel_data = []
+        with open('lib/json/channel_parameters.json', 'r') as f: data = json.load(f)
+        for c in channels: 
+            data['name'] = c
+            channel_data.append(data)
+        update_sample_json(sample, {'channels': channel_data})
+
 def make_sample_dirs(name):
     '''Creates the directory and file structure for a new sample
 
@@ -80,9 +100,9 @@ def make_sample_dirs(name):
 
     path = f'samples/{name}'
     os.makedirs(path)
+
     with open('lib/json/sample_dir_structure.json', 'r') as f: data = json.load(f)
     for d in data['sample_name']: os.makedirs(f'{path}/{d}')
-
     shutil.copy('lib/json/sample_parameters.json',f'{path}/{name}.json')
 
     update_sample_json(name, {'name': name})
