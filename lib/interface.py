@@ -17,6 +17,9 @@ import sys
 import json
 import shutil
 
+from lib.Colors import Color
+from lib.consistency import check_input_files
+
 def load_input(sample):
     '''Load input tiff, summary and annotations
 
@@ -35,23 +38,32 @@ def load_input(sample):
         path of the annotations file
     '''
 
-    files = os.listdir(f'samples/{sample}/input')
+    color = Color()
 
-    if not len(files) == 3:
-        print(f'3 files expected, found {len(files)}.')
-        sys.exit()
+    while True:
 
-    geojson_file, txt_file, tiff_file = '','',''
+        try:
+            result = check_input_files(sample)
 
-    for f in files:
-        if f.endswith('.txt') and txt_file == '': txt_file = f'samples/{sample}/input/{f}'
-        elif f.endswith('.tiff') and tiff_file == '': tiff_file = f'samples/{sample}/input/{f}'
-        elif f.endswith('.geojson') and geojson_file == '': geojson_file = f'samples/{sample}/input/{f}'
-        else:
-            print('Enexpected error, check input files.')
-            sys.exit()
+            if not result is None: raise result
 
-    return tiff_file, txt_file, geojson_file
+            files = os.listdir(f'samples/{sample}/input')
+
+            geojson_file, txt_file, tiff_file = '','',''
+
+            for f in files:
+                path = f'samples/{sample}/input/{f}'
+                if f.endswith('.txt'): txt_file = path
+                elif f.endswith('.tiff'): tiff_file = path
+                elif f.endswith('.geojson'): geojson_file = path
+
+            return (tiff_file, txt_file, geojson_file)
+
+        except Exception as e: 
+            input(f'{color.RED}{e} Press Enter to continue...{color.ENDC}')
+            return None
+
+
 
 
 def make_sample_dirs(name):

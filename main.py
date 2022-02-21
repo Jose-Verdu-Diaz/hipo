@@ -2,7 +2,7 @@
 
 Author: José Verdú Díaz
 
-This is the entry point of the application. The objective is
+This == the entry point of the application. The objective ==
 to keep this module as simple as possible, using it as a menu
 system and delegating all other tasks to the other modules.
 '''
@@ -55,7 +55,10 @@ if __name__ == '__main__':
                     else:
                         sample = df["Sample"][opt]
                         
-                        tiff_file, txt_file, geojson_file = load_input(sample)
+                        input = load_input(sample)
+                        if input == None: continue
+
+                        (tiff_file, txt_file, geojson_file) = input
                         images, metals, labels, summary_df = parse_tiff(tiff_file, txt_file)
                         table, df = display_sample_df(images, metals, labels, summary_df, sample)
 
