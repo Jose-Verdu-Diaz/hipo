@@ -10,7 +10,7 @@ system and delegating all other tasks to the other modules.
 import sys
 
 from lib.Colors import Color
-from lib.interface import load_input, make_sample_dirs
+from lib.interface import load_input, make_sample_dirs, delete_sample
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif
 from lib.utils import print_title, print_menu, input_menu_option, input_text
 from lib.browse_samples import list_samples, display_sample_df
@@ -30,7 +30,8 @@ if __name__ == '__main__':
         2: 'View Raw',
         3: 'View Normalized',
         4: 'Apply ROI',
-        5: 'Create GIF'
+        5: 'Create GIF',
+        6: 'Remove Sample'
 
     }
 
@@ -55,10 +56,10 @@ if __name__ == '__main__':
                     else:
                         sample = df["Sample"][opt]
                         
-                        input = load_input(sample)
-                        if input == None: continue
+                        sample_input = load_input(sample)
+                        if sample_input == None: continue
 
-                        (tiff_file, txt_file, geojson_file) = input
+                        (tiff_file, txt_file, geojson_file) = sample_input
                         images, metals, labels, summary_df = parse_tiff(tiff_file, txt_file)
                         table, df = display_sample_df(images, metals, labels, summary_df, sample)
 
@@ -88,7 +89,23 @@ if __name__ == '__main__':
                                         show_image(img)
 
                             elif opt == 4:
+                                pass
+
+                            elif opt == 5:
                                 create_gif(sample)
+
+                            elif opt == 6:
+                                name = input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
+
+                                if name == None:
+                                    continue
+                                elif name == sample:
+                                    delete_sample(name)
+                                    break
+                                else:
+                                    input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
+
+
 
                             else:
                                 pass

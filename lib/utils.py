@@ -124,7 +124,7 @@ def input_text(txt, cancel = True, display = [], consistency = []):
         None if cancel is True and the user inputs 'c'
         String with the input of the user otherwise
     '''
-    
+
     color = Color()
 
     while True:

@@ -55,3 +55,8 @@ inside `samples/<samplename>/input`:
  - The summary txt file
  - The annotation geojson file
 After including all the files, you will be able to proceed.
+
+## Considerations
+
+Try not to modify the files and directories generated under the 'samples' directory, as it
+would casue some bugs. The tool itself provides options to interact with the data.

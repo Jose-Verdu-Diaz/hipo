@@ -16,6 +16,7 @@ import os
 import sys
 import json
 import shutil
+from turtle import update
 
 from lib.Colors import Color
 from lib.consistency import check_input_files
@@ -85,23 +86,41 @@ def make_sample_dirs(name):
 
     shutil.copy('lib/json/sample_parameters.json',f'{path}/{name}.json')
 
-    update_sample_json(path, name)
+    update_sample_json(f'{path}/{name}.json', {'name': name})
 
 
-def update_sample_json(path, name = None):
+def update_sample_json(path, update_dict = None):
     '''Updates a sample json file
 
     Parameters
     ----------
     path
         Path to json
-    name, optional
-        New name
+    update_dict
+        Dict of parameters to be updated
     '''
 
-    with open(f'{path}/{name}.json', 'r+') as f: 
+    with open(path, 'r+') as f: 
         data = json.load(f)
-        data['name'] = name
+
+        for param in update_dict: data[param] = update_dict[param]
+
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
+
+
+def delete_sample(name):
+    '''Delete sample directory and all of its contents
+
+    Parameters
+    ----------
+    name
+        Name of the sample to delete
+    '''
+
+    color = Color()
+    path = f'samples/{name}'
+    shutil.rmtree(path)
+    input(f'\n{color.GREEN}Sample removed successfully!{color.ENDC}')
+
