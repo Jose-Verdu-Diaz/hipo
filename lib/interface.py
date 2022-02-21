@@ -86,19 +86,21 @@ def make_sample_dirs(name):
 
     shutil.copy('lib/json/sample_parameters.json',f'{path}/{name}.json')
 
-    update_sample_json(f'{path}/{name}.json', {'name': name})
+    update_sample_json(name, {'name': name})
 
 
-def update_sample_json(path, update_dict = None):
+def update_sample_json(name, update_dict = None):
     '''Updates a sample json file
 
     Parameters
     ----------
-    path
-        Path to json
+    name
+        name to sample to update
     update_dict
         Dict of parameters to be updated
     '''
+
+    path = f'samples/{name}/{name}.json'
 
     with open(path, 'r+') as f: 
         data = json.load(f)

@@ -30,6 +30,7 @@ import seaborn_image as isns
 import matplotlib.pyplot as plt
 
 from lib.Colors import Color
+from lib.interface import update_sample_json
 
 def parse_tiff(tiff_path, summary_path):
     '''Parses a hyperion tiff file with multiple images
@@ -87,6 +88,8 @@ def normalize_quantile(top_quantile, images, sample, metals):
     metals
         List of metals
     '''
+
+    update_sample_json(sample, {'norm_quant': top_quantile})
 
     color = Color()
     warnings = []

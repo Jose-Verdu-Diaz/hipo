@@ -13,6 +13,7 @@ display_sample_df
 '''
 
 import os
+import json
 import pandas as pd
 from tabulate import tabulate
 
@@ -31,7 +32,15 @@ def list_samples():
     '''
 
     dirs = sorted(os.listdir('samples'))
-    df = pd.DataFrame(list(zip(dirs)), columns=['Sample'])
+
+    norm_quant = []
+
+    for d in dirs:
+        with open(f'samples/{d}/{d}.json', 'r') as f: data = json.load(f)
+
+        norm_quant.append(data['norm_quant'])
+
+    df = pd.DataFrame(list(zip(dirs, norm_quant)), columns=['Sample', 'Norm. Quant.'])
     table = tabulate(df, headers = 'keys', tablefmt = 'github')
     return table, df
 
