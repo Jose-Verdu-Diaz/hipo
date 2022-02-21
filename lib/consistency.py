@@ -53,6 +53,23 @@ def check_repeated_sample_name(name):
 
 
 def check_input_files(sample):
+    '''Checks if the input directory has the necessary files
+
+    Parameters
+    ----------
+    sample
+        Sample to be checked
+
+    Returns
+    -------
+    UnexpectedInputFileAmountException
+        If the amount of a file is not the expected
+    UnknownInputFileException
+        If there is any unknown file
+    None
+        If everything is ok
+    '''
+
     files = os.listdir(f'samples/{sample}/input')
 
     geojson_file, txt_file, tiff_file, unknown_file = [], [], [], []

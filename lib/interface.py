@@ -36,6 +36,9 @@ def load_input(sample):
         Path of the summary file
     geojson_file
         path of the annotations file
+    
+    None
+        if there is any exception
     '''
 
     color = Color()

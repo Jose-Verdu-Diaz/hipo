@@ -30,7 +30,7 @@ def list_samples():
         information
     '''
 
-    dirs = os.listdir('samples')
+    dirs = sorted(os.listdir('samples'))
     df = pd.DataFrame(list(zip(dirs)), columns=['Sample'])
     table = tabulate(df, headers = 'keys', tablefmt = 'github')
     return table, df
