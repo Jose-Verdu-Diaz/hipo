@@ -16,6 +16,17 @@ import json
 
 from lib.browse_samples import list_samples
 
+# Key: name of the dir where the operation output will appear
+# Value: list of sample json parameters, corresponding to the required operations
+OPERATION_REQUIREMENTS = {
+    'img_norm': [],
+    'img_roi': ['norm_quant']
+}
+REQUIREMENTS_NAME_MAPPING = {
+    'norm_quant': 'Normalization',
+    'roi': 'ROI'
+}
+
 class RepeatedNameException(Exception):
     def __init__(self, message=f'Repeated name!'):
         super(RepeatedNameException, self).__init__(message)
@@ -113,3 +124,12 @@ def check_overwrite(sample, param):
 
     if data[param] == None: return True
     else: return False
+
+def check_operation_requirements(sample, operation):
+
+    with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
+
+    for op_req in OPERATION_REQUIREMENTS[operation]:
+        if data[op_req] == None: return REQUIREMENTS_NAME_MAPPING[op_req]
+    return None
+

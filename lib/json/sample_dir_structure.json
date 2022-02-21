@@ -1,6 +1,7 @@
 {
     "sample_name": {
         "input": null,
-        "img_norm": null
+        "img_norm": null,
+        "img_roi": null
     }
 }
