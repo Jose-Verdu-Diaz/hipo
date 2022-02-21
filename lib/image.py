@@ -182,18 +182,18 @@ def make_mask(geojson_file, size):
 
     with open(geojson_file) as f: annotation_data = json.load(f)
 
-    n_annotations = len(annotation_data["features"])
-
-    blob = annotation_data["features"][0]["geometry"] # We assume there is only 1 ROI, this should be fixed 
-
-    if blob["type"] == "LineString": coords = blob["coordinates"]
-    if blob["type"] == "Polygon": coords = blob["coordinates"][0]
-
-    tuples = [tuple(coord) for coord in coords]
-
     black = Image.new('1', size)
     imd = ImageDraw.Draw(black)
-    imd.polygon(tuples,fill="white",outline="white")
+
+    for ann in annotation_data["features"]:
+
+        blob = ann["geometry"] # We assume there is only 1 ROI, this should be fixed 
+
+        if blob["type"] == "LineString": coords = blob["coordinates"]
+        if blob["type"] == "Polygon": coords = blob["coordinates"][0]
+
+        tuples = [tuple(coord) for coord in coords]
+        imd.polygon(tuples,fill="white",outline="white")
 
     return np.array(black)
 
