@@ -24,6 +24,7 @@ import os
 from lib.Colors import Color
 from lib.consistency import RepeatedNameException
 
+
 def clear():
     '''Clear the terminal
     '''
@@ -79,7 +80,6 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
     '''
 
     color = Color()
-
     while True:
         print_title()
         for d in display: print(f'{d}\n')
@@ -120,13 +120,13 @@ def input_text(txt, cancel = True, display = [], consistency = []):
 
     Raises
     ------
-    RepeatedNameException
-        None if cancel is True and the user inputs 'c'
-        String with the input of the user otherwise
+    None 
+        if cancel is True and the user inputs 'c'
+    String 
+        with the input of the user otherwise
     '''
 
     color = Color()
-
     while True:
         print_title()
         for d in display: print(f'{d}\n')
@@ -166,7 +166,6 @@ def input_yes_no(txt, display = []):
     '''
 
     color = Color()
-
     while True:
         print_title()
         for d in display: print(f'{d}\n')
@@ -177,6 +176,51 @@ def input_yes_no(txt, display = []):
             if opt == 'y': return True
             elif opt == 'n': return False
             else: input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+
+        except: 
+            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            continue
+
+
+def input_number(txt, cancel = True, display = [], range = None, type = 'int'):
+    '''Make the user enter a number
+
+    Parameters
+    ----------
+    txt
+        String to be prompted to the user
+    cancel, optional
+        Add a cancel option, by default True
+    display, optional
+        List of strings to print between the title and the menu, by default []
+    range, optional
+        Tuple (min, max) If provided, checks that the number is inside the range
+    type, optional
+       type of the number, 'int' or 'float'
+
+    Returns
+    -------
+    None 
+        if cancel is True and the user inputs 'c'
+    Number 
+        with the input of the user otherwise
+    '''
+
+    color = Color()
+    while True:
+        print_title()
+        for d in display: print(f'{d}\n')
+        try:
+            prompt = f'\n{txt} (\'c\' to cancel): ' if cancel else f'\n{txt}: '
+            number = str(input(prompt))
+
+            if  number == 'c': return None
+            else: 
+                if type == 'int': number = int(number)
+                elif type == 'float': number = float(number)
+
+                if not None and range[0] <= number <= range[1]: return number
+                else: input(f'{color.RED}The value is not inside the range! Press enter to continue...{color.ENDC}')
 
         except: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')

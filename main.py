@@ -12,7 +12,7 @@ import sys
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI
-from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no
+from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no, input_number
 from lib.browse_samples import list_samples, display_sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
 
@@ -67,13 +67,16 @@ if __name__ == '__main__':
 
                             if opt == 0: break
 
-                            elif opt == 1:
+                            elif opt == 1:         
+                                top_quantile = input_number('Enter the top quantile (between 0 and 1).', display=[table], range = (0,1), type = 'float')
+                                if top_quantile == None: continue
+
                                 masked = apply_ROI(geojson_file, images)
 
                                 if not check_overwrite(sample, 'norm_quant') and not input_yes_no(f'{color.YELLOW}Sample already normalized. Overwrite?', display=[table]): continue
 
                                 print(f'Normalizing {sample}, wait please...')
-                                normalize_quantile(0.95, masked, sample, metals)
+                                normalize_quantile(top_quantile, masked, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
 
                             elif opt == 2:

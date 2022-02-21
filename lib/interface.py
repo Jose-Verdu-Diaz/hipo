@@ -21,6 +21,7 @@ from turtle import update
 from lib.Colors import Color
 from lib.consistency import check_input_files
 
+
 def load_input(sample):
     '''Load input tiff, summary and annotations
 
@@ -66,8 +67,6 @@ def load_input(sample):
         except Exception as e: 
             input(f'{color.RED}{e} Press Enter to continue...{color.ENDC}')
             return None
-
-
 
 
 def make_sample_dirs(name):
