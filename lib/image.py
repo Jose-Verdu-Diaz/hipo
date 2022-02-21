@@ -184,7 +184,7 @@ def make_mask(geojson_file, size):
 
     n_annotations = len(annotation_data["features"])
 
-    blob = annotation_data["features"][0]["geometry"]
+    blob = annotation_data["features"][0]["geometry"] # We assume there is only 1 ROI, this should be fixed 
 
     if blob["type"] == "LineString": coords = blob["coordinates"]
     if blob["type"] == "Polygon": coords = blob["coordinates"][0]
@@ -198,13 +198,26 @@ def make_mask(geojson_file, size):
     return np.array(black)
 
 
-def apply_ROI(sample, geojson_file, images, metals):
+def apply_ROI(geojson_file, images):
+    '''Masks ROIs from images
 
+    Parameters
+    ----------
+    geojson_file
+        Path to geojson file
+    images
+        Images to mask
+
+    Returns
+    -------
+    masked
+        masked images
+    '''
 
     img_size = Image.fromarray(images[0]).size # We assume all images of a sample have the same size
     mask = make_mask(geojson_file, img_size)
 
-    for i, img in enumerate(images):
-        masked = np.logical_and(mask, img)
-        masked = Image.fromarray(masked)
-        masked.save(os.path.join(f'samples/{sample}/img_roi', metals[i] + '.png'), quality = 100)
+    masked = []
+    for img in images: masked.append(np.where(mask, img, 0))
+
+    return masked

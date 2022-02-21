@@ -26,13 +26,12 @@ if __name__ == '__main__':
 
     SAMPLE_OPTIONS = {
         0: 'Back',
-        1: 'Normalize',
+        1: 'Apply ROI and Normalize',
         2: 'View Raw',
         3: 'View Normalized',
-        4: 'Apply ROI',
-        5: 'Create GIF',
-        6: 'Remove Sample'
-
+        4: 'Create GIF',
+        5: 'Remove Sample',
+        6: 'Perform analysis'
     }
 
     color = Color()
@@ -67,10 +66,14 @@ if __name__ == '__main__':
                             opt = input_menu_option(SAMPLE_OPTIONS, cancel = False, display = [table])
 
                             if opt == 0: break
+
                             elif opt == 1:
+                                masked = apply_ROI(geojson_file, images)
+
                                 if not check_overwrite(sample, 'norm_quant') and not input_yes_no(f'{color.YELLOW}Sample already normalized. Overwrite?', display=[table]): continue
+
                                 print(f'Normalizing {sample}, wait please...')
-                                normalize_quantile(0.95, images, sample, metals)
+                                normalize_quantile(0.95, masked, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
 
                             elif opt == 2:
@@ -90,16 +93,9 @@ if __name__ == '__main__':
                                         show_image(img)
 
                             elif opt == 4:
-                                res = check_operation_requirements(sample, 'img_roi')
-                                if not res == None:
-                                    input(f'{color.YELLOW}{res} is required before applying the ROIs. Press Enter to continue...{color.ENDC}')
-                                else:
-                                    apply_ROI(sample, geojson_file, images, metals) 
-
-                            elif opt == 5:
                                 create_gif(sample)
 
-                            elif opt == 6:
+                            elif opt == 5:
                                 name = input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
@@ -110,7 +106,12 @@ if __name__ == '__main__':
                                 else:
                                     input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
 
-
+                            elif opt == 6:
+                                res = check_operation_requirements(sample, 'analysis')
+                                if not res == None:
+                                    input(f'{color.YELLOW}{res} is required before applying the ROIs. Press Enter to continue...{color.ENDC}')
+                                else:
+                                    input('Analysis currently not available')
 
                             else:
                                 pass

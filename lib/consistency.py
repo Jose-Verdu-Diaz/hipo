@@ -20,7 +20,8 @@ from lib.browse_samples import list_samples
 # Value: list of sample json parameters, corresponding to the required operations
 OPERATION_REQUIREMENTS = {
     'img_norm': [],
-    'img_roi': ['norm_quant']
+    'img_roi': ['norm_quant'],
+    'analysis': ['img_roi']
 }
 REQUIREMENTS_NAME_MAPPING = {
     'norm_quant': 'Normalization',
@@ -126,6 +127,22 @@ def check_overwrite(sample, param):
     else: return False
 
 def check_operation_requirements(sample, operation):
+    '''Checks if required operations for a new operation are already done
+
+    Parameters
+    ----------
+    sample
+        Sample to check
+    operation
+        New operation
+
+    Returns
+    -------
+    Name of required operation
+        if requirements are not met
+    None
+        If requirements are met
+    '''
 
     with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
 
