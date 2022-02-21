@@ -20,6 +20,7 @@ create_gif
 '''
 
 import os
+import json
 import numpy as np
 from tqdm import tqdm
 from PIL import Image, ImageDraw
@@ -162,3 +163,48 @@ def create_gif(images, sample, channels = None):
         out.append(converted)      
 
     out[0].save(f'samples/{sample}/image_animation.gif', save_all=True, append_images=out[1:], optimize=False, duration=1000, loop=0)
+
+
+def make_mask(geojson_file, size):
+    '''Creates mask images from coordinates tuples list
+
+    Parameters
+    ----------
+    geojson_file
+        path to geojson
+    size
+        Size of the mask
+
+    Returns
+    -------
+        Numpy array representing the mask
+    '''
+
+    with open(geojson_file) as f: annotation_data = json.load(f)
+
+    n_annotations = len(annotation_data["features"])
+
+    blob = annotation_data["features"][0]["geometry"]
+
+    if blob["type"] == "LineString": coords = blob["coordinates"]
+    if blob["type"] == "Polygon": coords = blob["coordinates"][0]
+
+    tuples = [tuple(coord) for coord in coords]
+
+    black = Image.new('1', size)
+    imd = ImageDraw.Draw(black)
+    imd.polygon(tuples,fill="white",outline="white")
+
+    return np.array(black)
+
+
+def apply_ROI(sample, geojson_file, images, metals):
+
+
+    img_size = Image.fromarray(images[0]).size # We assume all images of a sample have the same size
+    mask = make_mask(geojson_file, img_size)
+
+    for i, img in enumerate(images):
+        masked = np.logical_and(mask, img)
+        masked = Image.fromarray(masked)
+        masked.save(os.path.join(f'samples/{sample}/img_roi', metals[i] + '.png'), quality = 100)
