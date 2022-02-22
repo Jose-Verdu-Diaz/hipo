@@ -10,8 +10,8 @@ system and delegating all other tasks to the other modules.
 import sys
 
 from lib.Colors import Color
-from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json
-from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI
+from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images
+from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI, appy_threshold
 from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no, input_number
 from lib.browse_samples import list_samples, display_sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
@@ -31,7 +31,8 @@ if __name__ == '__main__':
         3: 'View Normalized',
         4: 'Create GIF',
         5: 'Remove Sample',
-        6: 'Perform analysis'
+        6: 'Perform analysis',
+        7: 'Apply threshold'
     }
 
     color = Color()
@@ -119,6 +120,11 @@ if __name__ == '__main__':
                                     input('Analysis currently not available')
                                 '''
                                 input('Analysis currently not available. Press Enter to continue...')
+                            
+                            elif opt == 7:
+                                images_norm, channels = load_dir_images(sample, 'img_norm')
+                                appy_threshold(sample, images_norm, channels, 0.5)
+                                input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
 
                             else:

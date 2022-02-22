@@ -16,7 +16,8 @@ import os
 import sys
 import json
 import shutil
-from turtle import update
+import numpy as np
+from PIL import Image
 
 from lib.Colors import Color
 from lib.consistency import check_input_files
@@ -69,6 +70,34 @@ def load_input(sample):
             return None
 
 
+def load_dir_images(sample, dir):
+    '''Load png images from directory
+
+    Parameters
+    ----------
+    sample
+        Sample name
+    dir
+        Directory with images
+
+    Returns
+    -------
+    images 
+        list with numpy arrays representing the images
+    channels
+        list with the channel names of the images
+    '''
+
+    files = os.listdir(f'samples/{sample}/{dir}')
+    images, channels = [], []
+    for f in files:
+        if f.endswith('.png'):
+            images.append(np.asarray(Image.open(f'samples/{sample}/{dir}/{f}')))
+            channels.append(f.strip('.png'))
+    return images, channels
+
+
+
 def populate_channels_json(sample, channels):
     '''_summary_
 
@@ -86,7 +115,7 @@ def populate_channels_json(sample, channels):
         with open('lib/json/channel_parameters.json', 'r') as f: data = json.load(f)
         for c in channels: 
             data['name'] = c
-            channel_data.append(data)
+            channel_data.append(data.copy()) # Copy, otherwise it points to same dict
         update_sample_json(sample, {'channels': channel_data})
 
 def make_sample_dirs(name):

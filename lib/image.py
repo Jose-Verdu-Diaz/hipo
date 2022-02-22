@@ -221,3 +221,13 @@ def apply_ROI(geojson_file, images):
     for img in images: masked.append(np.where(mask, img, 0))
 
     return masked
+
+def appy_threshold(sample, images, channels, threshold):
+    for i, img in enumerate(images):
+        img = img / 255
+        result = np.where(img > threshold, img, 0)
+        result = Image.fromarray(np.array(np.round(255.0 * result), dtype = np.uint8))
+        result.save(os.path.join(f'samples/{sample}/img_threshold', channels[i] + '.png'), quality = 100)
+        
+
+
