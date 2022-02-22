@@ -31,7 +31,7 @@ import seaborn_image as isns
 import matplotlib.pyplot as plt
 
 from lib.Colors import Color
-from lib.interface import update_sample_json
+from lib.interface import update_sample_json, load_dir_images
 
 def parse_tiff(tiff_path, summary_path):
     '''Parses a hyperion tiff file with multiple images
@@ -245,4 +245,48 @@ def appy_threshold(sample, images, channels, threshold):
         result.save(os.path.join(f'samples/{sample}/img_threshold', channels[i] + '.png'), quality = 100)
         
 
+def analyse_images(sample, geojson_file):
+    '''Create a csv report of the thresholded images
 
+    Parameters
+    ----------
+    sample
+        Sample name
+    geojson_file
+        path to geojson
+    '''
+
+    images, channels = load_dir_images(sample, 'img_threshold')
+    img_size = Image.fromarray(images[0]).size
+    mask = make_mask(geojson_file, img_size)
+
+    result = []
+    for i, img in enumerate(images):
+        img = img / 255
+
+        mask_positive = np.logical_and(mask, img > 0)
+
+        positive_pixels = img[mask_positive]
+        all_pixels = img[mask]
+
+        mean_positive = np.mean(positive_pixels)
+        area_positive = np.sum(mask_positive)
+
+        mean_all = np.mean(all_pixels)
+        area_all = np.sum(mask)
+        
+        positive_fraction = float(area_positive)/float(area_all)
+
+        summary_dict = {
+            "Channel": channels[i],    
+            "Positive Area" : area_positive,
+            "Positive Mean" : mean_positive,
+            "Total Area": area_all,
+            "Total Mean" : mean_all, 
+            "Positive Fraction" : positive_fraction
+        }
+
+        result.append(summary_dict)
+
+    result_df = pd.DataFrame(result)
+    result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)

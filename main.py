@@ -11,7 +11,7 @@ import sys
 
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_sample_json, update_channel_threshold_json
-from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI, appy_threshold
+from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI, appy_threshold, analyse_images
 from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no, input_number
 from lib.browse_samples import list_samples, display_sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
@@ -118,7 +118,7 @@ if __name__ == '__main__':
                                 else:
                                     input('Analysis currently not available')
                                 '''
-                                input('Analysis currently not available. Press Enter to continue...')
+                                analyse_images(sample, geojson_file)
                             
                             elif opt == 7:
                                 res = check_operation_requirements(sample, 'img_threshold')
