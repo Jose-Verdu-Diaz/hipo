@@ -69,7 +69,7 @@ def parse_tiff(tiff_path, summary_path):
     return tiff_slices, metals, labels, summary_df
 
 
-def normalize_quantile(top_quantile, images, sample, metals):
+def normalize_quantile(top_quantile, geojson_file, images, sample, metals):
     '''Normalize images with a quantile
 
     Normalizing by a quantile instead of normalizing by the max
@@ -92,10 +92,12 @@ def normalize_quantile(top_quantile, images, sample, metals):
 
     update_sample_json(sample, {'norm_quant': top_quantile})
 
+    masked = apply_ROI(geojson_file, images)
+
     color = Color()
     warnings = []
 
-    for i,img in enumerate(tqdm(images, postfix=False)):
+    for i,img in enumerate(tqdm(masked, desc = 'Normalizing images', postfix=False)):
 
         max_val = np.quantile(img, top_quantile)
 
@@ -218,8 +220,7 @@ def apply_ROI(geojson_file, images):
     mask = make_mask(geojson_file, img_size)
 
     masked = []
-    for img in images: masked.append(np.where(mask, img, 0))
-
+    for img in tqdm(images, desc = 'Applying ROIs', postfix=False): masked.append(np.where(mask, img, 0))
     return masked
 
 def appy_threshold(sample, images, channels, threshold):
@@ -237,7 +238,7 @@ def appy_threshold(sample, images, channels, threshold):
         Threshold to be applied
     '''
 
-    for i, img in enumerate(images):
+    for i, img in enumerate(tqdm(images, desc = 'Thresholding images', postfix=False)):
         img = img / 255
         result = np.where(img > threshold, img, 0)
         result = Image.fromarray(np.array(np.round(255.0 * result), dtype = np.uint8))

@@ -18,6 +18,7 @@ import json
 import shutil
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 
 from lib.Colors import Color
 from lib.consistency import check_input_files
@@ -95,7 +96,7 @@ def load_dir_images(sample, dir, img = None):
     else: files = [f'{i}.png' for i in img]
 
     images, channels = [], []
-    for f in files:
+    for f in tqdm(files, desc = 'Loading images', postfix=False):
         if f.endswith('.png'):
             images.append(np.asarray(Image.open(f'samples/{sample}/{dir}/{f}')))
             channels.append(f.strip('.png'))

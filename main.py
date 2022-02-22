@@ -74,12 +74,10 @@ if __name__ == '__main__':
                                 top_quantile = input_number('Enter the top quantile (between 0 and 1).', display=[table], range = (0,1), type = 'float')
                                 if top_quantile == None: continue
 
-                                masked = apply_ROI(geojson_file, images)
-
                                 if not check_overwrite(sample, 'norm_quant') and not input_yes_no(f'{color.YELLOW}Sample already normalized. Overwrite?', display=[table]): continue
 
                                 print(f'Normalizing {sample}, wait please...')
-                                normalize_quantile(top_quantile, masked, sample, metals)
+                                normalize_quantile(top_quantile, geojson_file, images, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
 
                             elif opt == 2:
