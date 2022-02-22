@@ -10,7 +10,7 @@ system and delegating all other tasks to the other modules.
 import sys
 
 from lib.Colors import Color
-from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images
+from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_sample_json, update_channel_threshold_json
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI, appy_threshold
 from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no, input_number
 from lib.browse_samples import list_samples, display_sample_df
@@ -31,8 +31,9 @@ if __name__ == '__main__':
         3: 'View Normalized',
         4: 'Create GIF',
         5: 'Remove Sample',
-        6: 'Perform analysis',
-        7: 'Apply threshold'
+        6: 'Perform Analysis',
+        7: 'Apply Threshold',
+        8: 'Change Threshold'
     }
 
     color = Color()
@@ -126,6 +127,12 @@ if __name__ == '__main__':
                                 appy_threshold(sample, images_norm, channels, 0.5)
                                 input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
+                            elif opt == 8:
+                                opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                threshold = input_number('Enter threshold (between 0 and 1).', display=[table], range = (0,1), type = 'float')
+                                update_channel_threshold_json(sample, opt, threshold)
+                                
+                                table, df = display_sample_df(images, metals, labels, summary_df, sample)
 
                             else:
                                 pass

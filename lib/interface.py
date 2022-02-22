@@ -165,6 +165,31 @@ def update_sample_json(name, update_dict = None):
         json.dump(data, f, indent=4)
         f.truncate()
 
+def update_channel_threshold_json(name, channel, threshold):
+    '''Update the threshold of a channel of a single sample
+
+    Parameters
+    ----------
+    name
+        Name of the sample
+    channel
+        int that identifies a channel
+    threshold
+        float threshold
+    '''
+
+    path = f'samples/{name}/{name}.json'
+
+    with open(path, 'r+') as f: 
+        data = json.load(f)
+
+        data['channels'][channel]['threshold'] = threshold
+
+        f.seek(0)
+        json.dump(data, f, indent=4)
+        f.truncate()
+
+
 
 def delete_sample(name):
     '''Delete sample directory and all of its contents
