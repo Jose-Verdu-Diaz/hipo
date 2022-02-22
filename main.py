@@ -122,7 +122,7 @@ if __name__ == '__main__':
                                 input('Analysis currently not available. Press Enter to continue...')
                             
                             elif opt == 7:
-                                images_norm, channels = load_dir_images(sample, 'img_norm')
+                                images_norm, channels = load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
                                 appy_threshold(sample, images_norm, channels, 0.5)
                                 input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 

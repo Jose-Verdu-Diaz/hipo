@@ -74,8 +74,13 @@ def display_sample_df(images, metals, labels, summary_df, sample_name):
     img_sizes = [img.shape for img in images]
     pixel_min = summary_df['MinValue'].tolist()
     pixel_max = summary_df['MaxValue'].tolist()
+    with open(f'samples/{sample_name}/{sample_name}.json', 'r') as f: data = json.load(f)
+    channel_threshold = ['-' if c['threshold'] == None else c['threshold'] for c in data['channels']]
 
-    df = pd.DataFrame(list(zip(metals, labels, img_sizes, pixel_min, pixel_max)),columns =['Channel', 'Label', 'Image Size', 'Min Value', 'Max Value'])
+    df = pd.DataFrame(
+        list(zip(metals, labels, img_sizes, pixel_min, pixel_max, channel_threshold)),
+        columns =['Channel', 'Label', 'Image Size', 'Min', 'Max', 'Th.']
+        )
 
     table = tabulate(df, headers = 'keys', tablefmt = 'github')
     table = f'{color.BOLD}{color.UNDERLINE}Displaying sample:{color.ENDC} {sample_name}\n\n{table}'

@@ -70,7 +70,7 @@ def load_input(sample):
             return None
 
 
-def load_dir_images(sample, dir):
+def load_dir_images(sample, dir, img = None):
     '''Load png images from directory
 
     Parameters
@@ -79,6 +79,9 @@ def load_dir_images(sample, dir):
         Sample name
     dir
         Directory with images
+    img, optional
+        List of image names (without file extension). If provided, it selects
+        the images to load. By default None
 
     Returns
     -------
@@ -88,12 +91,15 @@ def load_dir_images(sample, dir):
         list with the channel names of the images
     '''
 
-    files = os.listdir(f'samples/{sample}/{dir}')
+    if img == None: files = os.listdir(f'samples/{sample}/{dir}')
+    else: files = [f'{i}.png' for i in img]
+
     images, channels = [], []
     for f in files:
         if f.endswith('.png'):
             images.append(np.asarray(Image.open(f'samples/{sample}/{dir}/{f}')))
             channels.append(f.strip('.png'))
+
     return images, channels
 
 
