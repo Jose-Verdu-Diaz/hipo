@@ -123,9 +123,13 @@ if __name__ == '__main__':
                                 input('Analysis currently not available. Press Enter to continue...')
                             
                             elif opt == 7:
-                                images_norm, channels = load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
-                                appy_threshold(sample, images_norm, channels, 0.5)
-                                input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
+                                res = check_operation_requirements(sample, 'img_threshold')
+                                if not res == None:
+                                    input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
+                                else:
+                                    images_norm, channels = load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
+                                    appy_threshold(sample, images_norm, channels, 0.5)
+                                    input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
                             elif opt == 8:
                                 opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)

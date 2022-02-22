@@ -20,11 +20,14 @@ from lib.browse_samples import list_samples
 # Value: list of sample json parameters, corresponding to the required operations
 OPERATION_REQUIREMENTS = {
     'img_norm': [],
-    'img_roi': ['norm_quant'],
+    'img_threshold': ['norm_quant'],
     'analysis': ['img_roi']
 }
+
+# Key: json parameter, corresponding to the required operations
+# Value: name to be displayed
 REQUIREMENTS_NAME_MAPPING = {
-    'norm_quant': 'Normalization',
+    'norm_quant': 'ROI and Normalization',
     'roi': 'ROI'
 }
 
