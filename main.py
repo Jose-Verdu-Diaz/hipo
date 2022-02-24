@@ -128,7 +128,10 @@ if __name__ == '__main__':
 
                             elif opt == 8:
                                 opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                if opt == None: continue
+
                                 threshold = input_number('Enter threshold (between 0 and 1).', display=[table], range = (0,1), type = 'float')
+                                if threshold == None: continue
                                 update_channel_threshold_json(sample, opt, threshold)
                                 
                                 table, df = display_sample_df(images, metals, labels, summary_df, sample)
