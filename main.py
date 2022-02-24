@@ -38,6 +38,8 @@ if __name__ == '__main__':
 
     color = Color()
 
+    if not os.path.exists('samples'): os.mkdir('samples')
+
     while True:
         print_title()
 
