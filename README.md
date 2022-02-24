@@ -7,6 +7,8 @@ Tool for processing and analysing hyperion imaging.
 This is a work-in-progress tool. Many bugs may arise and features will be added with time.
 If you discover a bug or have a feature suggestion, do not hesitate to open an Issue.
 
+This tool has been developed in a Linux (Ubuntu) machine and has not been tested in other OS.
+
 ## Setup
 
 Check conda is installed in PATH:

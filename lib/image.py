@@ -261,7 +261,7 @@ def analyse_images(sample, geojson_file):
     mask = make_mask(geojson_file, img_size)
 
     result = []
-    for i, img in enumerate(images):
+    for i, img in enumerate(tqdm(images, desc = 'Analysing images', postfix=False)):
         img = img / 255
 
         mask_positive = np.logical_and(mask, img > 0)
