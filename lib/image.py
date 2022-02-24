@@ -254,9 +254,20 @@ def analyse_images(sample, geojson_file):
         Sample name
     geojson_file
         path to geojson
+
+    Returns
+    -------
+    None
+        if no thresholded images are found
+    result_df
+        pandas DataFrame with the analysis results
     '''
 
+    color = Color()
+
     images, channels = load_dir_images(sample, 'img_threshold')
+    if len(images) == 0: return None
+
     img_size = Image.fromarray(images[0]).size
     mask = make_mask(geojson_file, img_size)
 
@@ -290,3 +301,5 @@ def analyse_images(sample, geojson_file):
 
     result_df = pd.DataFrame(result)
     result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)
+
+    return result_df

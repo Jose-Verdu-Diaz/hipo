@@ -114,8 +114,9 @@ if __name__ == '__main__':
                                     input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
 
                             elif opt == 6:
-                                analyse_images(sample, geojson_file)
-                                input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
+                                res = analyse_images(sample, geojson_file)
+                                if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
+                                else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
                             
                             elif opt == 7:
                                 res = check_operation_requirements(sample, 'img_threshold')
