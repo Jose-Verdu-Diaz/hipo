@@ -8,6 +8,7 @@ system and delegating all other tasks to the other modules.
 '''
 
 import sys
+improt os
 
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_sample_json, update_channel_threshold_json
