@@ -20,6 +20,7 @@ input_text
 '''
 
 import os
+from tabulate import tabulate
 
 from lib.Colors import Color
 from lib.consistency import RepeatedNameException
@@ -221,6 +222,37 @@ def input_number(txt, cancel = True, display = [], range = None, type = 'int'):
 
                 if not None and range[0] <= number <= range[1]: return number
                 else: input(f'{color.RED}The value is not inside the range! Press enter to continue...{color.ENDC}')
+
+        except: 
+            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            continue
+
+
+def input_df_toggle(df, cancel = True, display = []):
+    color = Color()
+
+    df['Toggle'] = '-'
+    toggle = [False for i in range(df.shape[0])]
+
+    while True:
+        print_title()
+        for d in display: print(f'{d}\n')
+
+        table = tabulate(df, headers = 'keys', tablefmt = 'github')
+        print(table)
+
+        try:
+            txt = 'Select an option to toggle, or enter \'y\' to confirm'
+            prompt = f'\n{txt} (\'c\' to cancel): ' if cancel else f'\n{txt}: '
+            id = str(input(prompt))
+
+            if  id == 'c': return None
+            elif id == 'y': return toggle
+            else: 
+                id = int(id)
+                toggle[id] = not toggle[id]
+                df['Toggle'][id] = 'X' if toggle[id] else '-'
+
 
         except: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')

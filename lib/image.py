@@ -29,6 +29,7 @@ import pandas as pd
 import seaborn as sns
 import seaborn_image as isns
 import matplotlib.pyplot as plt
+import napari
 
 from lib.Colors import Color
 from lib.interface import update_sample_json, load_dir_images
@@ -259,8 +260,8 @@ def analyse_images(sample, geojson_file):
     -------
     None
         if no thresholded images are found
-    result_df
-        pandas DataFrame with the analysis results
+    1
+        if ok
     '''
 
     color = Color()
@@ -303,3 +304,11 @@ def analyse_images(sample, geojson_file):
     result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)
 
     return 1
+
+
+def show_napari(images):
+
+    viewer = napari.Viewer()
+    for img in images:
+        viewer.add_image(img)
+    napari.run()

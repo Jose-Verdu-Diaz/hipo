@@ -11,9 +11,9 @@ import sys
 import os
 
 from lib.Colors import Color
-from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_sample_json, update_channel_threshold_json
-from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, apply_ROI, appy_threshold, analyse_images
-from lib.utils import print_title, print_menu, input_menu_option, input_text, input_yes_no, input_number
+from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_channel_threshold_json
+from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari
+from lib.utils import print_title, input_menu_option, input_text, input_yes_no, input_number, input_df_toggle
 from lib.browse_samples import list_samples, display_sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
 
@@ -34,7 +34,8 @@ if __name__ == '__main__':
         5: 'Remove Sample',
         6: 'Perform Analysis',
         7: 'Apply Threshold',
-        8: 'Change Threshold'
+        8: 'Change Threshold',
+        9: 'Napari Show'
     }
 
     color = Color()
@@ -136,6 +137,14 @@ if __name__ == '__main__':
                                 update_channel_threshold_json(sample, opt, threshold)
                                 
                                 table, df = display_sample_df(images, metals, labels, summary_df, sample)
+
+                            elif opt == 9:
+                                toggle = input_df_toggle(df)
+                                if toggle == None: continue
+                                else: 
+                                    selected_image = [img for i,img in enumerate(images) if toggle[i]]
+                                    show_napari(selected_image)
+
 
                             else:
                                 pass
