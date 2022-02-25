@@ -302,4 +302,4 @@ def analyse_images(sample, geojson_file):
     result_df = pd.DataFrame(result)
     result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)
 
-    return result_df
+    return 1
