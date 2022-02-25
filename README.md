@@ -11,6 +11,8 @@ This tool has been developed in a Linux (Ubuntu) machine and has not been tested
 
 ## Setup
 
+Download the latest stable [release](https://github.com/Jose-Verdu-Diaz/hyperion_jvd/releases), or clone this repo (unstable).
+
 Check conda is installed in PATH:
 ```console
 $ conda -V
