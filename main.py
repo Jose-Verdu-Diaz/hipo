@@ -14,7 +14,7 @@ from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_channel_threshold_json
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari
 from lib.utils import print_title, input_menu_option, input_text, input_yes_no, input_number, input_df_toggle
-from lib.browse_samples import list_samples, display_sample_df
+from lib.browse_samples import list_samples, sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
 
 if __name__ == '__main__':
@@ -66,8 +66,8 @@ if __name__ == '__main__':
 
                         (tiff_file, txt_file, geojson_file) = sample_input
                         images, metals, labels, summary_df = parse_tiff(tiff_file, txt_file)
-                        populate_channels_json(sample, metals)
-                        table, df = display_sample_df(images, metals, labels, summary_df, sample)
+                        populate_channels_json(sample, metals, labels)
+                        table, df = sample_df(images, metals, labels, summary_df, sample)
 
                         while True:
                             opt = input_menu_option(SAMPLE_OPTIONS, cancel = False, display = [table])
@@ -136,15 +136,14 @@ if __name__ == '__main__':
                                 if threshold == None: continue
                                 update_channel_threshold_json(sample, opt, threshold)
                                 
-                                table, df = display_sample_df(images, metals, labels, summary_df, sample)
+                                table, df = sample_df(images, metals, labels, summary_df, sample)
 
                             elif opt == 9:
-                                toggle = input_df_toggle(df)
-                                if toggle == None: continue
-                                else: 
-                                    selected_image = [img for i,img in enumerate(images) if toggle[i]]
-                                    show_napari(selected_image)
-
+                                selected_images = input_df_toggle(df)
+                                if selected_images == None: continue
+                                else:
+                                    images_norm, channels = load_dir_images(sample, 'img_norm', img = selected_images) # Images return unordered, must fix
+                                    show_napari(images_norm, channels)
 
                             else:
                                 pass

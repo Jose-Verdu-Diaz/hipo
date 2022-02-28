@@ -17,6 +17,7 @@ import sys
 import json
 import shutil
 import numpy as np
+import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
@@ -105,7 +106,7 @@ def load_dir_images(sample, dir, img = None):
 
 
 
-def populate_channels_json(sample, channels):
+def populate_channels_json(sample, channels, labels):
     '''_summary_
 
     Parameters
@@ -116,13 +117,20 @@ def populate_channels_json(sample, channels):
         Channels of the sample to populate
     '''
 
+    df = pd.DataFrame(
+            list(zip(channels, labels)),
+            columns =['Channel', 'Label']
+        ).sort_values(['Channel']).reset_index(drop=True)
+
     with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
     if data['channels'] == None:
         channel_data = []
         with open('lib/json/channel_parameters.json', 'r') as f: data = json.load(f)
-        for c in channels: 
+        for i,c in enumerate(df['Channel'].to_list()): 
             data['name'] = c
+            data['label'] = df['Label'].to_list()[i]
             channel_data.append(data.copy()) # Copy, otherwise it points to same dict
+
         update_sample_json(sample, {'channels': channel_data})
 
 def make_sample_dirs(name):

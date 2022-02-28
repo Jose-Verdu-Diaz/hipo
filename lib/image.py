@@ -306,9 +306,41 @@ def analyse_images(sample, geojson_file):
     return 1
 
 
-def show_napari(images):
-
+def show_napari(images, channels):
     viewer = napari.Viewer()
-    for img in images:
-        viewer.add_image(img)
+
+    colors = ['red', 'yellow', 'green', 'cyan', 'blue', 'magenta']
+
+    for i,img in enumerate(images):
+        cmap = create_cmap(colors[i])
+        viewer.add_image(img, colormap = cmap, name = channels[i])
     napari.run()
+
+
+def create_cmap(c):
+
+    stop = {
+        'red': [1, 0, 0, 1],
+        'yellow': [1, 1, 0, 1],
+        'green': [0, 1, 0, 1],
+        'cyan': [0, 1, 1, 1],
+        'blue': [0, 0, 1, 1],
+        'magenta': [1, 0, 1, 1]
+    }
+
+    colors = np.linspace(
+        start = [0, 0, 0, 1],
+        stop = stop[c],
+        num = 100,
+        endpoint = True
+    )
+
+    colors[0] = np.array([0, 0, 0, 0])
+
+    new_colormap = {
+        'colors': colors,
+        'name': 'white_to_blue',
+        'interpolation': 'linear'
+    }
+
+    return new_colormap

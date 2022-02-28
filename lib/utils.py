@@ -247,7 +247,9 @@ def input_df_toggle(df, cancel = True, display = []):
             id = str(input(prompt))
 
             if  id == 'c': return None
-            elif id == 'y': return toggle
+            elif id == 'y':
+                selected_images = [channel for i,channel in enumerate(df['Channel'].to_list()) if toggle[i]]
+                return selected_images
             else: 
                 id = int(id)
                 toggle[id] = not toggle[id]
