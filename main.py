@@ -139,10 +139,10 @@ if __name__ == '__main__':
                                 table, df = sample_df(images, metals, labels, summary_df, sample)
 
                             elif opt == 9:
-                                selected_images = input_df_toggle(df)
+                                selected_images = input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
-                                    images_norm, channels = load_dir_images(sample, 'img_norm', img = selected_images) # Images return unordered, must fix
+                                    images_norm, channels = load_dir_images(sample, 'img_threshold', img = selected_images) # Images return unordered, must fix
                                     show_napari(images_norm, channels)
 
                             else:
@@ -162,5 +162,3 @@ if __name__ == '__main__':
             else: 
                 print('UNEXPECTED OPTION')
                 input('\nPress Enter to continue...')
-
-

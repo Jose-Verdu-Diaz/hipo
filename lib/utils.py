@@ -23,7 +23,7 @@ import os
 from tabulate import tabulate
 
 from lib.Colors import Color
-from lib.consistency import RepeatedNameException
+from lib.consistency import RepeatedNameException, ThresholdExpectedException, check_existing_threshold
 
 
 def clear():
@@ -228,7 +228,7 @@ def input_number(txt, cancel = True, display = [], range = None, type = 'int'):
             continue
 
 
-def input_df_toggle(df, cancel = True, display = []):
+def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
     color = Color()
 
     df['Toggle'] = '-'
@@ -252,10 +252,17 @@ def input_df_toggle(df, cancel = True, display = []):
                 return selected_images
             else: 
                 id = int(id)
+
+                result = check_existing_threshold(sample, id)
+                if not result is None: raise result
+
                 toggle[id] = not toggle[id]
                 df['Toggle'][id] = 'X' if toggle[id] else '-'
 
+        except ThresholdExpectedException as e: 
+            input(f'{color.RED}{e} Press enter to continue...{color.ENDC}')
+            continue
 
-        except: 
+        except Exception: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue

@@ -46,6 +46,11 @@ class UnknownInputFileException(Exception):
         message = f'Unknown input files: {files}!'
         super(UnknownInputFileException, self).__init__(message)
 
+class ThresholdExpectedException(Exception):
+    def __init__(self, channel):
+        message = f'No threshold for the channel {channel}!'
+        super(UnknownInputFileException, self).__init__(message)
+
 
 def check_repeated_sample_name(name):
     '''Check if the sample name already exists
@@ -129,6 +134,7 @@ def check_overwrite(sample, param):
     if data[param] == None: return True
     else: return False
 
+
 def check_operation_requirements(sample, operation):
     '''Checks if required operations for a new operation are already done
 
@@ -153,3 +159,12 @@ def check_operation_requirements(sample, operation):
         if data[op_req] == None: return REQUIREMENTS_NAME_MAPPING[op_req]
     return None
 
+
+def check_existing_threshold(sample, channel_id):
+
+    with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
+
+    if data['channels'][channel_id]['threshold'] == None: 
+        return ThresholdExpectedException(data['channels'][channel_id]['name'])
+    
+    return None
