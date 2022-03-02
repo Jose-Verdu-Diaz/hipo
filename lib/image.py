@@ -264,8 +264,6 @@ def analyse_images(sample, geojson_file):
         if ok
     '''
 
-    color = Color()
-
     images, channels = load_dir_images(sample, 'img_threshold')
     if len(images) == 0: return None
 
@@ -307,6 +305,8 @@ def analyse_images(sample, geojson_file):
 
 
 def show_napari(images, channels):
+    color = Color()
+
     viewer = napari.Viewer()
 
     colors = ['red', 'yellow', 'green', 'cyan', 'blue', 'magenta']
@@ -314,6 +314,8 @@ def show_napari(images, channels):
     for i,img in enumerate(images):
         cmap = create_cmap(colors[i])
         viewer.add_image(img, colormap = cmap, name = channels[i])
+
+    print(f'{color.CYAN}Opening napari. Close napari window to continue...{color.ENDC}')
     napari.run()
 
 
@@ -339,7 +341,7 @@ def create_cmap(c):
 
     new_colormap = {
         'colors': colors,
-        'name': 'white_to_blue',
+        'name': c,
         'interpolation': 'linear'
     }
 

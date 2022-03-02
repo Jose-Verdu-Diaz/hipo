@@ -56,7 +56,13 @@ def print_menu(options):
         is the option name
     '''
 
-    for key in options.keys(): print (key, ' - ', options[key] )
+    max_len = 0
+    for k in options:
+        if len(options[k]) > max_len: max_len = len(options[k])
+
+    for k in options:
+        if type(k) == str: print(f'\n{options[k].ljust(max_len + 4, "#")}')
+        else: print (f'{k} - {options[k]}')
 
 
 def input_menu_option(options, cancel = True, display = [], show_menu = True):

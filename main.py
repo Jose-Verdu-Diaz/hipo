@@ -27,15 +27,20 @@ if __name__ == '__main__':
 
     SAMPLE_OPTIONS = {
         0: 'Back',
+        'a': 'Normalize ',
         1: 'Apply ROI and Normalize',
-        2: 'View Raw',
-        3: 'View Normalized',
-        4: 'Create GIF',
-        5: 'Remove Sample',
-        6: 'Perform Analysis',
-        7: 'Apply Threshold',
-        8: 'Change Threshold',
-        9: 'Napari Show'
+        'b': 'Threshold ',
+        2: 'Change Threshold',
+        3: 'Apply Threshold',
+        'c': 'Analyze ',
+        4: 'Perform Analysis',
+        'd': 'Visualize ',    
+        5: 'View Raw',
+        6: 'View Normalized',
+        7: 'Create GIF', 
+        8: 'Napari Show',
+        'f': 'Edit ', 
+        9: 'Remove Sample',
     }
 
     color = Color()
@@ -74,6 +79,7 @@ if __name__ == '__main__':
 
                             if opt == 0: break
 
+
                             elif opt == 1:         
                                 top_quantile = input_number('Enter the top quantile (between 0 and 1).', display=[table], range = (0,1), type = 'float')
                                 if top_quantile == None: continue
@@ -84,14 +90,43 @@ if __name__ == '__main__':
                                 normalize_quantile(top_quantile, geojson_file, images, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
 
+
                             elif opt == 2:
+                                opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                if opt == None: continue
+
+                                threshold = input_number('Enter threshold (between 0 and 1).', display=[table], range = (0,1), type = 'float')
+                                if threshold == None: continue
+                                update_channel_threshold_json(sample, opt, threshold)
+                                
+                                table, df = sample_df(images, metals, labels, summary_df, sample)
+
+
+                            elif opt == 3:
+                                res = check_operation_requirements(sample, 'img_threshold')
+                                if not res == None:
+                                    input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
+                                else:
+                                    images_norm, channels = load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
+                                    appy_threshold(sample, images_norm, channels, 0.5)
+                                    input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
+
+
+                            elif opt == 4:
+                                res = analyse_images(sample, geojson_file)
+                                if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
+                                else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
+
+
+                            elif opt == 5:
                                 while True:
                                     opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False)
 
                                     if opt == None: break
                                     else: show_image(images[opt])
 
-                            elif opt == 3:
+
+                            elif opt == 6:
                                 while True:
                                     opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False )
 
@@ -100,10 +135,20 @@ if __name__ == '__main__':
                                         img = load_image(f'samples/{sample}/img_norm/{metals[opt]}.png')
                                         show_image(img)
 
-                            elif opt == 4:
+
+                            elif opt == 7:
                                 create_gif(sample)
 
-                            elif opt == 5:
+
+                            elif opt == 8:
+                                selected_images = input_df_toggle(sample, df)
+                                if selected_images == None: continue
+                                else:
+                                    images_norm, channels = load_dir_images(sample, 'img_threshold', img = selected_images) # Images return unordered, must fix
+                                    show_napari(images_norm, channels)
+
+
+                            elif opt == 9:
                                 name = input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
@@ -114,36 +159,6 @@ if __name__ == '__main__':
                                 else:
                                     input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
 
-                            elif opt == 6:
-                                res = analyse_images(sample, geojson_file)
-                                if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
-                                else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
-                            
-                            elif opt == 7:
-                                res = check_operation_requirements(sample, 'img_threshold')
-                                if not res == None:
-                                    input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
-                                else:
-                                    images_norm, channels = load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
-                                    appy_threshold(sample, images_norm, channels, 0.5)
-                                    input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
-
-                            elif opt == 8:
-                                opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
-                                if opt == None: continue
-
-                                threshold = input_number('Enter threshold (between 0 and 1).', display=[table], range = (0,1), type = 'float')
-                                if threshold == None: continue
-                                update_channel_threshold_json(sample, opt, threshold)
-                                
-                                table, df = sample_df(images, metals, labels, summary_df, sample)
-
-                            elif opt == 9:
-                                selected_images = input_df_toggle(sample, df)
-                                if selected_images == None: continue
-                                else:
-                                    images_norm, channels = load_dir_images(sample, 'img_threshold', img = selected_images) # Images return unordered, must fix
-                                    show_napari(images_norm, channels)
 
                             else:
                                 pass
