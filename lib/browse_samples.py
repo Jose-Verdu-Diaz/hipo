@@ -78,15 +78,15 @@ def sample_df(images, metals, labels, summary_df, sample_name):
     channel_threshold = ['-' if c['threshold'] == None else c['threshold'] for c in data['channels']]
 
     df = pd.DataFrame(
-            list(zip(metals, labels, img_sizes, pixel_min, pixel_max)),
-            columns =['Channel', 'Label', 'Image Size', 'Min', 'Max']
+            list(zip(images, metals, labels, img_sizes, pixel_min, pixel_max)),
+            columns =['Image', 'Channel', 'Label', 'Image Size', 'Min', 'Max']
         )
 
     df = df.sort_values(['Channel']).reset_index(drop=True)
 
     df['Th.'] = channel_threshold # channel_threshold is already sorted, add it after sorting DataFrame
 
-    table = tabulate(df, headers = 'keys', tablefmt = 'github')
+    table = tabulate(df.loc[:, df.columns != 'Image'], headers = 'keys', tablefmt = 'github')
     table = f'{color.BOLD}{color.UNDERLINE}Displaying sample:{color.ENDC} {sample_name}\n\n{table}'
 
     return table, df

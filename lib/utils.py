@@ -244,7 +244,7 @@ def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
         print_title()
         for d in display: print(f'{d}\n')
 
-        table = tabulate(df, headers = 'keys', tablefmt = 'github')
+        table = tabulate(df.loc[:, df.columns != 'Image'], headers = 'keys', tablefmt = 'github')
         print(table)
 
         try:

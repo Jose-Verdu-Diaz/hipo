@@ -12,7 +12,7 @@ import os
 
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_channel_threshold_json
-from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari
+from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari, threshold_napari
 from lib.utils import print_title, input_menu_option, input_text, input_yes_no, input_number, input_df_toggle
 from lib.browse_samples import list_samples, sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
@@ -31,16 +31,17 @@ if __name__ == '__main__':
         1: 'Apply ROI and Normalize',
         'b': 'Threshold ',
         2: 'Change Threshold',
-        3: 'Apply Threshold',
+        3: 'Change Threshold (napari)',
+        4: 'Apply Threshold',
         'c': 'Analyze ',
-        4: 'Perform Analysis',
+        5: 'Perform Analysis',
         'd': 'Visualize ',    
-        5: 'View Raw',
-        6: 'View Normalized',
-        7: 'Create GIF', 
-        8: 'Napari Show',
+        6: 'View Raw',
+        7: 'View Normalized',
+        8: 'Create GIF', 
+        9: 'Napari Show',
         'f': 'Edit ', 
-        9: 'Remove Sample',
+        10: 'Remove Sample',
     }
 
     color = Color()
@@ -102,7 +103,15 @@ if __name__ == '__main__':
                                 table, df = sample_df(images, metals, labels, summary_df, sample)
 
 
-                            elif opt == 3:
+                            elif opt == 3: # napari
+                                opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                if opt == None: continue
+                                else: 
+                                    images_norm, channels = load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
+                                    threshold_napari(images_norm[0], channels[0])
+
+
+                            elif opt == 4:
                                 res = check_operation_requirements(sample, 'img_threshold')
                                 if not res == None:
                                     input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
@@ -112,13 +121,13 @@ if __name__ == '__main__':
                                     input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 4:
+                            elif opt == 5:
                                 res = analyse_images(sample, geojson_file)
                                 if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 5:
+                            elif opt == 6:
                                 while True:
                                     opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False)
 
@@ -126,7 +135,7 @@ if __name__ == '__main__':
                                     else: show_image(images[opt])
 
 
-                            elif opt == 6:
+                            elif opt == 7:
                                 while True:
                                     opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False )
 
@@ -136,11 +145,11 @@ if __name__ == '__main__':
                                         show_image(img)
 
 
-                            elif opt == 7:
+                            elif opt == 8:
                                 create_gif(sample)
 
 
-                            elif opt == 8:
+                            elif opt == 9:
                                 selected_images = input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
@@ -148,7 +157,7 @@ if __name__ == '__main__':
                                     show_napari(images_norm, channels)
 
 
-                            elif opt == 9:
+                            elif opt == 10:
                                 name = input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:

@@ -305,7 +305,12 @@ def analyse_images(sample, geojson_file):
 
 
 def show_napari(images, channels):
+
     color = Color()
+
+    if len(images) > 6:
+        input(f'{color.RED}Only 6 images can be displayed at the same time.\nPress enter to continue...{color.ENDC}')
+        return
 
     viewer = napari.Viewer()
 
@@ -346,3 +351,14 @@ def create_cmap(c):
     }
 
     return new_colormap
+
+
+def threshold_napari(img, channel):
+    color = Color()
+    viewer = napari.Viewer()
+    viewer.add_image(img, name = channel)
+    print(f'{color.CYAN}Opening napari. Close napari window to continue...{color.ENDC}')
+    napari.run()
+
+    contrast = viewer.layers[channel].contrast_limits
+    input(f'{color.GREEN}The selected contrast limits are: {contrast}. Press Enter to continue...')
