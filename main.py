@@ -105,6 +105,12 @@ if __name__ == '__main__':
 
 
                             elif opt == 3: # napari
+
+                                print(f'{color.YELLOW}This option allows retrieve the contrast limits applied to the image.{color.ENDC}')
+                                print(f'{color.YELLOW}A future release will allow to modify the threshold/contrast directly from napari.{color.ENDC}')
+                                print(f'{color.YELLOW}Use this option only to visualize how the contrast modifies the channel.{color.ENDC}')
+                                input(f'{color.YELLOW}Press Enter to continue...{color.ENDC}')
+
                                 opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
                                 else: 
