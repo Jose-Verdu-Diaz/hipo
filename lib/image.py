@@ -382,5 +382,5 @@ def view_histogram(img):
     plt.axvline(0, color='red')
     plt.axvline(255, color='red')
     counts = img.ravel()
-    plt.hist(counts[counts != 0], bins = 200)
+    plt.hist(counts[counts != 0], bins = 255)
     plt.show()

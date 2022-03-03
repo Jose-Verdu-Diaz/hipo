@@ -163,7 +163,6 @@ if __name__ == '__main__':
                                 if opt == None: continue
                                 else: 
                                     images_norm, channels = load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
-                                    input(channels)
                                     view_histogram(images_norm[0])
 
 

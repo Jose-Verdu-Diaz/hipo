@@ -259,7 +259,7 @@ def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
             else: 
                 id = int(id)
 
-                result = check_existing_threshold(sample, id)
+                result = check_existing_threshold(sample = sample, channel_id = id)
                 if not result is None: raise result
 
                 toggle[id] = not toggle[id]
@@ -271,4 +271,5 @@ def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
 
         except Exception as e: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            input(e)
             continue
