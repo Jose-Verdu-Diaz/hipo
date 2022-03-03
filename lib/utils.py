@@ -269,6 +269,6 @@ def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
             input(f'{color.RED}{e} Press enter to continue...{color.ENDC}')
             continue
 
-        except Exception: 
+        except Exception as e: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue

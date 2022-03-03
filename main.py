@@ -12,7 +12,7 @@ import os
 
 from lib.Colors import Color
 from lib.interface import load_input, make_sample_dirs, delete_sample, populate_channels_json, load_dir_images, update_channel_threshold_json
-from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari, threshold_napari
+from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari, threshold_napari, view_histogram
 from lib.utils import print_title, input_menu_option, input_text, input_yes_no, input_number, input_df_toggle
 from lib.browse_samples import list_samples, sample_df
 from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
@@ -40,8 +40,9 @@ if __name__ == '__main__':
         7: 'View Normalized',
         8: 'Create GIF', 
         9: 'Napari Show',
+        10: 'View Histogram',
         'f': 'Edit ', 
-        10: 'Remove Sample',
+        11: 'Remove Sample',
     }
 
     color = Color()
@@ -158,6 +159,15 @@ if __name__ == '__main__':
 
 
                             elif opt == 10:
+                                opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                if opt == None: continue
+                                else: 
+                                    images_norm, channels = load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
+                                    input(channels)
+                                    view_histogram(images_norm[0])
+
+
+                            elif opt == 11:
                                 name = input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:

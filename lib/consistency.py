@@ -49,7 +49,7 @@ class UnknownInputFileException(Exception):
 class ThresholdExpectedException(Exception):
     def __init__(self, channel):
         message = f'No threshold for the channel {channel}!'
-        super(UnknownInputFileException, self).__init__(message)
+        super(ThresholdExpectedException, self).__init__(message)
 
 
 def check_repeated_sample_name(name):
@@ -160,11 +160,13 @@ def check_operation_requirements(sample, operation):
     return None
 
 
-def check_existing_threshold(sample, channel_id):
+def check_existing_threshold(**kwargs):
+    sample = kwargs['sample']
+    channel_id = kwargs['channel_id']
 
     with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
 
-    if data['channels'][channel_id]['threshold'] == None: 
+    if data['channels'][channel_id]['threshold'] == None:
         return ThresholdExpectedException(data['channels'][channel_id]['name'])
     
     return None

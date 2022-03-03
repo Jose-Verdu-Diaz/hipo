@@ -362,3 +362,25 @@ def threshold_napari(img, channel):
 
     contrast = viewer.layers[channel].contrast_limits
     input(f'{color.GREEN}The selected contrast limits are: {contrast}. Press Enter to continue...')
+
+
+def contrast_LUT(img):
+    min=np.min(img)
+    max=np.max(img)
+
+    LUT=np.zeros(256,dtype=np.uint8)
+    LUT[min:max+1]=np.linspace(start=0,stop=255,num=(max-min)+1,endpoint=True,dtype=np.uint8)
+
+    Image.fromarray(LUT[img]).save('result.png')
+
+def view_histogram(img):
+    plt.figure(figsize = (20,10))
+    plt.title("Histogram")
+    plt.xlabel("Value")
+    plt.ylabel("pixels Frequency")
+    plt.yscale('log')
+    plt.axvline(0, color='red')
+    plt.axvline(255, color='red')
+    counts = img.ravel()
+    plt.hist(counts[counts != 0], bins = 200)
+    plt.show()
