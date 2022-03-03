@@ -25,6 +25,10 @@ $ conda update conda
 
 Create conda environment. This project has been created for Python 3.10.2 and won't be 
 maintained for any other version.
+
+Specifying the Python version on Win10 has been reported to cause some **problems when installing the requirements**. If this
+is your case, try removing and creating again the environment without specifying the Python version.
+
 ```console
 $ conda create -n envname python=3.10.2
 ```
@@ -43,6 +47,7 @@ $ conda install matplotlib
 $ conda install seaborn
 $ conda install seaborn_image
 $ conda install tqdm
+$ conda install -c conda-forge napari
 ```
 
 Run the tool
