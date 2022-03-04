@@ -15,7 +15,7 @@ from lib.interface import load_input, make_sample_dirs, delete_sample, populate_
 from lib.image import parse_tiff, show_image, normalize_quantile, load_image, create_gif, appy_threshold, analyse_images, show_napari, threshold_napari, view_histogram
 from lib.utils import print_title, input_menu_option, input_text, input_yes_no, input_number, input_df_toggle
 from lib.browse_samples import list_samples, sample_df
-from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements
+from lib.consistency import check_repeated_sample_name, check_overwrite, check_operation_requirements, check_existing_threshold
 
 if __name__ == '__main__':
 
@@ -157,19 +157,19 @@ if __name__ == '__main__':
 
 
                             elif opt == 9:
-                                selected_images = input_df_toggle(sample, df)
+                                selected_images = input_df_toggle(sample, df, consistency = [check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
-                                    images_norm, channels = load_dir_images(sample, 'img_threshold', img = selected_images) # Images return unordered, must fix
+                                    images_norm, channels = load_dir_images(sample, 'img_threshold', img = selected_images)
                                     show_napari(images_norm, channels)
 
 
                             elif opt == 10:
-                                opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
-                                if opt == None: continue
-                                else: 
-                                    images_norm, channels = load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
-                                    view_histogram(images_norm[0])
+                                selected_images = input_df_toggle(sample, df)
+                                if selected_images == None: continue
+                                else:
+                                    images_norm, channels = load_dir_images(sample, 'img_norm', img = selected_images)
+                                    view_histogram(images_norm, channels, geojson_file)
 
 
                             elif opt == 11:

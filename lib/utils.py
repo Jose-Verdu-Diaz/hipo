@@ -259,8 +259,9 @@ def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
             else: 
                 id = int(id)
 
-                result = check_existing_threshold(sample = sample, channel_id = id)
-                if not result is None: raise result
+                for c in consistency:
+                    result = c(sample = sample, channel_id = id)
+                    if not result is None: raise result
 
                 toggle[id] = not toggle[id]
                 df['Toggle'][id] = 'X' if toggle[id] else '-'

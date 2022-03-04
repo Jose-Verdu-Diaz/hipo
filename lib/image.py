@@ -21,6 +21,7 @@ create_gif
 
 import os
 import json
+from click import style
 import numpy as np
 from tqdm import tqdm
 from PIL import Image, ImageDraw
@@ -29,6 +30,7 @@ import pandas as pd
 import seaborn as sns
 import seaborn_image as isns
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 import napari
 
 from lib.Colors import Color
@@ -373,14 +375,54 @@ def contrast_LUT(img):
 
     Image.fromarray(LUT[img]).save('result.png')
 
-def view_histogram(img):
-    plt.figure(figsize = (20,10))
-    plt.title("Histogram")
-    plt.xlabel("Value")
-    plt.ylabel("pixels Frequency")
-    plt.yscale('log')
-    plt.axvline(0, color='red')
-    plt.axvline(255, color='red')
-    counts = img.ravel()
-    plt.hist(counts[counts != 0], bins = 255)
+def view_histogram(images, channels, geojson_file):
+    img_size = Image.fromarray(images[0]).size
+    mask = make_mask(geojson_file, img_size)
+
+    sns.set_theme(style="darkgrid")
+    
+    colors = ['#33964a', '#4d3396', '#963338', '#d38123', '#279db5', '#96bc18']
+
+    x = list(range(0,256))
+
+    p = 0.999
+    p_lines = ()
+    p_labels = ()
+
+    fig = plt.figure(figsize = (25,10))
+    fig.suptitle('Histogram of normalized channels (masked)', fontsize=20)
+    gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
+    ax0 = plt.subplot(gs[0])
+    ax1 = plt.subplot(gs[1], sharex = ax0)
+    ax0.set_yscale("log")
+
+    for i, img in enumerate(images):
+        img_masked = img[mask]
+
+        counts = img_masked.ravel()
+        percentile = np.quantile(img, p)
+
+        y, bins = np.histogram(counts, bins = range(0,257))
+        ax0.plot(x, y, label = channels[i], linestyle = '-', color= colors[i])
+        ax1.plot(x, y, label = channels[i], linestyle = '-', color= colors[i])
+        pline0 = ax0.axvline(percentile, linestyle = 'dotted', color = colors[i])
+        p_lines += (pline0,)
+        p_labels += (f'{channels[i]} {p * 100}% percentile',)
+        ax1.axvline(percentile, linestyle = 'dotted', color = colors[i])
+
+    plt.setp(ax0.get_xticklabels(), visible=False)
+    ax0.axvline(0, color='grey', alpha = 0.5)
+    ax0.axvline(255, color='grey', alpha = 0.5)
+    ax0.legend(p_lines, p_labels, loc='upper right')
+    ax0.axhline(1, color='grey', linestyle = 'dotted')
+    ax0.set_ylabel('Pixel Counts (log)')
+    ax1.axvline(0, color='grey', alpha = 0.5)
+    ax1.axvline(255, color='grey', alpha = 0.5)
+    ax1.legend(loc='upper right')
+    ax1.set_xlabel('Pixel Value')
+    ax1.set_ylabel('Pixel Counts')
+    ax1.ticklabel_format(style = 'plain')
+    plt.xticks(np.append(np.arange(start = 0, stop = 255, step = 10), 255))
+    plt.xticks(rotation = 45)
+    plt.subplots_adjust(hspace=.02)
     plt.show()
