@@ -40,9 +40,12 @@ if __name__ == '__main__':
         7: 'View Normalized',
         8: 'Create GIF', 
         9: 'Napari Show',
-        10: 'View Histogram',
-        'f': 'Edit ', 
-        11: 'Remove Sample',
+        'f': 'Histogram ', 
+        10: 'View Histogram (norm)',
+        11: 'View Histogram (cont)',
+        12: 'View Histogram (thre)',
+        'g': 'Edit ', 
+        13: 'Remove Sample',
     }
 
     color = Color()
@@ -172,7 +175,18 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 11:
+                            elif opt == 11: pass
+
+
+                            elif opt == 12:
+                                selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
+                                if selected_images == None: continue
+                                else:
+                                    images_norm, channels = interface.load_dir_images(sample, 'img_thre', img = selected_images)
+                                    image.view_histogram(images_norm, channels, geojson_file)
+
+
+                            elif opt == 13:
                                 name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
