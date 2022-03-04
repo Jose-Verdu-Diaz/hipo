@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
 
                             elif opt == 4:
-                                res = consistency.check_operation_requirements(sample, 'img_threshold')
+                                res = consistency.check_operation_requirements(sample, 'img_thre')
                                 if not res == None:
                                     input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
                                 else:
@@ -160,7 +160,7 @@ if __name__ == '__main__':
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
-                                    images_norm, channels = interface.load_dir_images(sample, 'img_threshold', img = selected_images)
+                                    images_norm, channels = interface.load_dir_images(sample, 'img_thre', img = selected_images)
                                     image.show_napari(images_norm, channels)
 
 
