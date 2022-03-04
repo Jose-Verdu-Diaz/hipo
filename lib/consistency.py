@@ -14,7 +14,7 @@ check_repeated_sample_name
 import os
 import json
 
-from lib.browse_samples import list_samples
+import lib.browse as browse
 
 # Key: name of the dir where the operation output will appear
 # Value: list of sample json parameters, corresponding to the required operations
@@ -66,7 +66,7 @@ def check_repeated_sample_name(name):
         False if the name already exists
     '''
 
-    table, df = list_samples()
+    table, df = browse.list_samples()
     
     if name in list(df['Sample']):
         return False

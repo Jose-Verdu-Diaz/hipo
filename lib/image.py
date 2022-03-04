@@ -34,7 +34,7 @@ from matplotlib import gridspec
 import napari
 
 from lib.Colors import Color
-from lib.interface import update_sample_json, load_dir_images
+import lib.interface as interface
 
 def parse_tiff(tiff_path, summary_path):
     '''Parses a hyperion tiff file with multiple images
@@ -93,7 +93,7 @@ def normalize_quantile(top_quantile, geojson_file, images, sample, metals):
         List of metals
     '''
 
-    update_sample_json(sample, {'norm_quant': top_quantile})
+    interface.update_sample_json(sample, {'norm_quant': top_quantile})
 
     masked = apply_ROI(geojson_file, images)
 
@@ -266,7 +266,7 @@ def analyse_images(sample, geojson_file):
         if ok
     '''
 
-    images, channels = load_dir_images(sample, 'img_threshold')
+    images, channels = interface.load_dir_images(sample, 'img_threshold')
     if len(images) == 0: return None
 
     img_size = Image.fromarray(images[0]).size

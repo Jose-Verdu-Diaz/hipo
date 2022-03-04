@@ -23,7 +23,7 @@ import os
 from tabulate import tabulate
 
 from lib.Colors import Color
-from lib.consistency import RepeatedNameException, ThresholdExpectedException, check_existing_threshold
+import lib.consistency as consistency
 
 
 def clear():
@@ -106,7 +106,7 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
             continue
 
 
-def input_text(txt, cancel = True, display = [], consistency = []):
+def input_text(txt, cancel = True, display = [], checks = []):
     '''Make the user enter a string
 
     Parameters
@@ -143,11 +143,11 @@ def input_text(txt, cancel = True, display = [], consistency = []):
 
             if  name == 'c': return None
             else: 
-                for c in consistency: 
-                    if not c(name): raise RepeatedNameException()
+                for c in checks: 
+                    if not c(name): raise consistency.RepeatedNameException()
                 return name
 
-        except RepeatedNameException as e:
+        except consistency.RepeatedNameException as e:
             input(f'{color.RED}{e} Press enter to continue...{color.ENDC}')
         except: 
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
@@ -234,7 +234,7 @@ def input_number(txt, cancel = True, display = [], range = None, type = 'int'):
             continue
 
 
-def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
+def input_df_toggle(sample, df, cancel = True, display = [], checks = []):
     color = Color()
 
     df['Toggle'] = '-'
@@ -259,14 +259,14 @@ def input_df_toggle(sample, df, cancel = True, display = [], consistency = []):
             else: 
                 id = int(id)
 
-                for c in consistency:
+                for c in checks:
                     result = c(sample = sample, channel_id = id)
                     if not result is None: raise result
 
                 toggle[id] = not toggle[id]
                 df['Toggle'][id] = 'X' if toggle[id] else '-'
 
-        except ThresholdExpectedException as e: 
+        except consistency.ThresholdExpectedException as e: 
             input(f'{color.RED}{e} Press enter to continue...{color.ENDC}')
             continue
 

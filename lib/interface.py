@@ -22,7 +22,7 @@ from PIL import Image
 from tqdm import tqdm
 
 from lib.Colors import Color
-from lib.consistency import check_input_files
+import lib.consistency as consistency
 
 
 def load_input(sample):
@@ -51,7 +51,7 @@ def load_input(sample):
     while True:
 
         try:
-            result = check_input_files(sample)
+            result = consistency.check_input_files(sample)
 
             if not result is None: raise result
 
