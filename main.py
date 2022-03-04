@@ -124,7 +124,7 @@ if __name__ == '__main__':
                                     input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
                                 else:
                                     images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
-                                    image.appy_threshold(sample, images_norm, channels, 0.5)
+                                    image.apply_threshold(sample, images_norm, channels, df)
                                     input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
 
