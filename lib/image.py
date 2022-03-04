@@ -245,7 +245,7 @@ def appy_threshold(sample, images, channels, threshold):
         img = img / 255
         result = np.where(img > threshold, img, 0)
         result = Image.fromarray(np.array(np.round(255.0 * result), dtype = np.uint8))
-        result.save(os.path.join(f'samples/{sample}/img_threshold', channels[i] + '.png'), quality = 100)
+        result.save(os.path.join(f'samples/{sample}/img_thre', channels[i] + '.png'), quality = 100)
         
 
 def analyse_images(sample, geojson_file):
@@ -266,7 +266,7 @@ def analyse_images(sample, geojson_file):
         if ok
     '''
 
-    images, channels = interface.load_dir_images(sample, 'img_threshold')
+    images, channels = interface.load_dir_images(sample, 'img_thre')
     if len(images) == 0: return None
 
     img_size = Image.fromarray(images[0]).size

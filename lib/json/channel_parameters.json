@@ -1,5 +1,6 @@
 {
     "name": null,
     "label": null,
-    "threshold": null
+    "threshold": null,
+    "contrast_limits": null
 }

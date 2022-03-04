@@ -2,6 +2,7 @@
     "sample_name": {
         "input": null,
         "img_norm": null,
-        "img_threshold": null
+        "img_cont": null,
+        "img_thre": null
     }
 }

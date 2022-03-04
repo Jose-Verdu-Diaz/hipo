@@ -20,7 +20,7 @@ import lib.browse as browse
 # Value: list of sample json parameters, corresponding to the required operations
 OPERATION_REQUIREMENTS = {
     'img_norm': [],
-    'img_threshold': ['norm_quant'],
+    'img_thre': ['norm_quant'],
     'analysis': ['img_roi']
 }
 
