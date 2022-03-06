@@ -76,6 +76,7 @@ def sample_df(images, metals, labels, summary_df, sample_name):
     pixel_max = summary_df['MaxValue'].tolist()
     with open(f'samples/{sample_name}/{sample_name}.json', 'r') as f: data = json.load(f)
     channel_threshold = ['-' if c['threshold'] == None else c['threshold'] for c in data['channels']]
+    channel_contrast = ['-' if c['contrast_limits'] == None else c['contrast_limits'] for c in data['channels']]
 
     df = pd.DataFrame(
             list(zip(images, metals, labels, img_sizes, pixel_min, pixel_max)),
@@ -85,6 +86,7 @@ def sample_df(images, metals, labels, summary_df, sample_name):
     df = df.sort_values(['Channel']).reset_index(drop=True)
 
     df['Th.'] = channel_threshold # channel_threshold is already sorted, add it after sorting DataFrame
+    df['Cont.'] = channel_contrast # channel_contrast is already sorted, add it after sorting DataFrame
 
     table = tabulate(df.loc[:, df.columns != 'Image'], headers = 'keys', tablefmt = 'github')
     table = f'{color.BOLD}{color.UNDERLINE}Displaying sample:{color.ENDC} {sample_name}\n\n{table}'

@@ -93,7 +93,7 @@ def normalize_quantile(top_quantile, geojson_file, images, sample, metals):
         List of metals
     '''
 
-    interface.update_sample_json(sample, {'norm_quant': top_quantile})
+    interface.update_sample_json(sample, update_dict = {'norm_quant': top_quantile})
 
     masked = apply_ROI(geojson_file, images)
 
@@ -365,16 +365,26 @@ def threshold_napari(img, channel):
 
     contrast = viewer.layers[channel].contrast_limits
     input(f'{color.GREEN}The selected contrast limits are: {contrast}. Press Enter to continue...')
+    return contrast
 
 
-def contrast_LUT(img):
-    min=np.min(img)
-    max=np.max(img)
+def apply_contrast(sample, images, channels, df):
+    for i, img in enumerate(tqdm(images, desc = 'Contrasting images', postfix=False)):
+        limits =  df.loc[df['Channel'] == channels[i], 'Cont.'].values[0]
 
-    LUT=np.zeros(256,dtype=np.uint8)
-    LUT[min:max+1]=np.linspace(start=0,stop=255,num=(max-min)+1,endpoint=True,dtype=np.uint8)
+        img = img / 255
+        bot_limit = limits[0] / 255
+        top_limit = limits[1] / 255
 
-    Image.fromarray(LUT[img]).save('result.png')
+        my_function = lambda x, a, b: (x - a) / (b - a)
+        img = my_function(img, bot_limit, top_limit)
+        img = np.where(img > 0, img, 0)
+        img = np.where(img < 1, img, 1)
+
+        result = Image.fromarray(np.array(np.round(255.0 * img), dtype = np.uint8))
+        result.save(os.path.join(f'samples/{sample}/img_cont', channels[i] + '.png'), quality = 100)
+
+
 
 def view_histogram(images, channels, geojson_file):
     img_size = Image.fromarray(images[0]).size

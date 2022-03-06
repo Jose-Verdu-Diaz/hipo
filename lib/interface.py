@@ -131,7 +131,7 @@ def populate_channels_json(sample, channels, labels):
             data['label'] = df['Label'].to_list()[i]
             channel_data.append(data.copy()) # Copy, otherwise it points to same dict
 
-        update_sample_json(sample, {'channels': channel_data})
+        update_sample_json(sample, update_dict = {'channels': channel_data})
 
 def make_sample_dirs(name):
     '''Creates the directory and file structure for a new sample
@@ -149,16 +149,18 @@ def make_sample_dirs(name):
     for d in data['sample_name']: os.makedirs(f'{path}/{d}')
     shutil.copy('lib/json/sample_parameters.json',f'{path}/{name}.json')
 
-    update_sample_json(name, {'name': name})
+    update_sample_json(name, update_dict = {'name': name})
 
 
-def update_sample_json(name, update_dict = None):
+def update_sample_json(name, channel = None, update_dict = None):
     '''Updates a sample json file
 
     Parameters
     ----------
     name
         name to sample to update
+    channel
+        channel id (int)
     update_dict
         Dict of parameters to be updated
     '''
@@ -168,36 +170,13 @@ def update_sample_json(name, update_dict = None):
     with open(path, 'r+') as f: 
         data = json.load(f)
 
-        for param in update_dict: data[param] = update_dict[param]
+        for param in update_dict: 
+            if not channel: data[param] = update_dict[param]
+            else: data['channels'][channel][param] = update_dict[param]
 
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
-
-def update_channel_threshold_json(name, channel, threshold):
-    '''Update the threshold of a channel of a single sample
-
-    Parameters
-    ----------
-    name
-        Name of the sample
-    channel
-        int that identifies a channel
-    threshold
-        float threshold
-    '''
-
-    path = f'samples/{name}/{name}.json'
-
-    with open(path, 'r+') as f: 
-        data = json.load(f)
-
-        data['channels'][channel]['threshold'] = threshold
-
-        f.seek(0)
-        json.dump(data, f, indent=4)
-        f.truncate()
-
 
 
 def delete_sample(name):

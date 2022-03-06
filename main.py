@@ -31,21 +31,23 @@ if __name__ == '__main__':
         1: 'Apply ROI and Normalize',
         'b': 'Threshold ',
         2: 'Change Threshold',
-        3: 'Change Threshold (napari)',
-        4: 'Apply Threshold',
-        'c': 'Analyze ',
-        5: 'Perform Analysis',
-        'd': 'Visualize ',    
-        6: 'View Raw',
-        7: 'View Normalized',
-        8: 'Create GIF', 
-        9: 'Napari Show',
+        3: 'Apply Threshold',
+        'c': 'Contrast ',
+        4: 'Change Contrast (napari)',
+        5: 'Apply Contrast',
+        'd': 'Analyze ',
+        6: 'Perform Analysis',
+        'e': 'Visualize ',    
+        7: 'View Raw',
+        8: 'View Normalized',
+        9: 'Create GIF', 
+        10: 'Napari Show',
         'f': 'Histogram ', 
-        10: 'View Histogram (norm)',
-        11: 'View Histogram (cont)',
-        12: 'View Histogram (thre)',
+        11: 'View Histogram (norm)',
+        12: 'View Histogram (cont)',
+        13: 'View Histogram (thre)',
         'g': 'Edit ', 
-        13: 'Remove Sample',
+        14: 'Remove Sample',
     }
 
     color = Color()
@@ -102,26 +104,12 @@ if __name__ == '__main__':
 
                                 threshold = utils.input_number('Enter threshold (between 0 and 1).', display=[table], range = (0,1), type = 'float')
                                 if threshold == None: continue
-                                interface.update_channel_threshold_json(sample, opt, threshold)
+                                interface.update_sample_json(sample, channel = opt, update_dict = {'threshold': threshold})
                                 
                                 table, df = browse.sample_df(images, metals, labels, summary_df, sample)
 
 
-                            elif opt == 3: # napari
-
-                                print(f'{color.YELLOW}This option allows retrieve the contrast limits applied to the image.{color.ENDC}')
-                                print(f'{color.YELLOW}A future release will allow to modify the threshold/contrast directly from napari.{color.ENDC}')
-                                print(f'{color.YELLOW}Use this option only to visualize how the contrast modifies the channel.{color.ENDC}')
-                                input(f'{color.YELLOW}Press Enter to continue...{color.ENDC}')
-
-                                opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
-                                if opt == None: continue
-                                else: 
-                                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
-                                    image.threshold_napari(images_norm[0], channels[0])
-
-
-                            elif opt == 4:
+                            elif opt == 3:
                                 res = consistency.check_operation_requirements(sample, 'img_thre')
                                 if not res == None:
                                     input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
@@ -131,13 +119,34 @@ if __name__ == '__main__':
                                     input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 5:
+                            elif opt == 4:
+                                opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                if opt == None: continue
+                                else: 
+                                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
+                                    contrast_limits = image.threshold_napari(images_norm[0], channels[0])
+                                    interface.update_sample_json(sample, channel = opt, update_dict = {'contrast_limits': contrast_limits})
+
+                                    table, df = browse.sample_df(images, metals, labels, summary_df, sample)
+
+
+                            elif opt == 5: 
+                                res = consistency.check_operation_requirements(sample, 'img_thre')
+                                if not res == None:
+                                    input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
+                                else:
+                                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Cont.']!='-'].tolist())
+                                    image.apply_contrast(sample, images_norm, channels, df)
+                                    input(f'\n{color.GREEN}Images contrasted successfully! Press Enter to continue...{color.ENDC}')
+
+
+                            elif opt == 6:
                                 res = image.analyse_images(sample, geojson_file)
                                 if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 6:
+                            elif opt == 7:
                                 while True:
                                     opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False)
 
@@ -145,7 +154,7 @@ if __name__ == '__main__':
                                     else: image.show_image(images[opt])
 
 
-                            elif opt == 7:
+                            elif opt == 8:
                                 while True:
                                     opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False )
 
@@ -155,11 +164,11 @@ if __name__ == '__main__':
                                         image.show_image(img)
 
 
-                            elif opt == 8:
+                            elif opt == 9:
                                 image.create_gif(sample)
 
 
-                            elif opt == 9:
+                            elif opt == 10:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -167,7 +176,7 @@ if __name__ == '__main__':
                                     image.show_napari(images_norm, channels)
 
 
-                            elif opt == 10:
+                            elif opt == 11:
                                 selected_images = utils.input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
@@ -175,10 +184,15 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 11: pass
-
-
                             elif opt == 12:
+                                selected_images = utils.input_df_toggle(sample, df) # Must add consistency check
+                                if selected_images == None: continue
+                                else:
+                                    images_norm, channels = interface.load_dir_images(sample, 'img_cont', img = selected_images)
+                                    image.view_histogram(images_norm, channels, geojson_file)
+
+
+                            elif opt == 13:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -186,7 +200,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 13:
+                            elif opt == 14:
                                 name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
