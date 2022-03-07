@@ -93,14 +93,20 @@ def load_dir_images(sample, dir, img = None):
         list with the channel names of the images
     '''
 
+    color = Color()
+
     if img == None: files = os.listdir(f'samples/{sample}/{dir}')
     else: files = [f'{i}.png' for i in img]
 
     images, channels = [], []
     for f in tqdm(files, desc = 'Loading images', postfix=False):
         if f.endswith('.png'):
-            images.append(np.asarray(Image.open(f'samples/{sample}/{dir}/{f}')))
-            channels.append(f.strip('.png'))
+
+            if os.path.isfile(f'samples/{sample}/{dir}/{f}'):
+                images.append(np.asarray(Image.open(f'samples/{sample}/{dir}/{f}')))
+                channels.append(f.strip('.png'))
+            else:
+                print(f'{color.RED}Contrast has not been adjusted for channel: {f.strip(".png")}{color.ENDC}')
 
     return images, channels
 

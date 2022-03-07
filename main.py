@@ -22,7 +22,8 @@ if __name__ == '__main__':
     MENU_OPTIONS = {
         0: 'Exit',
         1: 'Browse samples',
-        2: 'Add new sample'
+        2: 'Add new sample',
+        3: 'Process all'
     }
 
     SAMPLE_OPTIONS = {
@@ -220,6 +221,49 @@ if __name__ == '__main__':
 
                     print(f'\n{color.GREEN}Sample created successfully!{color.ENDC}')
                     input(f'\n{color.YELLOW}Add sample files in {color.UNDERLINE}samples/{name}/input{color.ENDC}{color.YELLOW}. Press Enter to continue...{color.ENDC}')
+
+
+            elif opt == 3:
+
+                continue # experimental
+
+                utils.print_title()
+                table, df = browse.list_samples()
+                samples = list(df['Sample'])
+                text = 'This option will normalize, modify the contrast and apply a threshold for all samples.'
+                text = text + '\nSelect a sample which has already set contrast ranges and thresholds.'
+                text = text + '\nThe contrast ranges and thresholds of the chosen sample will be used for all samples'
+                opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Sample']))), display = [table, text], show_menu = False)
+
+                sample = df["Sample"][opt]
+                
+                sample_input = interface.load_input(sample)
+                if sample_input == None: continue
+
+                (tiff_file, txt_file, geojson_file) = sample_input
+                images, metals, labels, summary_df = image.parse_tiff(tiff_file, txt_file)
+                interface.populate_channels_json(sample, metals, labels)
+                table, df = browse.sample_df(images, metals, labels, summary_df, sample)
+
+                for sample in samples:
+                    print(f'Processing sample: {sample}')
+
+                    sample_input = interface.load_input(sample)
+                    if sample_input == None: continue
+
+                    (tiff_file, txt_file, geojson_file) = sample_input
+                    images, metals, labels, summary_df = image.parse_tiff(tiff_file, txt_file)
+                    interface.populate_channels_json(sample, metals, labels)
+
+                    image.normalize(geojson_file, images, sample, metals)
+
+                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Cont.']!='-'].tolist())
+                    image.apply_contrast(sample, images_norm, channels, df)
+
+                    print(f'{color.GREEN}Sample {sample} processed successfully{color.ENDC}')
+
+                input()
+
 
             else: 
                 print('UNEXPECTED OPTION')
