@@ -9,7 +9,7 @@ Methods
 -------
 parse_tiff
     Parses a hyperion tiff file with multiple images
-normalize_quantile
+normalize
     Normalize images with a quantile
 show_image
     Displays an image
@@ -72,19 +72,13 @@ def parse_tiff(tiff_path, summary_path):
     return tiff_slices, metals, labels, summary_df
 
 
-def normalize_quantile(top_quantile, geojson_file, images, sample, metals):
-    '''Normalize images with a quantile
+def normalize(geojson_file, images, sample, metals):
+    '''Normalize images
 
-    Normalizing by a quantile instead of normalizing by the max
-    value helps avoiding the effect of high-valued artifacts.
-    However, it causes clipping in the higher values. Tune the
-    parameter top_quantile carefully.
+    Normalize by dividing by maximum value.
 
     Parameters
     ----------
-    top_quantile
-        Top quantile to select max value. Set to 1 to use the max
-        pixel value of the image.
     images
         Numpy array of images
     sample
@@ -93,26 +87,16 @@ def normalize_quantile(top_quantile, geojson_file, images, sample, metals):
         List of metals
     '''
 
-    interface.update_sample_json(sample, update_dict = {'norm_quant': top_quantile})
-
     masked = apply_ROI(geojson_file, images)
 
-    color = Color()
-    warnings = []
-
     for i,img in enumerate(tqdm(masked, desc = 'Normalizing images', postfix=False)):
-
-        max_val = np.quantile(img, top_quantile)
-
-        if max_val == 0: 
-            max_val = img.max()
-            warnings.append(f'Channel {metals[i]} has a {top_quantile} quantile of 0. Using max value: {max_val}')     
-
+        max_val = img.max()
         img_normalized = np.minimum(img / max_val, 1.0)
         img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
         img_normalized.save(os.path.join(f'samples/{sample}/img_norm', metals[i] + '.png'), quality = 100)
+
+    interface.update_sample_json(sample, update_dict = {"norm": True})
     
-    for w in warnings: print(f'{color.YELLOW}{w}{color.ENDC}')
 
 
 def show_image(img):
@@ -242,10 +226,9 @@ def apply_threshold(sample, images, channels, df):
     '''
 
     for i, img in enumerate(tqdm(images, desc = 'Thresholding images', postfix=False)):
-        img = img / 255
         th =  df.loc[df['Channel'] == channels[i], 'Th.'].values[0]
-        result = np.where(img > th, img, 0)
-        result = Image.fromarray(np.array(np.round(255.0 * result), dtype = np.uint8))
+        result = np.where(img >= th, img, 0)
+        result = Image.fromarray(result)
         result.save(os.path.join(f'samples/{sample}/img_thre', channels[i] + '.png'), quality = 100)
         
 
@@ -396,7 +379,7 @@ def view_histogram(images, channels, geojson_file):
 
     x = list(range(0,256))
 
-    p = 0.999
+    p = 0.99
     p_lines = ()
     p_labels = ()
 

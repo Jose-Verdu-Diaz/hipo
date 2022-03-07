@@ -88,21 +88,19 @@ if __name__ == '__main__':
 
 
                             elif opt == 1:         
-                                top_quantile = utils.input_number('Enter the top quantile (between 0 and 1).', display=[table], range = (0,1), type = 'float')
-                                if top_quantile == None: continue
-
-                                if not consistency.check_overwrite(sample, 'norm_quant') and not utils.input_yes_no(f'{color.YELLOW}Sample already normalized. Overwrite?', display=[table]): continue
-
                                 print(f'Normalizing {sample}, wait please...')
-                                image.normalize_quantile(top_quantile, geojson_file, images, sample, metals)
+                                image.normalize(geojson_file, images, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
 
 
                             elif opt == 2:
                                 opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
+                                if df['Cont.'][opt] == '-':
+                                    input(f'{color.YELLOW}The channel contrast has to be adjusted first. Press Enter to continue...{color.ENDC}')
+                                    continue
 
-                                threshold = utils.input_number('Enter threshold (between 0 and 1).', display=[table], range = (0,1), type = 'float')
+                                threshold = utils.input_number('Enter threshold (between 0 and 255).', display=[table], range = (0,255), type = 'int')
                                 if threshold == None: continue
                                 interface.update_sample_json(sample, channel = opt, update_dict = {'threshold': threshold})
                                 
@@ -110,16 +108,17 @@ if __name__ == '__main__':
 
 
                             elif opt == 3:
-                                res = consistency.check_operation_requirements(sample, 'img_thre')
-                                if not res == None:
-                                    input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
-                                else:
-                                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
-                                    image.apply_threshold(sample, images_norm, channels, df)
-                                    input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
+                                images_norm, channels = interface.load_dir_images(sample, 'img_cont', df['Channel'].loc[df['Th.']!='-'].tolist())
+                                image.apply_threshold(sample, images_norm, channels, df)
+                                input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
 
                             elif opt == 4:
+                                res = consistency.check_operation_requirements(sample, 'img_cont')
+                                if res != None:
+                                    input(f'{color.YELLOW}{res} is required before adjusting the contrast. Press Enter to continue...{color.ENDC}')
+                                    continue
+
                                 opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
                                 else: 
@@ -131,13 +130,9 @@ if __name__ == '__main__':
 
 
                             elif opt == 5: 
-                                res = consistency.check_operation_requirements(sample, 'img_thre')
-                                if not res == None:
-                                    input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
-                                else:
-                                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Cont.']!='-'].tolist())
-                                    image.apply_contrast(sample, images_norm, channels, df)
-                                    input(f'\n{color.GREEN}Images contrasted successfully! Press Enter to continue...{color.ENDC}')
+                                images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Cont.']!='-'].tolist())
+                                image.apply_contrast(sample, images_norm, channels, df)
+                                input(f'\n{color.GREEN}Images contrasted successfully! Press Enter to continue...{color.ENDC}')
 
 
                             elif opt == 6:

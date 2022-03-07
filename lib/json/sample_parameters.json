@@ -1,6 +1,6 @@
 {
     "name": null,
     "description": null,
-    "norm_quant": null,
+    "norm": false,
     "channels": null
 }

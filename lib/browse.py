@@ -32,15 +32,7 @@ def list_samples():
     '''
 
     dirs = sorted(os.listdir('samples'))
-
-    norm_quant = []
-
-    for d in dirs:
-        with open(f'samples/{d}/{d}.json', 'r') as f: data = json.load(f)
-
-        norm_quant.append(data['norm_quant'])
-
-    df = pd.DataFrame(list(zip(dirs, norm_quant)), columns=['Sample', 'Norm. Quant.'])
+    df = pd.DataFrame(list(zip(dirs)), columns=['Sample'])
     table = tabulate(df, headers = 'keys', tablefmt = 'github')
     return table, df
 

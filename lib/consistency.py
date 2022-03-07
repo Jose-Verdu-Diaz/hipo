@@ -20,14 +20,14 @@ import lib.browse as browse
 # Value: list of sample json parameters, corresponding to the required operations
 OPERATION_REQUIREMENTS = {
     'img_norm': [],
-    'img_thre': ['norm_quant'],
+    'img_cont': ['norm'],
     'analysis': ['img_roi']
 }
 
 # Key: json parameter, corresponding to the required operations
 # Value: name to be displayed
 REQUIREMENTS_NAME_MAPPING = {
-    'norm_quant': 'ROI and Normalization',
+    'norm': 'ROI and Normalization',
     'roi': 'ROI'
 }
 
@@ -111,30 +111,6 @@ def check_input_files(sample):
     return None
 
 
-def check_overwrite(sample, param):
-    '''Check if directory files are going to be overwritten
-
-    Parameters
-    ----------
-    sample
-        Name of the sample
-    param
-        Sample json parameter to check. If the parameter is not None, then overwritting will occur
-
-    Returns
-    -------
-    True
-        if no overwritting
-    False
-        if overwritting
-    '''
-
-    with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
-
-    if data[param] == None: return True
-    else: return False
-
-
 def check_operation_requirements(sample, operation):
     '''Checks if required operations for a new operation are already done
 
@@ -156,7 +132,7 @@ def check_operation_requirements(sample, operation):
     with open(f'samples/{sample}/{sample}.json', 'r') as f: data = json.load(f)
 
     for op_req in OPERATION_REQUIREMENTS[operation]:
-        if data[op_req] == None: return REQUIREMENTS_NAME_MAPPING[op_req]
+        if data[op_req] == None or data[op_req] == False: return REQUIREMENTS_NAME_MAPPING[op_req]
     return None
 
 
