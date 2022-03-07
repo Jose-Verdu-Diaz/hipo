@@ -22,8 +22,8 @@ if __name__ == '__main__':
     MENU_OPTIONS = {
         0: 'Exit',
         1: 'Browse samples',
-        2: 'Add new sample',
-        3: 'Process all'
+        2: 'Add new sample'#,
+        #3: 'Process all'
     }
 
     SAMPLE_OPTIONS = {
@@ -91,7 +91,7 @@ if __name__ == '__main__':
                             elif opt == 1:         
                                 print(f'Normalizing {sample}, wait please...')
                                 image.normalize(geojson_file, images, sample, metals)
-                                input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
+                                input(f'\n{color.GREEN}Images normalized successfully! Press Enter to continue...{color.ENDC}')
 
 
                             elif opt == 2:
