@@ -1,4 +1,8 @@
-# Hyperion_jvd
+# HIPO - Hyperion Image PrOcessing
+
+<p align="center">
+  <img src="https://github.com/Jose-Verdu-Diaz/hipo/blob/main/lib/HIPO.svg">
+</p>
 
 Tool for processing and analysing hyperion imaging.
 
