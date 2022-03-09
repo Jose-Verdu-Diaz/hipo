@@ -19,6 +19,8 @@ import lib.consistency as consistency
 
 if __name__ == '__main__':
 
+    utils.print_title()
+
     MENU_OPTIONS = {
         0: 'Exit',
         1: 'Browse samples',
@@ -56,7 +58,6 @@ if __name__ == '__main__':
     if not os.path.exists('samples'): os.mkdir('samples')
 
     while True:
-        utils.print_title()
 
         opt = utils.input_menu_option(MENU_OPTIONS, cancel = False)
         if opt == None: continue
@@ -66,7 +67,6 @@ if __name__ == '__main__':
             elif opt == 1:
 
                 while True:
-                    utils.print_title()
                     table, df = browse.list_samples()
                     opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Sample']))), display = [table], show_menu = False)
 
@@ -227,7 +227,6 @@ if __name__ == '__main__':
 
                 continue # experimental
 
-                utils.print_title()
                 table, df = browse.list_samples()
                 samples = list(df['Sample'])
                 text = 'This option will normalize, modify the contrast and apply a threshold for all samples.'

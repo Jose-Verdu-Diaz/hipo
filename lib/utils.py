@@ -39,11 +39,32 @@ def print_title():
 
     clear()
     color = Color()
-    print(f'{color.CYAN}88  88{color.RED}  88888{color.GREEN} Yb    dP{color.YELLOW} 8888b.')
-    print(f'{color.CYAN}88  88{color.RED}     88{color.GREEN}  Yb  dP{color.YELLOW}   8I  Yb ')
-    print(f'{color.CYAN}888888{color.RED} o.  88{color.GREEN}   YbdP{color.YELLOW}    8I  dY ')
-    print(f'{color.CYAN}88  88{color.RED} \"bodP\'{color.GREEN}    YP{color.YELLOW}    8888Y\" ')
+    print(color.CYAN)
+    print('      @@   @@ @@@@@ @@@@@@   @@@@@ ')
+    print('      @@   @@  @@@  @@   @@ @@   @@')
+    print('      @@@@@@@  @@@  @@@@@@  @@   @@')
+    print('      @@   @@  @@@  @@      @@   @@')
+    print('      @@   @@ @@@@@ @@       @@@@@ ')
+    print()
+    print('        *@@o.oO@@@@@@@@@@@Oo.o@@*')
+    print('        o@@@@@@@@@@@@@@@@@@@@@@@o')
+    print('         .@@@@@@@@@@@@@@@@@@@@@.')
+    print('         °@@@@@@@@@@@@@@@@@@@@@°')
+    print('        .°.     @@@@@@@     .°.')
+    print('      #@@@@@@@##@@@@@@@##@@@@@@@@#')
+    print('    O@@@@@@@@@@@@@@@@@@@@@@@@@@@@@O')
+    print('   @@@@@@@   *@@@@@@@@@@@*   @@@@@@@')
+    print('  @@@@@@@@@@..@@@@@@@@@@@..@@@@@@@@@@')
+    print('  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('  *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*')
+    print('    °@@@@@@@@@@o°°   °°o@@@@@@@@@@@°')
+    print('       °oOOo°              °oOOo°') 
+    print(color.BOLD)
+    print('       Hyperion Image PrOcessing')
     print(color.ENDC)
+
+    input('Press Enter to continue...')
 
 
 def print_menu(options):
@@ -88,7 +109,7 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
 
     color = Color()
     while True:
-        print_title()
+        clear()
         for d in display: print(f'{d}\n')
         if show_menu: print_menu(options)
         try:
@@ -135,7 +156,7 @@ def input_text(txt, cancel = True, display = [], checks = []):
 
     color = Color()
     while True:
-        print_title()
+        clear()
         for d in display: print(f'{d}\n')
         try:
             prompt = f'\n{txt} (\'c\' to cancel): ' if cancel else f'\n{txt}: '
@@ -174,7 +195,7 @@ def input_yes_no(txt, display = []):
 
     color = Color()
     while True:
-        print_title()
+        clear()
         for d in display: print(f'{d}\n')
         try:
             txt = f'\n{txt} (Enter \'y\' or \'n\'): {color.ENDC}'
@@ -215,7 +236,7 @@ def input_number(txt, cancel = True, display = [], range = None, type = 'int'):
 
     color = Color()
     while True:
-        print_title()
+        clear()
         for d in display: print(f'{d}\n')
         try:
             prompt = f'\n{txt} (\'c\' to cancel): ' if cancel else f'\n{txt}: '
@@ -241,7 +262,7 @@ def input_df_toggle(sample, df, cancel = True, display = [], checks = []):
     toggle = [False for i in range(df.shape[0])]
 
     while True:
-        print_title()
+        clear()
         for d in display: print(f'{d}\n')
 
         table = tabulate(df.loc[:, df.columns != 'Image'], headers = 'keys', tablefmt = 'github')
