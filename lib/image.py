@@ -224,7 +224,7 @@ def apply_ROI(geojson_file, images):
     for img in tqdm(images, desc = 'Applying ROIs', postfix=False): masked.append(np.where(mask, img, 0))
     return masked
 
-def appy_threshold(sample, images, channels, threshold):
+def appy_threshold(sample, images, channels, df):
     '''Applies threshold to images and saves them
 
     Parameters
@@ -240,8 +240,9 @@ def appy_threshold(sample, images, channels, threshold):
     '''
 
     for i, img in enumerate(tqdm(images, desc = 'Thresholding images', postfix=False)):
+        th =  df.loc[df['Channel'] == channels[i], 'Th.'].values[0]
         img = img / 255
-        result = np.where(img > threshold, img, 0)
+        result = np.where(img >= th, img, 0)
         result = Image.fromarray(np.array(np.round(255.0 * result), dtype = np.uint8))
         result.save(os.path.join(f'samples/{sample}/img_threshold', channels[i] + '.png'), quality = 100)
         
@@ -299,9 +300,12 @@ def analyse_images(sample, geojson_file):
         result.append(summary_dict)
 
     result_df = pd.DataFrame(result)
-    result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)
 
-    return 1
+    try:
+        result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)
+        return 1
+    except:
+        return 0
 
 
 def show_napari(images, channels):

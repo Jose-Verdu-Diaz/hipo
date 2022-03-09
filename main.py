@@ -36,13 +36,10 @@ if __name__ == '__main__':
         'c': 'Analyze ',
         5: 'Perform Analysis',
         'd': 'Visualize ',    
-        6: 'View Raw',
-        7: 'View Normalized',
-        8: 'Create GIF', 
-        9: 'Napari Show',
-        10: 'View Histogram',
+        6: 'Napari Show',
+        7: 'View Histogram',
         'f': 'Edit ', 
-        11: 'Remove Sample',
+        8: 'Remove Sample',
     }
 
     color = Color()
@@ -90,7 +87,7 @@ if __name__ == '__main__':
 
                                 print(f'Normalizing {sample}, wait please...')
                                 normalize_quantile(top_quantile, geojson_file, images, sample, metals)
-                                input(f'\n{color.GREEN}Images normalized uccessfully! Press Enter to continue...{color.ENDC}')
+                                input(f'\n{color.GREEN}Images normalized successfully! Press Enter to continue...{color.ENDC}')
 
 
                             elif opt == 2:
@@ -124,39 +121,19 @@ if __name__ == '__main__':
                                     input(f'{color.YELLOW}{res} is required before applying the thresholds. Press Enter to continue...{color.ENDC}')
                                 else:
                                     images_norm, channels = load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Th.']!='-'].tolist())
-                                    appy_threshold(sample, images_norm, channels, 0.5)
+                                    appy_threshold(sample, images_norm, channels, df)
                                     input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
 
 
                             elif opt == 5:
                                 res = analyse_images(sample, geojson_file)
                                 if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
+                                elif res == 0: input(f'{color.RED}Error writing output, is analysis.csv opened? Press Enter to continue...{color.ENDC}')
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
+
                             elif opt == 6:
-                                while True:
-                                    opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False)
-
-                                    if opt == None: break
-                                    else: show_image(images[opt])
-
-
-                            elif opt == 7:
-                                while True:
-                                    opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False )
-
-                                    if opt == None: break
-                                    else: 
-                                        img = load_image(f'samples/{sample}/img_norm/{metals[opt]}.png')
-                                        show_image(img)
-
-
-                            elif opt == 8:
-                                create_gif(sample)
-
-
-                            elif opt == 9:
                                 selected_images = input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
@@ -164,7 +141,7 @@ if __name__ == '__main__':
                                     show_napari(images_norm, channels)
 
 
-                            elif opt == 10:
+                            elif opt == 7:
                                 opt = input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
                                 else: 
@@ -172,7 +149,7 @@ if __name__ == '__main__':
                                     view_histogram(images_norm[0])
 
 
-                            elif opt == 11:
+                            elif opt == 8:
                                 name = input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
