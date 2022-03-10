@@ -1,7 +1,7 @@
 # HIPO - Hyperion Image PrOcessing
 
 <p align="center">
-  <img src="https://github.com/Jose-Verdu-Diaz/hipo/blob/main/lib/HIPO.svg">
+  <img height="300" src="https://github.com/Jose-Verdu-Diaz/hipo/blob/main/lib/img/HIPO2.svg">
 </p>
 
 Tool for processing and analysing hyperion imaging.
