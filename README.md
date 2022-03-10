@@ -1,10 +1,8 @@
-# HIPO - Hyperion Image PrOcessing
-
 <p align="center">
-  <img height="300" src="https://github.com/Jose-Verdu-Diaz/hipo/blob/main/lib/img/HIPO2.svg">
+  <img height="300" src="https://github.com/Jose-Verdu-Diaz/hipo/blob/main/lib/img/banner.svg">
 </p>
 
-Tool for processing and analysing hyperion imaging.
+HIPO (Hyperion Image PrOcessing) is a toolset for processing and analysing hyperion imaging.
 
 ## Disclaimer
 
