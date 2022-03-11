@@ -32,5 +32,15 @@ Environment It is recommended to use Conda for installing Python and the require
  Conda is an open source package management system and environment management system that runs on Windows, macOS and Linux.</description>
     </item>
     
+    <item>
+      <title>Workflow</title>
+      <link>/gettingstarted/workflow/</link>
+      <pubDate>Fri, 11 Mar 2022 12:18:07 +0000</pubDate>
+      
+      <guid>/gettingstarted/workflow/</guid>
+      <description>Obtaining Data The Hyperion Imaging System by Fluidigm should be used to obtain image data from a tissue sample. Then, the data should be processed with MCD Viewer, a post-acquisition data processing software provided by Fluidimg to draw regions of interest and export the following three files:
+ A .tiff file containing the images of all channels A .txt file containing a brief summary of all channels A .geojson file containing the ROIs  These files must be provided for each sample.</description>
+    </item>
+    
   </channel>
 </rss>
