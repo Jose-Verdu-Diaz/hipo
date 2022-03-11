@@ -3,41 +3,41 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://example.org/basics/</loc>
+    <loc>/basics/</loc>
     <lastmod>2022-03-10T09:24:08+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/2/first-content/</loc>
+    <loc>/2/first-content/</loc>
     <lastmod>2022-03-10T09:25:38+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/basics/first-content/</loc>
+    <loc>/basics/first-content/</loc>
     <lastmod>2022-03-10T09:25:38+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/2/</loc>
+    <loc>/2/</loc>
     <lastmod>2022-03-10T09:24:08+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/basics/second-content/</loc>
+    <loc>/basics/second-content/</loc>
     <lastmod>2022-03-10T09:25:52+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/</loc>
+    <loc>/</loc>
     <lastmod>2022-03-10T09:25:52+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/categories/</loc>
+    <loc>/categories/</loc>
   </url>
   
   <url>
-    <loc>http://example.org/tags/</loc>
+    <loc>/tags/</loc>
   </url>
   
 </urlset>
