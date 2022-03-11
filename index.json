@@ -11,7 +11,7 @@
 	"title": "HIPO",
 	"tags": [],
 	"description": "",
-	"content": "Welcome to HIPO What is HIPO? HIPO (or Hyperion Image PrOcessing) is a toolset for organizing, processing and analyzing Hyperion tissue images. HIPO is aimed to users without an IT background, for more information go to Principles, and it is currently in an early development (alpha) stage.\n"
+	"content": "Welcome to HIPO What is HIPO? HIPO (or Hyperion Image PrOcessing) is a toolset for organizing, processing and analyzing Hyperion tissue images. HIPO is aimed to users without an IT or programming background (go to Principles for more information), and it is in a very early, fast-paced development stage. New releases are published weekly and novel features are constantly being added.\n"
 },
 {
 	"uri": "/gettingstarted/principles/",
