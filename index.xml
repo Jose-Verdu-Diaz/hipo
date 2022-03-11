@@ -48,7 +48,7 @@ Environment It is recommended to use Conda for installing Python and the require
       <pubDate>Fri, 11 Mar 2022 12:56:25 +0000</pubDate>
       
       <guid>/credits/</guid>
-      <description>Lorem Ipsum.</description>
+      <description>Frameworks  Napari: image framework used in HIPO. Hugo: framework used for building this website. Learn: Hugo theme used for this website.  Python Modules  Pandas: data manipulation tool. Pillow: Python imaging library. Tiffile: Python library to work with tiff files. Matplotlib: Python library for creating visualizations. Seaborn: Python data visualization library based on matplotlib. Seaborn-Image: Python image visualization library based on matplotlib, and inspired in seaborn. Tqdm: Python library for printing progress indicators.</description>
     </item>
     
   </channel>
