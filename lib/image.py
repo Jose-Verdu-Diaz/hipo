@@ -20,18 +20,22 @@ create_gif
 '''
 
 import os
+import cv2
 import json
-from click import style
+import napari
 import numpy as np
-from tqdm import tqdm
-from PIL import Image, ImageDraw
-import tifffile as tf
 import pandas as pd
+from tqdm import tqdm
+import tifffile as tf
 import seaborn as sns
+from scipy import ndimage
 import seaborn_image as isns
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-import napari
+from PIL import Image, ImageDraw
+from skimage.segmentation import watershed
+from skimage.feature import peak_local_max
+from skimage.morphology import reconstruction
 
 from lib.Colors import Color
 import lib.interface as interface
@@ -176,7 +180,7 @@ def make_mask(geojson_file, size):
 
     for ann in annotation_data["features"]:
 
-        blob = ann["geometry"] # We assume there is only 1 ROI, this should be fixed 
+        blob = ann["geometry"]
 
         if blob["type"] == "LineString": coords = blob["coordinates"]
         if blob["type"] == "Polygon": coords = blob["coordinates"][0]
@@ -420,3 +424,62 @@ def view_histogram(images, channels, geojson_file):
     plt.xticks(rotation = 45)
     plt.subplots_adjust(hspace=.02)
     plt.show()
+
+
+def segment_fibers(sample, img, geojson_file):
+
+    print('Segmenting fibers. This can take some minutes...')
+
+    # Convert To grayscale
+    #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = img
+
+    # Reconstruct
+    inverted = np.invert(gray)
+    seed = np.copy(inverted)
+    seed = np.where(inverted > 0, inverted.max(), 0)
+    mask = inverted
+    filled = reconstruction(seed, mask, method='erosion')
+    filled = np.invert(np.array(filled, dtype='uint8'))
+
+    # Threshold and apply ROI
+    thresh = cv2.threshold(filled, np.mean(filled), 255, cv2.THRESH_BINARY_INV)[1]
+    thresh = apply_ROI(geojson_file, [thresh])[0]
+
+    # Remove noisy pixels
+    kernel = np.ones((4, 4), np.uint8)
+    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations = 1)
+
+    # Erode to clean edges
+    kernel = np.array([
+        [0,1,1,0],
+        [1,1,1,1],
+        [1,1,1,1],
+        [0,1,1,0]
+    ], np.uint8)
+    erode = cv2.erode(opening, kernel, iterations=2)
+
+    # Distance transform and peaks
+    D = ndimage.distance_transform_edt(erode)
+    localMax = peak_local_max(D, indices=False, min_distance=20, labels=erode)
+
+    # Watershed
+    markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
+    labels = watershed(-D, markers, mask=thresh)
+
+    # Save
+    np.savez_compressed(f'samples/{sample}/fiber_segmentation.npz', labels)
+
+    show_napari_segmentation(img, labels)
+
+
+def show_napari_segmentation(img, labels):
+    color = Color()
+
+    viewer = napari.Viewer()
+
+    viewer.add_image(img, name = 'Image')
+    viewer.add_labels(labels, name = 'Image')
+
+    print(f'{color.CYAN}Opening napari. Close napari window to continue...{color.ENDC}')
+    napari.run()

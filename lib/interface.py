@@ -152,7 +152,7 @@ def make_sample_dirs(name):
     os.makedirs(path)
 
     with open('lib/json/sample_dir_structure.json', 'r') as f: data = json.load(f)
-    for d in data['sample_name']: os.makedirs(f'{path}/{d}')
+    for d in data: os.makedirs(f'{path}/{d}')
     shutil.copy('lib/json/sample_parameters.json',f'{path}/{name}.json')
 
     update_sample_json(name, update_dict = {'name': name})

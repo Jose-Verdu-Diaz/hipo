@@ -7,17 +7,22 @@ to keep this module as simple as possible, using it as a menu
 system and delegating all other tasks to the other modules.
 '''
 
-import sys
 import os
+import sys
 
-from lib.Colors import Color
-import lib.interface as interface
 import lib.image as image
 import lib.utils as utils
 import lib.browse as browse
+from lib.Colors import Color
+import lib.interface as interface
+from lib.models.State import State
+from lib.models.Sample import Sample
 import lib.consistency as consistency
 
+
 if __name__ == '__main__':
+
+    state = State()
 
     utils.print_title()
 
@@ -31,26 +36,29 @@ if __name__ == '__main__':
     SAMPLE_OPTIONS = {
         0: 'Back',
         'a': 'Normalize ',
-        1: 'Apply ROI and Normalize',
+           1:  'Apply ROI and Normalize',
         'b': 'Threshold ',
-        2: 'Change Threshold',
-        3: 'Apply Threshold',
+           2:  'Change Threshold',
+           3:  'Apply Threshold',
         'c': 'Contrast ',
-        4: 'Change Contrast (napari)',
-        5: 'Apply Contrast',
+           4:  'Change Contrast (napari)',
+           5:  'Apply Contrast',
         'd': 'Analyze ',
-        6: 'Perform Analysis',
+           6:  'Perform Analysis',
         'e': 'Visualize ',    
-        7: 'View Raw',
-        8: 'View Normalized',
-        9: 'Create GIF', 
-        10: 'Napari Show',
+           7:  'View Raw',
+           8:  'View Normalized',
+           9:  'Create GIF', 
+           10: 'Napari Show',
         'f': 'Histogram ', 
-        11: 'View Histogram (norm)',
-        12: 'View Histogram (cont)',
-        13: 'View Histogram (thre)',
-        'g': 'Edit ', 
-        14: 'Remove Sample',
+           11: 'View Histogram (norm)',
+           12: 'View Histogram (cont)',
+           13: 'View Histogram (thre)',
+        'g': 'Fiber Segmentation',
+           14: 'Segment fibers',
+           15: 'Show Segmentation',
+        'h': 'Edit ', 
+           16: 'Remove Sample',
     }
 
     color = Color()
@@ -197,6 +205,16 @@ if __name__ == '__main__':
 
 
                             elif opt == 14:
+                                input('Segmentation is performed using the contrasted Tm(169) channel.')
+                                img, channels = interface.load_dir_images(sample, 'img_cont', img = ['Tm(169)'])
+                                image.segment_fibers(sample, img[0], geojson_file)
+                                input(f'{color.GREEN}Fibers Segmented successfully! Press Enter to continue...{color.ENDC}')
+
+
+                            elif opt == 15: pass
+
+
+                            elif opt == 16:
                                 name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
@@ -217,7 +235,10 @@ if __name__ == '__main__':
 
                 if name == None: pass
                 else:
-                    interface.make_sample_dirs(name)
+                    #interface.make_sample_dirs(name)
+
+                    sample = Sample(name=name)
+                    sample.make_dir_structure()
 
                     print(f'\n{color.GREEN}Sample created successfully!{color.ENDC}')
                     input(f'\n{color.YELLOW}Add sample files in {color.UNDERLINE}samples/{name}/input{color.ENDC}{color.YELLOW}. Press Enter to continue...{color.ENDC}')
