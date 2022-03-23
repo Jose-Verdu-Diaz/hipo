@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import pickle as pkl
 import tifffile as tf
+import tabulate as tblt 
 
 from lib.Colors import Color
 import lib.consistency as consistency
@@ -18,6 +19,8 @@ class Sample:
         self.channels = channels
         self.summary = summary
         self.mask = mask
+
+        self.df = None
 
     def make_dir_structure(self):
         '''Creates the directory and file structure for a new sample
@@ -42,7 +45,7 @@ class Sample:
         with open(f'{path}/list.pkl', 'rb') as file: self = pkl.load(file)
         res = self.load_channels()
 
-        return res
+        return res, self
 
     
     def load_channels(self):
@@ -82,6 +85,7 @@ class Sample:
                     self.channels.append(Channel(name=c, label=df['Label'].to_list()[i], image=df['Image'].to_list()[i]))
 
                 self.save()
+                self.update_df()
 
                 return 1
 
@@ -111,7 +115,7 @@ class Sample:
         tiff_slices = tf.TiffFile(tiff_path).asarray()
         channels, labels = [], []
 
-        summary_df = pd.read_csv(summary_path, sep = '\t')
+        summary_df = pd.read_csv(summary_path, sep = '\t').sort_values(['Channel']).reset_index(drop=True) 
 
         for slice in range(tiff_slices.shape[0]):
             channels.append(str(summary_df['Channel'][slice]))
@@ -122,7 +126,7 @@ class Sample:
         return tiff_slices, channels, labels, summary_df
 
 
-    def sample_df():
+    def update_df(self):
         '''Generate a table with the information of a sample
 
         Returns
@@ -133,30 +137,33 @@ class Sample:
             Pandas DataFrame containing information of the sample
         '''
 
-        color = Color()
+        if self.channels != None:
+            clr = Color()
 
-        img_sizes = [img.shape for img in images]
-        pixel_min = self.summary['MinValue'].tolist()
-        pixel_max = self.summar['MaxValue'].tolist()
-        with open(f'samples/{self.name}/{self.name}.json', 'r') as f: data = json.load(f)
-        channel_threshold = ['-' if c['threshold'] == None else c['threshold'] for c in data['channels']]
-        channel_contrast = ['-' if c['contrast_limits'] == None else c['contrast_limits'] for c in data['channels']]
+            pixel_min = self.summary['MinValue'].tolist()
+            pixel_max = self.summary['MaxValue'].tolist()
 
+            names, labels, img_sizes, thresholds, contrasts= [], [], [], [], []
 
-        for c in self.channels: pass
+            for c in self.channels:
+                names.append(c.name)
+                labels.append(c.label)
+                img_sizes.append(c.image.shape)
+                thresholds.append('-' if c.threshold == None else c.threshold)
+                contrasts.append('-' if c.contrast == None else c.contrast)
 
+            self.df = pd.DataFrame(
+                    list(zip(names, labels, img_sizes, pixel_min, pixel_max, thresholds, contrasts)),
+                    columns =['Channel', 'Label', 'Image Size', 'Min', 'Max', 'Th.', 'Cont.']
+                )
 
-        df = pd.DataFrame(
-                list(zip(images, metals, labels, img_sizes, pixel_min, pixel_max)),
-                columns =['Image', 'Channel', 'Label', 'Image Size', 'Min', 'Max']
-            )
+            self.save()
 
-        df = df.sort_values(['Channel']).reset_index(drop=True)
+            return self.df
 
-        df['Th.'] = channel_threshold # channel_threshold is already sorted, add it after sorting DataFrame
-        df['Cont.'] = channel_contrast # channel_contrast is already sorted, add it after sorting DataFrame
-
-        table = tabulate(df.loc[:, df.columns != 'Image'], headers = 'keys', tablefmt = 'github')
-        table = f'{color.BOLD}{color.UNDERLINE}Displaying sample:{color.ENDC} {self.name}\n\n{table}'
-
-        return table, df
+    def tabulate(self):
+        if isinstance(self.df, pd.DataFrame):
+            clr = Color()
+            table = tblt.tabulate(self.df, headers = 'keys', tablefmt = 'github')
+            table = f'{clr.BOLD}{clr.UNDERLINE}Displaying sample:{clr.ENDC} {self.name}\n\n{table}'
+            return table

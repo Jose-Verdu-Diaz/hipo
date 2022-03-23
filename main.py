@@ -79,24 +79,10 @@ if __name__ == '__main__':
 
                     if opt == None: break
                     else:
-                        state.sample = Sample(name=df["Sample"][opt])
-                        res =  state.sample.load()
-                        print(res)
+                        res = state.load_sample(name = df["Sample"][opt])
                         if res == 0: continue
 
-                        #sample = df["Sample"][opt]
-                        
-                        #sample_input = interface.load_input(sample)
-                        #if sample_input == None: continue
-
-                        #(tiff_file, txt_file, geojson_file) = sample_input
-                        #images, metals, labels, summary_df = image.parse_tiff(tiff_file, txt_file)
-                        #interface.populate_channels_json(sample, metals, labels)
-
-                        input('End')
-                        sys.exit()
-
-                        table, df = browse.sample_df(images, metals, labels, summary_df, sample)
+                        table = state.tabulate_sample()
 
                         while True:
                             opt = utils.input_menu_option(SAMPLE_OPTIONS, cancel = False, display = [table])
