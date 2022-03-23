@@ -47,7 +47,6 @@ if __name__ == '__main__':
         'e': 'Visualize ',    
            7:  'View Raw',
            8:  'View Normalized',
-           9:  'Create GIF', 
            10: 'Napari Show',
         'f': 'Histogram ', 
            11: 'View Histogram (norm)',
@@ -93,7 +92,7 @@ if __name__ == '__main__':
                             elif opt == 1: state.normalize()
 
                             elif opt == 2:
-                                opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                opt = utils.input_menu_option(dict(zip(list(state.samples.df.index),list(state.samples.df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
                                 if df['Cont.'][opt] == '-':
                                     input(f'{color.YELLOW}The channel contrast has to be adjusted first. Press Enter to continue...{color.ENDC}')
@@ -113,19 +112,9 @@ if __name__ == '__main__':
 
 
                             elif opt == 4:
-                                res = consistency.check_operation_requirements(sample, 'img_cont')
-                                if res != None:
-                                    input(f'{color.YELLOW}{res} is required before adjusting the contrast. Press Enter to continue...{color.ENDC}')
-                                    continue
-
-                                opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)
+                                opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
-                                else: 
-                                    images_norm, channels = interface.load_dir_images(sample, 'img_norm', [df['Channel'][opt]])
-                                    contrast_limits = image.threshold_napari(images_norm[0], channels[0])
-                                    interface.update_sample_json(sample, channel = opt, update_dict = {'contrast_limits': contrast_limits})
-
-                                    table, df = browse.sample_df(images, metals, labels, summary_df, sample)
+                                else: state.contrast(opt)
 
 
                             elif opt == 5: 
@@ -144,10 +133,8 @@ if __name__ == '__main__':
 
                             elif opt == 8: state.show_napari('image_norm')
 
-                            elif opt == 9: image.create_gif(sample)
 
-
-                            elif opt == 10:
+                            elif opt == 9:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -155,7 +142,7 @@ if __name__ == '__main__':
                                     image.show_napari(images_norm, channels)
 
 
-                            elif opt == 11:
+                            elif opt == 10:
                                 selected_images = utils.input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
@@ -163,7 +150,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 12:
+                            elif opt == 11:
                                 selected_images = utils.input_df_toggle(sample, df) # Must add consistency check
                                 if selected_images == None: continue
                                 else:
@@ -171,7 +158,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 13:
+                            elif opt == 12:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -179,17 +166,17 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 14:
+                            elif opt == 13:
                                 input('Segmentation is performed using the contrasted Tm(169) channel.')
                                 img, channels = interface.load_dir_images(sample, 'img_cont', img = ['Tm(169)'])
                                 image.segment_fibers(sample, img[0], geojson_file)
                                 input(f'{color.GREEN}Fibers Segmented successfully! Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 15: pass
+                            elif opt == 14: pass
 
 
-                            elif opt == 16:
+                            elif opt == 15:
                                 name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:

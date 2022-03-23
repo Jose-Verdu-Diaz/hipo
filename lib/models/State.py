@@ -51,6 +51,12 @@ class State:
         self.current_sample = self.current_sample.normalize()
         input(f'\n{clr.GREEN}Images normalized successfully! Press Enter to continue...{clr.ENDC}')
 
+    
+    def contrast(self, opt):
+        clr = Color()
+        contrast = self.current_sample.show_napari(function='contrast', opt = opt)
+        input(contrast)
+
 ####################################################################
 ########################## VISUALIZATION ###########################
 ####################################################################

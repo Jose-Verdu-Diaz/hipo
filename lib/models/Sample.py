@@ -6,8 +6,10 @@ import pandas as pd
 import pickle as pkl
 from tqdm import tqdm
 import tifffile as tf
-import tabulate as tblt 
+import tabulate as tblt
+from magicgui import magicgui
 from PIL import Image, ImageDraw
+from napari.types import ImageData
 
 from lib.Colors import Color
 import lib.consistency as consistency
@@ -82,7 +84,9 @@ class Sample:
                     elif f.endswith('.tiff'): tiff_file = path
                     elif f.endswith('.geojson'): geojson_file = path
 
-                images, channels, labels, self.summary = self.parse_tiff(tiff_file, txt_file)
+                images, channels, labels, summary = self.parse_tiff(tiff_file, txt_file)
+
+                self.summary = summary.sort_values(['Channel']).reset_index(drop=True) 
 
                 df = pd.DataFrame(
                         list(zip(images, channels, labels)),
@@ -126,12 +130,12 @@ class Sample:
         tiff_slices = tf.TiffFile(tiff_path).asarray()
         channels, labels = [], []
 
-        summary_df = pd.read_csv(summary_path, sep = '\t').sort_values(['Channel']).reset_index(drop=True) 
+        summary_df = pd.read_csv(summary_path, sep = '\t')
 
         for slice in range(tiff_slices.shape[0]):
             channels.append(str(summary_df['Channel'][slice]))
 
-            label =str(summary_df['Label'][slice])
+            label = str(summary_df['Label'][slice])
             labels.append(label if not label == 'nan' else '-')
 
         return tiff_slices, channels, labels, summary_df
@@ -231,16 +235,38 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, mode):
-        images = [getattr(c, mode) for c in self.channels]
-        blobs = np.stack(images)
-
+    def show_napari(self, mode = 'image', function = 'display', opt = 0):
         viewer = napari.Viewer()
-        layer = viewer.add_image(blobs.astype(float))
 
-        @viewer.dims.events.current_step.connect
-        def _on_change(event):
-            idx = event.value[0]
-            layer.name = self.channels[idx].name
+        if function == 'threshold':
+            @magicgui(
+                auto_call=True,
+                th={"widget_type": "IntSlider", "max": 255},
+                layout='horizontal'
+            )
+            def threshold(layer: ImageData, th: int = 0) -> ImageData:
+                return np.where(layer > th, layer, 0)
+
+            viewer.window.add_dock_widget(threshold, area='bottom')
+
+        elif function == 'display':
+            images = [getattr(c, mode) for c in self.channels if getattr(c, mode) != None]
+            names = [c.name for c in self.channels if getattr(c, mode) != None]
+
+            @viewer.dims.events.current_step.connect
+            def _on_change(event):
+                idx = event.value[0]
+                layer.name = names[idx]
+
+            layer = viewer.add_image(np.stack(images))
+
+        elif function == 'contrast':
+            if  isinstance(self.channels[opt].image_norm,np.ndarray):
+                layer = viewer.add_image(self.channels[opt].image_norm)
+            else:
+                pass # Give error
 
         napari.run()
+
+        if function == 'contrast':
+            return layer.contrast_limits
