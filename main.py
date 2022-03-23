@@ -90,11 +90,7 @@ if __name__ == '__main__':
                             if opt == 0: break
 
 
-                            elif opt == 1:
-                                print(f'Normalizing {sample}, wait please...')
-                                image.normalize(geojson_file, images, sample, metals)
-                                input(f'\n{color.GREEN}Images normalized successfully! Press Enter to continue...{color.ENDC}')
-
+                            elif opt == 1: state.normalize()
 
                             elif opt == 2:
                                 opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), display = [table], show_menu = False)

@@ -1,9 +1,12 @@
 import os
 import json
+import numpy as np
 import pandas as pd
 import pickle as pkl
+from tqdm import tqdm
 import tifffile as tf
 import tabulate as tblt 
+from PIL import Image, ImageDraw
 
 from lib.Colors import Color
 import lib.consistency as consistency
@@ -22,6 +25,10 @@ class Sample:
 
         self.df = None
 
+####################################################################
+################### LOADING AND SAVING FUNCTIONS ###################
+####################################################################
+
     def make_dir_structure(self):
         '''Creates the directory and file structure for a new sample
         '''
@@ -36,6 +43,7 @@ class Sample:
 
 
     def save(self):
+        print('Saving sample, this can take some seconds...')
         path = f'samples/{self.name}'
         with open(f'{path}/list.pkl', 'wb') as file: pkl.dump(self, file)
 
@@ -83,6 +91,8 @@ class Sample:
                 self.channels = []
                 for i,c in enumerate(df['Channel'].to_list()): 
                     self.channels.append(Channel(name=c, label=df['Label'].to_list()[i], image=df['Image'].to_list()[i]))
+
+                self.make_mask(geojson_file)
 
                 self.save()
                 self.update_df()
@@ -161,9 +171,56 @@ class Sample:
 
             return self.df
 
+####################################################################
+############################## UTILS ###############################
+####################################################################
+
     def tabulate(self):
         if isinstance(self.df, pd.DataFrame):
             clr = Color()
             table = tblt.tabulate(self.df, headers = 'keys', tablefmt = 'github')
             table = f'{clr.BOLD}{clr.UNDERLINE}Displaying sample:{clr.ENDC} {self.name}\n\n{table}'
             return table
+
+####################################################################
+######################### IMAGE PROCESSING #########################
+####################################################################
+
+    def make_mask(self, geojson_file):
+        '''Creates mask images from coordinates tuples list
+
+        Parameters
+        ----------
+        geojson_file
+            path to geojson
+        size
+            Size of the mask
+
+        Returns
+        -------
+            Numpy array representing the mask
+        '''
+
+        with open(geojson_file) as f: annotation_data = json.load(f)
+
+        black = Image.new('1', Image.fromarray(self.channels[0].image).size)
+        imd = ImageDraw.Draw(black)
+
+        for ann in annotation_data["features"]:
+
+            blob = ann["geometry"]
+
+            if blob["type"] == "LineString": coords = blob["coordinates"]
+            if blob["type"] == "Polygon": coords = blob["coordinates"][0]
+
+            tuples = [tuple(coord) for coord in coords]
+            imd.polygon(tuples,fill="white",outline="white")
+
+        self.mask = np.array(black)
+        self.save()
+
+
+    def normalize(self):
+        for c in tqdm(self.channels, desc = 'Normalizing images', postfix=False): c = c.normalize(self.mask)
+        self.save()
+        return self
