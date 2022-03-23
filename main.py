@@ -74,12 +74,12 @@ if __name__ == '__main__':
             elif opt == 1:
 
                 while True:
-                    table, df = browse.list_samples()
-                    opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Sample']))), display = [table], show_menu = False)
+                    table = state.list_samples()
+                    opt = utils.input_menu_option(dict(zip(list(state.samples.index),list(state.samples['Sample']))), display = [table], show_menu = False)
 
                     if opt == None: break
                     else:
-                        res = state.load_sample(name = df["Sample"][opt])
+                        res = state.load_sample(name = state.samples["Sample"][opt])
                         if res == 0: continue
 
                         table = state.tabulate_sample()
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                             if opt == 0: break
 
 
-                            elif opt == 1:         
+                            elif opt == 1:
                                 print(f'Normalizing {sample}, wait please...')
                                 image.normalize(geojson_file, images, sample, metals)
                                 input(f'\n{color.GREEN}Images normalized successfully! Press Enter to continue...{color.ENDC}')
@@ -229,10 +229,11 @@ if __name__ == '__main__':
 
                 if name == None: pass
                 else:
-                    #interface.make_sample_dirs(name)
 
                     sample = Sample(name=name)
                     sample.make_dir_structure()
+
+                    state.set_samples()
 
                     print(f'\n{color.GREEN}Sample created successfully!{color.ENDC}')
                     input(f'\n{color.YELLOW}Add sample files in {color.UNDERLINE}samples/{name}/input{color.ENDC}{color.YELLOW}. Press Enter to continue...{color.ENDC}')
