@@ -1,5 +1,6 @@
 import os
 import json
+import napari
 import numpy as np
 import pandas as pd
 import pickle as pkl
@@ -224,3 +225,22 @@ class Sample:
         for c in tqdm(self.channels, desc = 'Normalizing images', postfix=False): c = c.normalize(self.mask)
         self.save()
         return self
+
+
+####################################################################
+########################## VISUALIZATION ###########################
+####################################################################
+
+    def show_napari(self):
+        images = [c.image for c in self.channels]
+        blobs = np.stack(images)
+
+        viewer = napari.Viewer()
+        layer = viewer.add_image(blobs.astype(float))
+
+        @viewer.dims.events.current_step.connect
+        def _on_change(event):
+            idx = event.value[0]
+            layer.name = self.channels[idx].name
+
+        napari.run()

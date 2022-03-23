@@ -50,3 +50,10 @@ class State:
         print(f'Normalizing, this might take some minutes...')
         self.current_sample = self.current_sample.normalize()
         input(f'\n{clr.GREEN}Images normalized successfully! Press Enter to continue...{clr.ENDC}')
+
+####################################################################
+########################## VISUALIZATION ###########################
+####################################################################
+
+    def show_napari(self):
+        self.current_sample.show_napari()

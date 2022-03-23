@@ -140,12 +140,7 @@ if __name__ == '__main__':
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 7:
-                                while True:
-                                    opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False)
-
-                                    if opt == None: break
-                                    else: image.show_image(images[opt])
+                            elif opt == 7: state.show_napari()
 
 
                             elif opt == 8:
