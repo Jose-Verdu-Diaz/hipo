@@ -55,5 +55,5 @@ class State:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self):
-        self.current_sample.show_napari()
+    def show_napari(self, mode):
+        self.current_sample.show_napari(mode)

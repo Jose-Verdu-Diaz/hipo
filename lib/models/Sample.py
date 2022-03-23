@@ -231,8 +231,8 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self):
-        images = [c.image for c in self.channels]
+    def show_napari(self, mode):
+        images = [getattr(c, mode) for c in self.channels]
         blobs = np.stack(images)
 
         viewer = napari.Viewer()

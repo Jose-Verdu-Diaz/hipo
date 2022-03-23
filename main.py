@@ -140,21 +140,11 @@ if __name__ == '__main__':
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 7: state.show_napari()
+                            elif opt == 7: state.show_napari('image')
 
+                            elif opt == 8: state.show_napari('image_norm')
 
-                            elif opt == 8:
-                                while True:
-                                    opt = utils.input_menu_option(dict(zip(list(df.index),list(df['Channel']))), cancel = True, display = [table], show_menu = False )
-
-                                    if opt == None: break
-                                    else: 
-                                        img = image.load_image(f'samples/{sample}/img_norm/{metals[opt]}.png')
-                                        image.show_image(img)
-
-
-                            elif opt == 9:
-                                image.create_gif(sample)
+                            elif opt == 9: image.create_gif(sample)
 
 
                             elif opt == 10:
