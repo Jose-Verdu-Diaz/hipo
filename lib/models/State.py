@@ -54,8 +54,9 @@ class State:
     
     def contrast(self, opt):
         clr = Color()
-        contrast = self.current_sample.show_napari(function='contrast', opt = opt)
-        input(contrast)
+        upper, lower = self.current_sample.show_napari(function='contrast', opt = opt)
+        print(f'Upper: {upper}\nLower: {lower}')
+        input('Press Enter...')
 
 ####################################################################
 ########################## VISUALIZATION ###########################

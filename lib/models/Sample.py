@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import napari
 import numpy as np
@@ -10,6 +11,7 @@ import tabulate as tblt
 from magicgui import magicgui
 from PIL import Image, ImageDraw
 from napari.types import ImageData
+from napari_brightness_contrast._dock_widget import BrightnessContrast
 
 from lib.Colors import Color
 import lib.consistency as consistency
@@ -235,9 +237,10 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, mode = 'image', function = 'display', opt = 0):
+    def show_napari(self, im_type = 'image', function = 'display', opt = 0):
         viewer = napari.Viewer()
 
+        # Open napari to obtain a threshold for a single image
         if function == 'threshold':
             @magicgui(
                 auto_call=True,
@@ -249,9 +252,31 @@ class Sample:
 
             viewer.window.add_dock_widget(threshold, area='bottom')
 
+        # Open napari to obtain a contrast for a single image
+        elif function == 'contrast':
+            if  isinstance(self.channels[opt].image_norm,np.ndarray):
+                layer = viewer.add_image(self.channels[opt].image_norm)
+                
+                bc = BrightnessContrast(viewer)
+                viewer.window.add_dock_widget(bc)
+
+                # Store new percentile values on update
+                layer.metadata = {
+                    'percentile_upper': bc.spinner_upper_percentile.value(),
+                    'percentile_lower': bc.spinner_lower_percentile.value()
+                }
+                def update(event):
+                    layer.metadata = {
+                        'percentile_upper': bc.spinner_upper_percentile.value(),
+                        'percentile_lower': bc.spinner_lower_percentile.value()
+                    }
+                
+                layer.events.connect(callback=update)
+
+        # Open napari to display a stack of images
         elif function == 'display':
-            images = [getattr(c, mode) for c in self.channels if getattr(c, mode) != None]
-            names = [c.name for c in self.channels if getattr(c, mode) != None]
+            images = [getattr(c, im_type) for c in self.channels if getattr(c, im_type) != None]
+            names = [c.name for c in self.channels if getattr(c, im_type) != None]
 
             @viewer.dims.events.current_step.connect
             def _on_change(event):
@@ -260,13 +285,11 @@ class Sample:
 
             layer = viewer.add_image(np.stack(images))
 
-        elif function == 'contrast':
-            if  isinstance(self.channels[opt].image_norm,np.ndarray):
-                layer = viewer.add_image(self.channels[opt].image_norm)
-            else:
-                pass # Give error
+        else:
+            return None
 
         napari.run()
 
+        # Return contrast
         if function == 'contrast':
-            return layer.contrast_limits
+            return layer.metadata["percentile_upper"], layer.metadata["percentile_lower"]
