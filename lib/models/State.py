@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import tabulate as tblt
 
@@ -54,7 +55,11 @@ class State:
     
     def contrast(self, opt):
         clr = Color()
-        self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
+        if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):          
+            self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
+            self.current_sample = self.current_sample.contrast(opt = opt)
+        else:
+            input(f'{clr.RED}Images need to be normalized first{clr.ENDC}')
 
 ####################################################################
 ########################## VISUALIZATION ###########################

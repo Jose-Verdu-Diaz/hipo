@@ -167,7 +167,7 @@ class Sample:
                 labels.append(c.label)
                 img_sizes.append(c.image.shape)
                 thresholds.append('-' if c.threshold == None else c.threshold)
-                contrasts.append('-' if c.contrast == None else c.contrast)
+                contrasts.append('-' if c.contrast_limits == None else c.contrast_limits)
 
             self.df = pd.DataFrame(
                     list(zip(names, labels, img_sizes, pixel_min, pixel_max, thresholds, contrasts)),
@@ -232,6 +232,11 @@ class Sample:
         self.save()
         return self
 
+    def contrast(self, opt = 0):
+        self.channels[opt] = self.channels[opt].contrast()
+        self.save()
+        return self        
+
 
 ####################################################################
 ########################## VISUALIZATION ###########################
@@ -254,24 +259,23 @@ class Sample:
 
         # Open napari to obtain a contrast for a single image
         elif function == 'contrast':
-            if  isinstance(self.channels[opt].image_norm,np.ndarray):
-                layer = viewer.add_image(self.channels[opt].image_norm)
-                
-                bc = BrightnessContrast(viewer)
-                viewer.window.add_dock_widget(bc)
+            layer = viewer.add_image(self.channels[opt].image_norm)
+            
+            bc = BrightnessContrast(viewer)
+            viewer.window.add_dock_widget(bc)
 
-                # Store new percentile values on update
+            # Store new percentile values on update
+            layer.metadata = {
+                'percentile_upper': bc.spinner_upper_percentile.value(),
+                'percentile_lower': bc.spinner_lower_percentile.value()
+            }
+            def update(event):
                 layer.metadata = {
                     'percentile_upper': bc.spinner_upper_percentile.value(),
                     'percentile_lower': bc.spinner_lower_percentile.value()
                 }
-                def update(event):
-                    layer.metadata = {
-                        'percentile_upper': bc.spinner_upper_percentile.value(),
-                        'percentile_lower': bc.spinner_lower_percentile.value()
-                    }
-                
-                layer.events.connect(callback=update)
+            
+            layer.events.connect(callback=update)
 
         # Open napari to display a stack of images
         elif function == 'display':
@@ -292,6 +296,6 @@ class Sample:
 
         # Return contrast
         if function == 'contrast':
-            self.channels[opt].contrast = (layer.metadata["percentile_lower"], layer.metadata["percentile_upper"])
+            self.channels[opt].contrast_limits = (layer.metadata["percentile_lower"], layer.metadata["percentile_upper"])
             self.update_df()
             return self
