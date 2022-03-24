@@ -292,4 +292,6 @@ class Sample:
 
         # Return contrast
         if function == 'contrast':
-            return layer.metadata["percentile_upper"], layer.metadata["percentile_lower"]
+            self.channels[opt].contrast = (layer.metadata["percentile_lower"], layer.metadata["percentile_upper"])
+            self.update_df()
+            return self

@@ -114,7 +114,9 @@ if __name__ == '__main__':
                             elif opt == 4:
                                 opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
-                                else: state.contrast(opt)
+                                else: 
+                                    state.contrast(opt)
+                                    table = state.tabulate_sample()
 
 
                             elif opt == 5: 
