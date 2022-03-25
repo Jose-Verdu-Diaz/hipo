@@ -3,13 +3,15 @@ import numpy as np
 import pandas as pd
 import tabulate as tblt
 
+import lib.utils as utils
 from lib.models.Sample import Sample
 from lib.models.Colors import Color
 
 class State:
-    def __init__(self):
+    def __init__(self, debug=False):
         self.current_sample = None # Loaded Sample (Sample Object)
         self.samples = None # Dataframe of Samples (only metadata)
+        self.debug = debug
 
         self.set_samples()
 
@@ -57,19 +59,24 @@ class State:
     
     def contrast(self, opt):
         clr = Color()
-
         if not os.path.isfile(f'samples/{self.current_sample.name}/image_norm.npz'):
-            input(f'{clr.RED}Images need to be normalized first{clr.ENDC}')
+            input(f'{clr.RED}Images need to be normalized first. Press Enter to continue...{clr.ENDC}')
             return
 
         self.current_sample = self.current_sample.load_channels_images(im_type='image_norm')
         if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
-            self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
+            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
+            with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+                self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
             self.current_sample = self.current_sample.contrast(opt = opt)
             self.current_sample.save_channels_images(im_type='image_cont')
-        else: input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs to be normalized first{clr.ENDC}')
+            self.current_sample.update_df()
+        else: 
+            input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs to be normalized first{clr.ENDC}')
+            return
 
         self.current_sample = self.current_sample.dump_channels_images()
+        input(f'\n{clr.GREEN}Contrast applied successfully! Press Enter to continue...{clr.ENDC}')
 
 ####################################################################
 ########################## VISUALIZATION ###########################

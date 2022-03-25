@@ -20,11 +20,34 @@ input_text
 '''
 
 import os
+import sys
 from tabulate import tabulate
 
 from lib.models.Colors import Color
 import lib.consistency as consistency
 
+class suppress_output:
+    def __init__(self, suppress_stdout=False, suppress_stderr=False):
+        self.suppress_stdout = suppress_stdout
+        self.suppress_stderr = suppress_stderr
+        self._stdout = None
+        self._stderr = None
+
+    def __enter__(self):
+        devnull = open(os.devnull, "w")
+        if self.suppress_stdout:
+            self._stdout = sys.stdout
+            sys.stdout = devnull
+
+        if self.suppress_stderr:
+            self._stderr = sys.stderr
+            sys.stderr = devnull
+
+    def __exit__(self, *args):
+        if self.suppress_stdout:
+            sys.stdout = self._stdout
+        if self.suppress_stderr:
+            sys.stderr = self._stderr
 
 def clear():
     '''Clear the terminal
@@ -33,13 +56,13 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def print_title():
+def print_title(debug = False):
     '''Prints the app title
     '''
 
     clear()
-    color = Color()
-    print(color.CYAN)
+    clr = Color()
+    print(clr.CYAN)
     print('      @@   @@ @@@@@ @@@@@@   @@@@@ ')
     print('      @@   @@  @@@  @@   @@ @@   @@')
     print('      @@@@@@@  @@@  @@@@@@  @@   @@')
@@ -60,10 +83,11 @@ def print_title():
     print('  *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*')
     print('    °@@@@@@@@@@o°°   °°o@@@@@@@@@@@°')
     print('       °oOOo°              °oOOo°') 
-    print(color.BOLD)
+    print(clr.BOLD)
     print('       Hyperion Image PrOcessing')
-    print(color.ENDC)
-
+    print(clr.ENDC)
+    
+    if debug: print(f'{clr.RED}Debug mode active{clr.ENDC}')
     input('Press Enter to continue...')
 
 

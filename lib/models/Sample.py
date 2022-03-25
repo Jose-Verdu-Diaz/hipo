@@ -346,5 +346,4 @@ class Sample:
         # Return contrast
         if function == 'contrast':
             self.channels[opt].contrast_limits = (layer.metadata["percentile_lower"], layer.metadata["percentile_upper"])
-            self.update_df()
             return self

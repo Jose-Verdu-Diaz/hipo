@@ -2,6 +2,8 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image, ImageDraw
 
+from lib.models.Colors import Color
+
 
 class Channel:
 
@@ -56,7 +58,8 @@ class Channel:
         return self
 
     def contrast(self):
-        print(f'Applying contrast on channgel: {self.name}')
+        clr = Color()
+        print(f'{clr.GREY}Applying contrast on channel {self.name}{clr.ENDC}')
         quant_lower = np.quantile(self.image_norm, self.contrast_limits[0] / 100)
         quant_upper = np.quantile(self.image_norm, self.contrast_limits[1] / 100)
         update_contrast = lambda x, a, b: (x - a) / (b - a)

@@ -9,6 +9,7 @@ system and delegating all other tasks to the other modules.
 
 import os
 import sys
+import argparse
 
 import lib.image as image
 import lib.utils as utils
@@ -22,9 +23,13 @@ import lib.consistency as consistency
 
 if __name__ == '__main__':
 
-    state = State()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='store_true', help='Toggle debug mode)')
+    args = parser.parse_args()
 
-    utils.print_title()
+    state = State(debug=args.debug)
+
+    utils.print_title(state.debug)
 
     MENU_OPTIONS = {
         0: 'Exit',
