@@ -4,7 +4,7 @@ import pandas as pd
 import tabulate as tblt
 
 from lib.models.Sample import Sample
-from lib.Colors import Color
+from lib.models.Colors import Color
 
 class State:
     def __init__(self):
@@ -47,18 +47,29 @@ class State:
 
     def normalize(self):
         clr = Color()
-        print(f'Normalizing, this might take some minutes...')
+        print(f'\n{clr.CYAN}Normalizing, this might take some seconds...{clr.ENDC}')
+        self.current_sample = self.current_sample.load_channels_images(im_type='image')
         self.current_sample = self.current_sample.normalize()
+        self.current_sample.save_channels_images(im_type='image_norm')
+        self.current_sample = self.current_sample.dump_channels_images()     
         input(f'\n{clr.GREEN}Images normalized successfully! Press Enter to continue...{clr.ENDC}')
 
     
     def contrast(self, opt):
         clr = Color()
-        if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):          
+
+        if not os.path.isfile(f'samples/{self.current_sample.name}/image_norm.npz'):
+            input(f'{clr.RED}Images need to be normalized first{clr.ENDC}')
+            return
+
+        self.current_sample = self.current_sample.load_channels_images(im_type='image_norm')
+        if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
             self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
             self.current_sample = self.current_sample.contrast(opt = opt)
-        else:
-            input(f'{clr.RED}Images need to be normalized first{clr.ENDC}')
+            self.current_sample.save_channels_images(im_type='image_cont')
+        else: input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs to be normalized first{clr.ENDC}')
+
+        self.current_sample = self.current_sample.dump_channels_images()
 
 ####################################################################
 ########################## VISUALIZATION ###########################

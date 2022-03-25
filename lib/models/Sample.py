@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw
 from napari.types import ImageData
 from napari_brightness_contrast._dock_widget import BrightnessContrast
 
-from lib.Colors import Color
+from lib.models.Colors import Color
 import lib.consistency as consistency
 from lib.models.Channel import Channel
 
@@ -57,8 +57,9 @@ class Sample:
         save_channels_images() method.
         '''
 
-        print('Saving sample, this can take some seconds...')
-        for c in self.channels: c = c.dump_images()
+        clr = Color()
+        print(f'{clr.GREY}Saving sample, this can take some seconds...{clr.ENDC}')
+        self.dump_channels_images()
         path = f'samples/{self.name}'
         with open(f'{path}/sample.pkl', 'wb') as file: pkl.dump(self, file)
 
@@ -109,8 +110,8 @@ class Sample:
                 for i,c in enumerate(df['Channel'].to_list()): 
                     self.channels.append(Channel(name=c, label=df['Label'].to_list()[i], image=df['Image'].to_list()[i]))
 
-                self.make_mask(geojson_file)
-
+                self.save_channels_images(im_type='image')
+                self.make_mask(geojson_file)      
                 self.save()
                 self.update_df()
 
@@ -118,9 +119,11 @@ class Sample:
 
 
     def load_channels_images(self, im_type = 'image'):
-        img_stack = np.load(f'../../samples/{self.name}/{im_type}.npz')
-        for c in self.channels:
+        clr = Color()
+        img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
+        for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
             c = c.load_images(im_type=im_type, img=img_stack[c.name])
+        return self
 
 
     def save_channels_images(self, im_type = None):
@@ -138,12 +141,14 @@ class Sample:
         '''
 
         if self.channels != None:
+            clr = Color()
             IM_TYPE_OPT = ['image', 'image_norm', 'image_cont']
             save_list = [im_type] if im_type != None else IM_TYPE_OPT
             for s in save_list:
                 images = {}
-                for c in self.channels: 
-                    if isinstance(getattr(c, s), np.ndarray): images[c.name] = c.getattr(c, s) 
+                for c in tqdm(self.channels, desc = f'{clr.GREY}Saving {s}', postfix=clr.ENDC): 
+                    if isinstance(getattr(c, s), np.ndarray): images[c.name] = getattr(c, s) 
+                print(f'{clr.GREY}Compressing images file...{clr.ENDC}')
                 np.savez_compressed(f'samples/{self.name}/{s}.npz', **images)
 
 
@@ -183,6 +188,13 @@ class Sample:
         return tiff_slices, channels, labels, summary_df
 
 
+    def dump_channels_images(self):
+        if self.channels != None:
+            clr = Color()
+            for c in tqdm(self.channels, desc = f'{clr.GREY}Dumping channel images', postfix=clr.ENDC): c = c.dump_images()
+        return self
+
+
     def update_df(self):
         '''Generate a table with the information of a sample
 
@@ -200,18 +212,17 @@ class Sample:
             pixel_min = self.summary['MinValue'].tolist()
             pixel_max = self.summary['MaxValue'].tolist()
 
-            names, labels, img_sizes, thresholds, contrasts= [], [], [], [], []
+            names, labels, thresholds, contrasts= [], [], [], []
 
             for c in self.channels:
                 names.append(c.name)
                 labels.append(c.label)
-                img_sizes.append(c.image.shape)
                 thresholds.append('-' if c.threshold == None else c.threshold)
                 contrasts.append('-' if c.contrast_limits == None else c.contrast_limits)
 
             self.df = pd.DataFrame(
-                    list(zip(names, labels, img_sizes, pixel_min, pixel_max, thresholds, contrasts)),
-                    columns =['Channel', 'Label', 'Image Size', 'Min', 'Max', 'Th.', 'Cont.']
+                    list(zip(names, labels, pixel_min, pixel_max, thresholds, contrasts)),
+                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.', 'Cont.']
                 )
 
             self.save()
@@ -264,18 +275,16 @@ class Sample:
             imd.polygon(tuples,fill="white",outline="white")
 
         self.mask = np.array(black)
-        self.save()
 
 
     def normalize(self):
-        for c in tqdm(self.channels, desc = 'Normalizing images', postfix=False): c = c.normalize(self.mask)
-        self.save()
+        clr = Color()
+        for c in tqdm(self.channels, desc = f'{clr.GREY}Normalizing images', postfix=clr.ENDC): c = c.normalize(self.mask)
         return self
 
     def contrast(self, opt = 0):
         self.channels[opt] = self.channels[opt].contrast()
-        self.save()
-        return self        
+        return self
 
 
 ####################################################################

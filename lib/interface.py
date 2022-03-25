@@ -21,7 +21,7 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
-from lib.Colors import Color
+from lib.models.Colors import Color
 import lib.consistency as consistency
 
 

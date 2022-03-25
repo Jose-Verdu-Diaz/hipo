@@ -13,7 +13,7 @@ import sys
 import lib.image as image
 import lib.utils as utils
 import lib.browse as browse
-from lib.Colors import Color
+from lib.models.Colors import Color
 import lib.interface as interface
 from lib.models.State import State
 from lib.models.Sample import Sample

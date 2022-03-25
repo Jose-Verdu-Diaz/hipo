@@ -17,7 +17,7 @@ import json
 import pandas as pd
 from tabulate import tabulate
 
-from lib.Colors import Color
+from lib.models.Colors import Color
 
 def list_samples():
     '''List all the existing samples

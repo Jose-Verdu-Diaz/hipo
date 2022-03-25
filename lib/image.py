@@ -37,7 +37,7 @@ from skimage.segmentation import watershed
 from skimage.feature import peak_local_max
 from skimage.morphology import reconstruction
 
-from lib.Colors import Color
+from lib.models.Colors import Color
 import lib.interface as interface
 
 def parse_tiff(tiff_path, summary_path):
