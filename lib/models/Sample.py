@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import lzma
 import napari
 import numpy as np
 import pandas as pd
@@ -48,20 +49,29 @@ class Sample:
 
 
     def save(self):
+        '''Stores a pickle file with the Sample object
+
+        Stores the current Sample object as a pickle binary file. Removes the channel
+        images before creating the file, as they make the binary file extremely large.
+        These images should be stored in compressed numpy binary files using the 
+        save_channels_images() method.
+        '''
+
         print('Saving sample, this can take some seconds...')
+        for c in self.channels: c = c.dump_images()
         path = f'samples/{self.name}'
-        with open(f'{path}/list.pkl', 'wb') as file: pkl.dump(self, file)
+        with open(f'{path}/sample.pkl', 'wb') as file: pkl.dump(self, file)
 
     
     def load(self):
         path = f'samples/{self.name}'
-        with open(f'{path}/list.pkl', 'rb') as file: self = pkl.load(file)
-        res = self.load_channels()
+        with open(f'{path}/sample.pkl', 'rb') as file: self = pkl.load(file)
+        res = self.create_channels()
 
         return res, self
 
     
-    def load_channels(self):
+    def create_channels(self):
         if self.channels == None:
             clr = Color()
 
@@ -105,6 +115,36 @@ class Sample:
                 self.update_df()
 
                 return 1
+
+
+    def load_channels_images(self, im_type = 'image'):
+        img_stack = np.load(f'../../samples/{self.name}/{im_type}.npz')
+        for c in self.channels:
+            c = c.load_images(im_type=im_type, img=img_stack[c.name])
+
+
+    def save_channels_images(self, im_type = None):
+        '''Saves channel images in compressed numpy binary files (.npz)
+
+        This method provides a way of storing channel images in a compressed format,
+        allowing for a more compact file system. All images or a single image type
+        can be stored using the im_type parameter.
+
+        Parameters
+        ----------
+        im_type, optional
+            Type of image to store. Options are 'image', 'image_norm', 'image_cont'
+            and None. If None, all image types are stored. By default None
+        '''
+
+        if self.channels != None:
+            IM_TYPE_OPT = ['image', 'image_norm', 'image_cont']
+            save_list = [im_type] if im_type != None else IM_TYPE_OPT
+            for s in save_list:
+                images = {}
+                for c in self.channels: 
+                    if isinstance(getattr(c, s), np.ndarray): images[c.name] = c.getattr(c, s) 
+                np.savez_compressed(f'samples/{self.name}/{s}.npz', **images)
 
 
     def parse_tiff(self, tiff_path, summary_path):

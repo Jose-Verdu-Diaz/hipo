@@ -8,12 +8,37 @@ class Channel:
     def __init__(self, name=None, label=None, image=None, threshold=None, contrast_limits=None):
         self.name = name
         self.label = label
-        self.image = image
         self.threshold = threshold
         self.contrast_limits = contrast_limits
 
+        self.image = image
         self.image_norm = None
         self.image_cont = None
+
+####################################################################
+################### LOADING AND SAVING FUNCTIONS ###################
+####################################################################
+
+    def save(self, sample):
+        np.savez_compressed(f'samples/{sample}/{self.name}.npz', self.image_norm)
+
+    
+    def load_images(self, im_type = 'image', img = None):
+        setattr(self, im_type, img)
+        return self
+
+    
+    def dump_images(self):
+        '''Dumps all images of the channel
+
+        Returns
+        -------
+            Channel
+        '''
+        self.image = None
+        self.image_norm = None
+        self.image_cont = None
+        return self 
 
 ####################################################################
 ######################### IMAGE PROCESSING #########################

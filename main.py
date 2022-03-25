@@ -41,22 +41,21 @@ if __name__ == '__main__':
            3:  'Apply Threshold',
         'c': 'Contrast ',
            4:  'Change Contrast (napari)',
-           5:  'Apply Contrast',
         'd': 'Analyze ',
-           6:  'Perform Analysis',
+           5:  'Perform Analysis',
         'e': 'Visualize ',    
-           7:  'View Raw',
-           8:  'View Normalized',
-           10: 'Napari Show',
+           6:  'View Raw',
+           7:  'View Normalized',
+           8: 'Napari Show',
         'f': 'Histogram ', 
-           11: 'View Histogram (norm)',
-           12: 'View Histogram (cont)',
-           13: 'View Histogram (thre)',
+           9: 'View Histogram (norm)',
+           10: 'View Histogram (cont)',
+           11: 'View Histogram (thre)',
         'g': 'Fiber Segmentation',
-           14: 'Segment fibers',
-           15: 'Show Segmentation',
+           12: 'Segment fibers',
+           13: 'Show Segmentation',
         'h': 'Edit ', 
-           16: 'Remove Sample',
+           14: 'Remove Sample',
     }
 
     color = Color()
@@ -119,24 +118,18 @@ if __name__ == '__main__':
                                     table = state.tabulate_sample()
 
 
-                            elif opt == 5: 
-                                images_norm, channels = interface.load_dir_images(sample, 'img_norm', df['Channel'].loc[df['Cont.']!='-'].tolist())
-                                image.apply_contrast(sample, images_norm, channels, df)
-                                input(f'\n{color.GREEN}Images contrasted successfully! Press Enter to continue...{color.ENDC}')
-
-
-                            elif opt == 6:
+                            elif opt == 5:
                                 res = image.analyse_images(sample, geojson_file)
                                 if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 7: state.show_napari('image')
+                            elif opt == 6: state.show_napari('image')
 
-                            elif opt == 8: state.show_napari('image_norm')
+                            elif opt == 7: state.show_napari('image_norm')
 
 
-                            elif opt == 9:
+                            elif opt == 8:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -144,7 +137,7 @@ if __name__ == '__main__':
                                     image.show_napari(images_norm, channels)
 
 
-                            elif opt == 10:
+                            elif opt == 9:
                                 selected_images = utils.input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
@@ -152,7 +145,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 11:
+                            elif opt == 10:
                                 selected_images = utils.input_df_toggle(sample, df) # Must add consistency check
                                 if selected_images == None: continue
                                 else:
@@ -160,7 +153,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 12:
+                            elif opt == 11:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -168,17 +161,17 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 13:
+                            elif opt == 12:
                                 input('Segmentation is performed using the contrasted Tm(169) channel.')
                                 img, channels = interface.load_dir_images(sample, 'img_cont', img = ['Tm(169)'])
                                 image.segment_fibers(sample, img[0], geojson_file)
                                 input(f'{color.GREEN}Fibers Segmented successfully! Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 14: pass
+                            elif opt == 13: pass
 
 
-                            elif opt == 15:
+                            elif opt == 14:
                                 name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:
@@ -202,7 +195,6 @@ if __name__ == '__main__':
 
                     sample = Sample(name=name)
                     sample.make_dir_structure()
-
                     state.set_samples()
 
                     print(f'\n{color.GREEN}Sample created successfully!{color.ENDC}')
