@@ -49,18 +49,24 @@ if __name__ == '__main__':
         'd': 'Analyze ',
            5:  'Perform Analysis',
         'e': 'Visualize ',    
-           6:  'View Raw',
-           7:  'View Normalized',
-           8: 'Napari Show',
+           6:  'View Images',
+           7:  'Napari Show',
         'f': 'Histogram ', 
-           9: 'View Histogram (norm)',
-           10: 'View Histogram (cont)',
-           11: 'View Histogram (thre)',
+           8:  'View Histogram (norm)',
+           9:  'View Histogram (cont)',
+           10: 'View Histogram (thre)',
         'g': 'Fiber Segmentation',
-           12: 'Segment fibers',
-           13: 'Show Segmentation',
+           11: 'Segment fibers',
+           12: 'Show Segmentation',
         'h': 'Edit ', 
-           14: 'Remove Sample',
+           13: 'Remove Sample',
+    }
+
+    VISUALIZE_OPTIONS = {
+        0: 'Raw',
+        1: 'Normalized',
+        2: 'Contrast',
+        3: 'Mask'
     }
 
     color = Color()
@@ -131,10 +137,8 @@ if __name__ == '__main__':
 
                             elif opt == 6: state.show_napari('image')
 
-                            elif opt == 7: state.show_napari('image_norm')
 
-
-                            elif opt == 8:
+                            elif opt == 7:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -142,7 +146,7 @@ if __name__ == '__main__':
                                     image.show_napari(images_norm, channels)
 
 
-                            elif opt == 9:
+                            elif opt == 8:
                                 selected_images = utils.input_df_toggle(sample, df)
                                 if selected_images == None: continue
                                 else:
@@ -150,7 +154,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 10:
+                            elif opt == 9:
                                 selected_images = utils.input_df_toggle(sample, df) # Must add consistency check
                                 if selected_images == None: continue
                                 else:
@@ -158,7 +162,7 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 11:
+                            elif opt == 10:
                                 selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                                 if selected_images == None: continue
                                 else:
@@ -166,17 +170,17 @@ if __name__ == '__main__':
                                     image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            elif opt == 12:
+                            elif opt == 11:
                                 input('Segmentation is performed using the contrasted Tm(169) channel.')
                                 img, channels = interface.load_dir_images(sample, 'img_cont', img = ['Tm(169)'])
                                 image.segment_fibers(sample, img[0], geojson_file)
                                 input(f'{color.GREEN}Fibers Segmented successfully! Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 13: pass
+                            elif opt == 12: pass
 
 
-                            elif opt == 14:
+                            elif opt == 13:
                                 name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
 
                                 if name == None:

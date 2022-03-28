@@ -152,6 +152,54 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
             continue
 
 
+def input_menu_toggle(options, cancel = True, display = [], show_menu = True):
+    '''Make the user select an option from a menu
+
+    Parameters
+    ----------
+    options
+        Dictionary of options where the key is the option number and value 
+        is the option name
+    cancel, optional
+        Add a cancel option, by default True
+    display, optional
+        List of strings to print between the title and the menu, by default []
+    show_menu, optional
+        Print the menu uptions, by default True
+
+    Returns
+    -------
+        None if cancel is True and the user inputs 'c'
+        Integer with the input of the user otherwise
+    '''
+
+    # WORK IN PROGRESS HERE!!!
+
+    color = Color()
+    toggle = [False for i in options]
+    while True:
+        clear()
+        for d in display: print(f'{d}\n')
+
+        if show_menu: print_menu(options)
+
+        try:
+            if cancel: prompt = '\nSelect an option to toggle (\'c\' to cancel): '
+            else: prompt = '\nSelect an option to toggle: '
+            opt = input(prompt)
+
+            if  opt == 'c': return None
+            else: opt = int(opt)
+
+            if opt not in list(options.keys()): input(f'{color.RED}Option doesn\'t exist! Press enter to continue...{color.ENDC}')
+            else: 
+                toggle[opt] = not toggle[opt]
+                options[opt].replace(options[opt][len(options[opt]) - 1:], '(X)')
+        except: 
+            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            continue
+
+
 def input_text(txt, cancel = True, display = [], checks = []):
     '''Make the user enter a string
 
