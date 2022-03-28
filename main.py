@@ -10,6 +10,8 @@ system and delegating all other tasks to the other modules.
 import os
 import sys
 import argparse
+import pandas as pd
+from tabulate import tabulate
 
 import lib.image as image
 import lib.utils as utils
@@ -66,7 +68,8 @@ if __name__ == '__main__':
         0: 'Raw',
         1: 'Normalized',
         2: 'Contrast',
-        3: 'Mask'
+        3: 'Threshold',
+        4: 'Mask'
     }
 
     color = Color()
@@ -137,7 +140,8 @@ if __name__ == '__main__':
                                         'image': opt[0],
                                         'image_norm': opt[1],
                                         'image_cont': opt[2],
-                                        'mask': opt[3],
+                                        'image_thre': opt[3],
+                                        'mask': opt[4],
                                     }
                                     state.show_napari(display)
 
@@ -198,7 +202,23 @@ if __name__ == '__main__':
 
                             else:
                                 pass
-                        
+
+                            if state.debug:
+                                print('Displaying local variables...')
+                                local_vars = list(locals().items())
+                                var_names, var_sizes= [], []
+                                for var, obj in local_vars:
+                                    var_names.append(var)
+                                    var_sizes.append(sys.getsizeof(obj))
+
+                                df = pd.DataFrame(
+                                        list(zip(var_names, var_sizes)),
+                                        columns =['Var', 'Size']
+                                    ).sort_values(['Size'], ascending=False).reset_index(drop=True)
+
+                                print(tabulate(df, headers = 'keys', tablefmt = 'github'))
+                                input('Press Enter to continue...')
+                                                    
 
             elif opt == 2:
                 name = utils.input_text('Enter new sample name', checks = [consistency.check_repeated_sample_name])

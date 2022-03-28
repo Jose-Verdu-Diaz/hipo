@@ -1,5 +1,5 @@
-import enum
 import os
+import gc
 import numpy as np
 import pandas as pd
 import tabulate as tblt
@@ -119,3 +119,4 @@ class State:
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             self.current_sample.show_napari(im_type = mode, function = 'display')
         self.current_sample = self.current_sample.dump_channels_images() 
+        gc.collect(2)

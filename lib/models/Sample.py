@@ -348,7 +348,8 @@ class Sample:
             NAMES = {
                 'image': 'Raw',
                 'image_norm': 'Norm.',
-                'image_cont': 'Cont.'
+                'image_cont': 'Cont.',
+                'image_thre': 'Thre.'
             }
 
             if type(im_type) != dict: im_type = {im_type: True}
@@ -384,6 +385,8 @@ class Sample:
 
         napari.run()
 
+        del(viewer)
+
         # Return threshold
         if function == 'threshold':
             self.channels[opt].th = layer.metadata['threshold']
@@ -393,3 +396,6 @@ class Sample:
         elif function == 'contrast':
             self.channels[opt].contrast_limits = (layer.metadata['percentile_lower'], layer.metadata['percentile_upper'])
             return self
+
+        elif function == 'display':
+            del(layers)
