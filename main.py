@@ -135,7 +135,17 @@ if __name__ == '__main__':
                                 else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
 
 
-                            elif opt == 6: state.show_napari('image')
+                            elif opt == 6: 
+                                opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
+                                if opt == None: continue
+                                else:
+                                    display = {
+                                        'image': opt[0],
+                                        'image_norm': opt[1],
+                                        'image_cont': opt[2],
+                                        'mask': opt[3],
+                                    }
+                                    state.show_napari(display)
 
 
                             elif opt == 7:

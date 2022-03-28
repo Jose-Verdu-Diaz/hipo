@@ -173,30 +173,31 @@ def input_menu_toggle(options, cancel = True, display = [], show_menu = True):
         Integer with the input of the user otherwise
     '''
 
-    # WORK IN PROGRESS HERE!!!
-
-    color = Color()
+    clr = Color()
     toggle = [False for i in options]
+    options_toggle = options.copy()
     while True:
         clear()
         for d in display: print(f'{d}\n')
 
-        if show_menu: print_menu(options)
+        if show_menu: print_menu(options_toggle)
 
         try:
-            if cancel: prompt = '\nSelect an option to toggle (\'c\' to cancel): '
-            else: prompt = '\nSelect an option to toggle: '
+            if cancel: prompt = '\nSelect an option to toggle or "y" to proceed (\'c\' to cancel): '
+            else: prompt = '\nSelect an option to toggle or "y" to proceed: '
             opt = input(prompt)
 
-            if  opt == 'c': return None
+            if opt == 'c': return None
+            elif opt == 'y': return toggle
             else: opt = int(opt)
 
-            if opt not in list(options.keys()): input(f'{color.RED}Option doesn\'t exist! Press enter to continue...{color.ENDC}')
+            if opt not in list(options.keys()): input(f'{clr.RED}Option doesn\'t exist! Press enter to continue...{clr.ENDC}')
             else: 
                 toggle[opt] = not toggle[opt]
-                options[opt].replace(options[opt][len(options[opt]) - 1:], '(X)')
+                options_toggle[opt] = f'{clr.GREEN}{options[opt]}{clr.ENDC}' if toggle[opt] else options[opt]            
+
         except: 
-            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            input(f'{clr.RED}Invalid option! Press enter to continue...{clr.ENDC}')
             continue
 
 

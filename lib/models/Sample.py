@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import lzma
+from unicodedata import name
 import napari
 import numpy as np
 import pandas as pd
@@ -328,15 +329,24 @@ class Sample:
 
         # Open napari to display a stack of images
         elif function == 'display':
-            images = [getattr(c, im_type) for c in self.channels if getattr(c, im_type) != None]
-            names = [c.name for c in self.channels if getattr(c, im_type) != None]
+            if type(im_type) != dict: im_type = {im_type: True}
+            layer = []
+            for i, imt in enumerate(im_type):
+                if im_type[imt]:
+                    if imt == 'mask':
+                        layer.append(viewer.add_image(self.mask, name = 'mask'))
+                    else:
+                        images = [getattr(c, imt) for c in self.channels if isinstance(getattr(c, imt), np.ndarray) and im_type[imt]]
+                        names = [c.name for c in self.channels if isinstance(getattr(c, imt), np.ndarray) and im_type[imt]]
+                        layer.append(viewer.add_image(np.stack(images), name = imt))
 
-            @viewer.dims.events.current_step.connect
-            def _on_change(event):
-                idx = event.value[0]
-                layer.name = names[idx]
-
-            layer = viewer.add_image(np.stack(images))
+                        @viewer.dims.events.current_step.connect
+                        def _on_change(event):
+                            idx = event.value[0]
+                            for l in layer:
+                                if l.name != 'mask':
+                                    prefix = l.name.split(' - ')[0]
+                                    l.name = f'{prefix} - {names[idx]}'
 
         else:
             return None

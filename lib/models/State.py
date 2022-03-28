@@ -1,3 +1,4 @@
+import enum
 import os
 import numpy as np
 import pandas as pd
@@ -83,4 +84,8 @@ class State:
 ####################################################################
 
     def show_napari(self, mode):
-        self.current_sample.show_napari(mode)
+        if type(mode) != dict: mode = {mode: True}
+        for i, imt in enumerate(mode):
+            if mode[imt] and imt != 'mask': self.current_sample.load_channels_images(im_type = imt)
+        self.current_sample.show_napari(im_type = mode, function = 'display')
+        self.current_sample = self.current_sample.dump_channels_images() 
