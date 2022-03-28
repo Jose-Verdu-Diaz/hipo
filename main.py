@@ -45,7 +45,7 @@ if __name__ == '__main__':
            2:  'Change Threshold',
            3:  'Apply Threshold',
         'c': 'Contrast ',
-           4:  'Change Contrast (napari)',
+           4:  'Change Contrast',
         'd': 'Analyze ',
            5:  'Perform Analysis',
         'e': 'Visualize ',    

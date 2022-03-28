@@ -51,7 +51,7 @@ class State:
     def normalize(self):
         clr = Color()
         print(f'\n{clr.CYAN}Normalizing, this might take some seconds...{clr.ENDC}')
-        self.current_sample = self.current_sample.load_channels_images(im_type='image')
+        self.current_sample.load_channels_images(im_type='image')
         self.current_sample = self.current_sample.normalize()
         self.current_sample.save_channels_images(im_type='image_norm')
         self.current_sample = self.current_sample.dump_channels_images()     
@@ -64,7 +64,8 @@ class State:
             input(f'{clr.RED}Images need to be normalized first. Press Enter to continue...{clr.ENDC}')
             return
 
-        self.current_sample = self.current_sample.load_channels_images(im_type='image_norm')
+        self.current_sample.load_channels_images(im_type='image_norm')
+        self.current_sample.load_channels_images(im_type='image_cont')
         if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
             print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
@@ -84,8 +85,13 @@ class State:
 ####################################################################
 
     def show_napari(self, mode):
+        clr = Color()
         if type(mode) != dict: mode = {mode: True}
         for i, imt in enumerate(mode):
-            if mode[imt] and imt != 'mask': self.current_sample.load_channels_images(im_type = imt)
+            if mode[imt] and imt != 'mask': 
+                res = self.current_sample.load_channels_images(im_type = imt)
+                if res == None:
+                    input(f'{clr.RED}File for {imt} does not exist. Press Enter to continue...{clr.ENDC}')
+                    return
         self.current_sample.show_napari(im_type = mode, function = 'display')
         self.current_sample = self.current_sample.dump_channels_images() 

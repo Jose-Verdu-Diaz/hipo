@@ -31,6 +31,7 @@ class Sample:
         self.mask = mask
 
         self.df = None
+        self.img_size = None
 
 ####################################################################
 ################### LOADING AND SAVING FUNCTIONS ###################
@@ -100,6 +101,8 @@ class Sample:
 
                 images, channels, labels, summary = self.parse_tiff(tiff_file, txt_file)
 
+                self.img_size = images[0].shape # We assume the same size for all input images
+
                 self.summary = summary.sort_values(['Channel']).reset_index(drop=True) 
 
                 df = pd.DataFrame(
@@ -121,9 +124,12 @@ class Sample:
 
     def load_channels_images(self, im_type = 'image'):
         clr = Color()
-        img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
+        if os.path.isfile(f'samples/{self.name}/{im_type}.npz'):
+            img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
+        else: return None
         for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
-            c = c.load_images(im_type=im_type, img=img_stack[c.name])
+            if c.name in img_stack.keys():
+                c = c.load_images(im_type=im_type, img=img_stack[c.name])        
         return self
 
 
@@ -329,25 +335,40 @@ class Sample:
 
         # Open napari to display a stack of images
         elif function == 'display':
+            NAMES = {
+                'image': 'Raw',
+                'image_norm': 'Norm.',
+                'image_cont': 'Cont.'
+            }
+
             if type(im_type) != dict: im_type = {im_type: True}
-            layer = []
+            layers = []
             for i, imt in enumerate(im_type):
                 if im_type[imt]:
                     if imt == 'mask':
-                        layer.append(viewer.add_image(self.mask, name = 'mask'))
+                        layers.append(viewer.add_image(self.mask, name = 'Mask'))
                     else:
-                        images = [getattr(c, imt) for c in self.channels if isinstance(getattr(c, imt), np.ndarray) and im_type[imt]]
-                        names = [c.name for c in self.channels if isinstance(getattr(c, imt), np.ndarray) and im_type[imt]]
-                        layer.append(viewer.add_image(np.stack(images), name = imt))
+                        images, names = [], []
+                        for c in self.channels:
+                            # Set up data. Create empty images for missing channels (we need
+                            # all input data to have the same shape)
+                            if isinstance(getattr(c, imt), np.ndarray):
+                                images.append(getattr(c, imt))
+                                names.append(c.name)
+                            else:
+                                images.append(np.zeros(shape = self.img_size))
+                                names.append('NaN')                                
+
+                        layers.append(viewer.add_image(np.stack(images), name = imt))
+                        layers[-1].metadata['type'] = imt
+                        layers[-1].metadata['ch_names'] = names
 
                         @viewer.dims.events.current_step.connect
                         def _on_change(event):
                             idx = event.value[0]
-                            for l in layer:
-                                if l.name != 'mask':
-                                    prefix = l.name.split(' - ')[0]
-                                    l.name = f'{prefix} - {names[idx]}'
-
+                            for l in layers:
+                                if l.name != 'Mask':
+                                    l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
         else:
             return None
 
