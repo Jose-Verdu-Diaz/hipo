@@ -7,15 +7,16 @@ from lib.models.Colors import Color
 
 class Channel:
 
-    def __init__(self, name=None, label=None, image=None, threshold=None, contrast_limits=None):
+    def __init__(self, name=None, label=None, image=None, th=None, contrast_limits=None):
         self.name = name
         self.label = label
-        self.threshold = threshold
+        self.th = th
         self.contrast_limits = contrast_limits
 
         self.image = image
         self.image_norm = None
         self.image_cont = None
+        self.image_thre = None
 
 ####################################################################
 ################### LOADING AND SAVING FUNCTIONS ###################
@@ -40,6 +41,7 @@ class Channel:
         self.image = None
         self.image_norm = None
         self.image_cont = None
+        self.image_thre = None
         return self 
 
 ####################################################################
@@ -57,6 +59,7 @@ class Channel:
         self.image_norm = np.array(np.round(255.0 * img_normalized), dtype = np.uint8)
         return self
 
+
     def contrast(self):
         clr = Color()
         print(f'{clr.GREY}Applying contrast on channel {self.name}{clr.ENDC}')
@@ -66,5 +69,12 @@ class Channel:
         self.image_cont = update_contrast(self.image_norm, quant_lower, quant_upper)
         self.image_cont = np.where(self.image_cont > 0, self.image_cont, 0)
         self.image_cont = np.where(self.image_cont < 1, self.image_cont, 1)
+        return self
+
+
+    def threshold(self):
+        clr = Color()
+        print(f'{clr.GREY}Applying threshold on channel {self.name}{clr.ENDC}')
+        self.image_thre = np.where(self.image_cont >= self.th, self.image_cont, 0)
         return self
 

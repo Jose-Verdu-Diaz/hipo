@@ -224,7 +224,7 @@ class Sample:
             for c in self.channels:
                 names.append(c.name)
                 labels.append(c.label)
-                thresholds.append('-' if c.threshold == None else c.threshold)
+                thresholds.append('-' if c.th == None else c.th)
                 contrasts.append('-' if c.contrast_limits == None else c.contrast_limits)
 
             self.df = pd.DataFrame(
@@ -289,10 +289,15 @@ class Sample:
         for c in tqdm(self.channels, desc = f'{clr.GREY}Normalizing images', postfix=clr.ENDC): c = c.normalize(self.mask)
         return self
 
+
     def contrast(self, opt = 0):
         self.channels[opt] = self.channels[opt].contrast()
         return self
 
+    
+    def threshold(self, opt = 0):
+        self.channels[opt] = self.channels[opt].threshold()
+        return self
 
 ####################################################################
 ########################## VISUALIZATION ###########################
@@ -303,13 +308,18 @@ class Sample:
 
         # Open napari to obtain a threshold for a single image
         if function == 'threshold':
+            img = self.channels[opt].image_cont
+            layer = viewer.add_image(img)
+            layer.metadata['threshold'] = 0
+
             @magicgui(
                 auto_call=True,
-                th={"widget_type": "IntSlider", "max": 255},
+                th={'widget_type': 'FloatSlider', 'max': 1},
                 layout='horizontal'
             )
-            def threshold(layer: ImageData, th: int = 0) -> ImageData:
-                return np.where(layer > th, layer, 0)
+            def threshold(data: ImageData, th: float = 0) -> ImageData:
+                layer.metadata['threshold'] = th
+                return np.where(data > th, data, 0)
 
             viewer.window.add_dock_widget(threshold, area='bottom')
 
@@ -374,7 +384,12 @@ class Sample:
 
         napari.run()
 
+        # Return threshold
+        if function == 'threshold':
+            self.channels[opt].th = layer.metadata['threshold']
+            return self
+
         # Return contrast
-        if function == 'contrast':
-            self.channels[opt].contrast_limits = (layer.metadata["percentile_lower"], layer.metadata["percentile_upper"])
+        elif function == 'contrast':
+            self.channels[opt].contrast_limits = (layer.metadata['percentile_lower'], layer.metadata['percentile_upper'])
             return self

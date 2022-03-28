@@ -102,17 +102,11 @@ if __name__ == '__main__':
                             elif opt == 1: state.normalize()
 
                             elif opt == 2:
-                                opt = utils.input_menu_option(dict(zip(list(state.samples.df.index),list(state.samples.df['Channel']))), display = [table], show_menu = False)
+                                opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [table], show_menu = False)
                                 if opt == None: continue
-                                if df['Cont.'][opt] == '-':
-                                    input(f'{color.YELLOW}The channel contrast has to be adjusted first. Press Enter to continue...{color.ENDC}')
-                                    continue
-
-                                threshold = utils.input_number('Enter threshold (between 0 and 255).', display=[table], range = (0,255), type = 'int')
-                                if threshold == None: continue
-                                interface.update_sample_json(sample, channel = opt, update_dict = {'threshold': threshold})
-                                
-                                table, df = browse.sample_df(images, metals, labels, summary_df, sample)
+                                else: 
+                                    state.threshold(opt)
+                                    table = state.tabulate_sample()
 
 
                             elif opt == 3:

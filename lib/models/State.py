@@ -80,6 +80,29 @@ class State:
         self.current_sample = self.current_sample.dump_channels_images()
         input(f'\n{clr.GREEN}Contrast applied successfully! Press Enter to continue...{clr.ENDC}')
 
+
+    def threshold(self, opt):
+        clr = Color()
+        if not os.path.isfile(f'samples/{self.current_sample.name}/image_cont.npz'):
+            input(f'{clr.RED}The file image_cont.npz does not exist. Apply a contrast to some images first. Press Enter to continue...{clr.ENDC}')
+            return
+
+        self.current_sample.load_channels_images(im_type='image_cont')
+        self.current_sample.load_channels_images(im_type='image_thre')
+        if isinstance(self.current_sample.channels[opt].image_cont, np.ndarray):
+            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
+            with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+                self.current_sample = self.current_sample.show_napari(function='threshold', opt = opt)
+            self.current_sample = self.current_sample.threshold(opt = opt)
+            self.current_sample.save_channels_images(im_type='image_thre')
+            self.current_sample.update_df()
+        else: 
+            input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs a contrast modification first{clr.ENDC}')
+            return
+
+        self.current_sample = self.current_sample.dump_channels_images()
+        input(f'\n{clr.GREEN}Threshold applied successfully! Press Enter to continue...{clr.ENDC}')
+
 ####################################################################
 ########################## VISUALIZATION ###########################
 ####################################################################
@@ -92,6 +115,7 @@ class State:
                 res = self.current_sample.load_channels_images(im_type = imt)
                 if res == None:
                     input(f'{clr.RED}File for {imt} does not exist. Press Enter to continue...{clr.ENDC}')
-                    return
-        self.current_sample.show_napari(im_type = mode, function = 'display')
+                    return                
+        with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+            self.current_sample.show_napari(im_type = mode, function = 'display')
         self.current_sample = self.current_sample.dump_channels_images() 
