@@ -133,4 +133,23 @@ class State:
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             self.current_sample.show_napari(im_type = mode, function = 'display')
         self.current_sample = self.current_sample.dump_channels_images() 
-        gc.collect(2)
+        gc.collect()
+
+
+####################################################################
+############################ ANALYSIS ##############################
+####################################################################
+
+    def analyse(self):
+        clr = Color()
+        res = self.current_sample.load_channels_images(im_type = 'image_thre')
+        if res == None:
+            input(f'{clr.RED}File image_thre does not exist, threshold some images first. Press Enter to continue...{clr.ENDC}')
+            return
+        self.current_sample.analyse()
+        self.current_sample = self.current_sample.dump_channels_images()
+        print(f'\n{clr.GREEN}Images analyzed successfully! Press Enter to continue...{clr.ENDC}')
+        input(f'{clr.GREEN}Output at samples/{self.current_sample.name}/analysis.csv Press Enter to continue...{clr.ENDC}')
+
+    
+    def segment_fibers(self): pass

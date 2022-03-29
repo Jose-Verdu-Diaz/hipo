@@ -78,3 +78,25 @@ class Channel:
         self.image_thre = np.where(self.image_cont >= self.th, self.image_cont, 0)
         return self
 
+####################################################################
+############################ ANALYSIS ##############################
+####################################################################
+
+    def analyse(self, mask):
+        mask_positive = np.logical_and(mask, self.image_thre > 0)
+        positive_pixels = self.image_thre[mask_positive]
+        all_pixels = self.image_thre[mask]
+        mean_positive = np.mean(positive_pixels)
+        area_positive = np.sum(mask_positive)
+        mean_all = np.mean(all_pixels)
+        area_all = np.sum(mask)
+        positive_fraction = float(area_positive)/float(area_all)
+        summary_dict = {
+            "Channel": self.name,    
+            "Positive Area" : area_positive,
+            "Positive Mean" : mean_positive,
+            "Total Area": area_all,
+            "Total Mean" : mean_all, 
+            "Positive Fraction" : positive_fraction
+        }
+        return summary_dict

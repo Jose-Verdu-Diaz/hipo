@@ -42,27 +42,16 @@ if __name__ == '__main__':
 
     SAMPLE_OPTIONS = {
         0: 'Back',
-        'a': 'Normalize ',
+        'a': 'Image Processing ',
            1:  'Apply ROI and Normalize',
-        'b': 'Threshold ',
-           2:  'Change Threshold',
-           3:  'Apply Threshold',
-        'c': 'Contrast ',
-           4:  'Change Contrast',
-        'd': 'Analyze ',
-           5:  'Perform Analysis',
-        'e': 'Visualize ',    
-           6:  'View Images',
-           7:  'Napari Show',
-        'f': 'Histogram ', 
-           8:  'View Histogram (norm)',
-           9:  'View Histogram (cont)',
-           10: 'View Histogram (thre)',
-        'g': 'Fiber Segmentation',
-           11: 'Segment fibers',
-           12: 'Show Segmentation',
-        'h': 'Edit ', 
-           13: 'Remove Sample',
+           2:  'Modify Contrast',
+           3:  'Modify Threshold',
+        'b': 'Analyze ',
+           4:  'Perform Analysis',
+        'c': 'Visualize ',    
+           5:  'View Images',
+        'd': 'Fiber Segmentation',
+           6: 'Segment fibers',
     }
 
 
@@ -110,31 +99,23 @@ if __name__ == '__main__':
 
                             elif opt == 1: state.normalize()
 
+
                             elif opt == 2:
-                                opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
-                                if opt == None: continue
-                                else: state.threshold(opt)
-
-
-                            #elif opt == 3:
-                            #    images_norm, channels = interface.load_dir_images(sample, 'img_cont', df['Channel'].loc[df['Th.']!='-'].tolist())
-                            #    image.apply_threshold(sample, images_norm, channels, df)
-                            #    input(f'\n{color.GREEN}Images thresholded successfully! Press Enter to continue...{color.ENDC}')
-
-
-                            elif opt == 4:
                                 opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
                                 if opt == None: continue
                                 else: state.contrast(opt)
 
 
-                            #elif opt == 5:
-                            #    res = image.analyse_images(sample, geojson_file)
-                            #    if res == None: input(f'{color.YELLOW}No thresholded images found. Press Enter to continue...{color.ENDC}')
-                            #    else: input(f'\n{color.GREEN}Images analysed successfully!\nReport generated at samples/{sample}/analysis.csv. Press Enter to continue...{color.ENDC}')
+                            elif opt == 3:
+                                opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
+                                if opt == None: continue
+                                else: state.threshold(opt)
 
 
-                            elif opt == 6: 
+                            elif opt == 4: state.analyse()
+                            
+
+                            elif opt == 5: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
                                 else:
@@ -150,7 +131,10 @@ if __name__ == '__main__':
                                     os.execv(sys.executable, ['python'] + sys.argv)
 
 
-                            #elif opt == 7:
+                            elif opt == 6:
+                                state.segment_fibers()
+
+                            #elif opt == x:
                             #    selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                             #    if selected_images == None: continue
                             #    else:
@@ -158,7 +142,7 @@ if __name__ == '__main__':
                             #        image.show_napari(images_norm, channels)
 
 
-                            #elif opt == 8:
+                            #elif opt == x:
                             #    selected_images = utils.input_df_toggle(sample, df)
                             #    if selected_images == None: continue
                             #    else:
@@ -166,7 +150,7 @@ if __name__ == '__main__':
                             #        image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            #elif opt == 9:
+                            #elif opt == x:
                             #    selected_images = utils.input_df_toggle(sample, df) # Must add consistency check
                             #    if selected_images == None: continue
                             #    else:
@@ -174,7 +158,7 @@ if __name__ == '__main__':
                             #        image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            #elif opt == 10:
+                            #elif opt == x:
                             #    selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
                             #    if selected_images == None: continue
                             #    else:
@@ -182,17 +166,7 @@ if __name__ == '__main__':
                             #        image.view_histogram(images_norm, channels, geojson_file)
 
 
-                            #elif opt == 11:
-                            #    input('Segmentation is performed using the contrasted Tm(169) channel.')
-                            #    img, channels = interface.load_dir_images(sample, 'img_cont', img = ['Tm(169)'])
-                            #    image.segment_fibers(sample, img[0], geojson_file)
-                            #    input(f'{color.GREEN}Fibers Segmented successfully! Press Enter to continue...{color.ENDC}')
-
-
-                            #elif opt == 12: pass
-
-
-                            #elif opt == 13:
+                            #elif opt == x:
                             #    name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
                             #    if name == None:
                             #        continue

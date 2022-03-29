@@ -390,3 +390,15 @@ class Sample:
             for l in layers: del(l)
             del(layers)
             gc.collect()
+
+####################################################################
+############################ ANALYSIS ##############################
+####################################################################
+
+    def analyse(self):
+        result = []
+        for c in self.channels:
+            if isinstance(getattr(c, 'image_thre'), np.ndarray):
+                result.append(c.analyse(self.mask))
+        result_df = pd.DataFrame(result)
+        result_df.to_csv(f'samples/{self.name}/analysis.csv', index=False)
