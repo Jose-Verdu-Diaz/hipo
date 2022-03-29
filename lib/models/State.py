@@ -142,6 +142,7 @@ class State:
 
     def analyse(self):
         clr = Color()
+        print(f'\n{clr.CYAN}Analyzing, this might take some seconds...{clr.ENDC}')
         res = self.current_sample.load_channels_images(im_type = 'image_thre')
         if res == None:
             input(f'{clr.RED}File image_thre does not exist, threshold some images first. Press Enter to continue...{clr.ENDC}')
@@ -152,4 +153,17 @@ class State:
         input(f'{clr.GREEN}Output at samples/{self.current_sample.name}/analysis.csv Press Enter to continue...{clr.ENDC}')
 
     
-    def segment_fibers(self): pass
+    def segment_fibers(self): 
+        clr = Color()
+        print(f'\n{clr.CYAN}Segmenting, this might take some seconds...{clr.ENDC}')
+        res = self.current_sample.load_channels_images(im_type = 'image_thre')
+        if res == None:
+            input(f'{clr.RED}File image_thre does not exist, threshold channel Tm(169) first. Press Enter to continue...{clr.ENDC}')
+            return
+        with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+            res = self.current_sample.segment_fibers()
+        self.current_sample = self.current_sample.dump_channels_images()
+        if res == None:
+            input(f'{clr.RED}Channel Tm(169) has to be thresholded first. Press Enter to continue...{clr.ENDC}')
+        else:
+            input(f'\n{clr.GREEN}Fibers segmented successfully! Press Enter to continue...{clr.ENDC}')

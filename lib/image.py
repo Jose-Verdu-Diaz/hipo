@@ -19,118 +19,14 @@ create_gif
     Create an animated gif
 '''
 
-import os
-import cv2
-import json
 import napari
 import numpy as np
-import pandas as pd
-from tqdm import tqdm
-import tifffile as tf
 import seaborn as sns
-from scipy import ndimage
-import seaborn_image as isns
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from PIL import Image, ImageDraw
-from skimage.segmentation import watershed
-from skimage.feature import peak_local_max
-from skimage.morphology import reconstruction
+from PIL import Image
 
 from lib.models.Colors import Color
-import lib.interface as interface
-
-def parse_tiff(tiff_path, summary_path):
-    '''Parses a hyperion tiff file with multiple images
-
-    Parameters
-    ----------
-    tiff_path
-        Path of tiff file
-    summary_path
-        Path to summary file
-
-    Returns
-    -------
-    tiff_slices
-        Numpy array of images
-    metals
-        List of metals
-    labels
-        List of labels
-    summary_df
-        Pandas DataFrame with the data of the summary file
-    '''
-
-    tiff_slices = tf.TiffFile(tiff_path).asarray()
-    metals, labels = [], []
-
-    summary_df = pd.read_csv(summary_path, sep = '\t')
-
-    for slice in range(tiff_slices.shape[0]):
-        metals.append(str(summary_df['Channel'][slice]))
-
-        label =str(summary_df['Label'][slice])
-        labels.append(label if not label == 'nan' else '-')
-
-    return tiff_slices, metals, labels, summary_df
-
-
-def normalize(geojson_file, images, sample, metals):
-    '''Normalize images
-
-    Normalize by dividing by maximum value.
-
-    Parameters
-    ----------
-    images
-        Numpy array of images
-    sample
-        Name of the sample
-    metals
-        List of metals
-    '''
-
-    masked = apply_ROI(geojson_file, images)
-
-    for i,img in enumerate(tqdm(masked, desc = 'Normalizing images', postfix=False)):
-        max_val = img.max()
-        img_normalized = np.minimum(img / max_val, 1.0)
-        img_normalized = Image.fromarray(np.array(np.round(255.0 * img_normalized), dtype = np.uint8))
-        img_normalized.save(os.path.join(f'samples/{sample}/img_norm', metals[i] + '.png'), quality = 100)
-
-    interface.update_sample_json(sample, update_dict = {"norm": True})
-    
-
-
-def show_image(img):
-    '''Displays an image
-
-    Parameters
-    ----------
-    img
-        image to be displayed
-    '''
-
-    isns.imgplot(np.flipud(img))
-    plt.show()
-
-
-def load_image(path):
-    '''Load an image
-
-    Parameters
-    ----------
-    path
-        Path to image file
-
-    Returns
-    -------
-        Numpy array representing the image
-    '''
-
-    img = Image.open(path)
-    return np.asarray(img)
 
 
 def create_gif(images, sample, channels = None):
@@ -156,142 +52,6 @@ def create_gif(images, sample, channels = None):
         out.append(converted)      
 
     out[0].save(f'samples/{sample}/image_animation.gif', save_all=True, append_images=out[1:], optimize=False, duration=1000, loop=0)
-
-
-def make_mask(geojson_file, size):
-    '''Creates mask images from coordinates tuples list
-
-    Parameters
-    ----------
-    geojson_file
-        path to geojson
-    size
-        Size of the mask
-
-    Returns
-    -------
-        Numpy array representing the mask
-    '''
-
-    with open(geojson_file) as f: annotation_data = json.load(f)
-
-    black = Image.new('1', size)
-    imd = ImageDraw.Draw(black)
-
-    for ann in annotation_data["features"]:
-
-        blob = ann["geometry"]
-
-        if blob["type"] == "LineString": coords = blob["coordinates"]
-        if blob["type"] == "Polygon": coords = blob["coordinates"][0]
-
-        tuples = [tuple(coord) for coord in coords]
-        imd.polygon(tuples,fill="white",outline="white")
-
-    return np.array(black)
-
-
-def apply_ROI(geojson_file, images):
-    '''Masks ROIs from images
-
-    Parameters
-    ----------
-    geojson_file
-        Path to geojson file
-    images
-        Images to mask
-
-    Returns
-    -------
-    masked
-        masked images
-    '''
-
-    img_size = Image.fromarray(images[0]).size # We assume all images of a sample have the same size
-    mask = make_mask(geojson_file, img_size)
-
-    masked = []
-    for img in tqdm(images, desc = 'Applying ROIs', postfix=False): masked.append(np.where(mask, img, 0))
-    return masked
-
-def apply_threshold(sample, images, channels, df):
-    '''Applies threshold to images and saves them
-
-    Parameters
-    ----------
-    sample
-        Sample name
-    images
-        List of np arrays representing the images
-    channels
-        List of channel names of the images
-    threshold
-        Threshold to be applied
-    '''
-
-    for i, img in enumerate(tqdm(images, desc = 'Thresholding images', postfix=False)):
-        th =  df.loc[df['Channel'] == channels[i], 'Th.'].values[0]
-        result = np.where(img >= th, img, 0)
-        result = Image.fromarray(result)
-        result.save(os.path.join(f'samples/{sample}/img_thre', channels[i] + '.png'), quality = 100)
-        
-
-def analyse_images(sample, geojson_file):
-    '''Create a csv report of the thresholded images
-
-    Parameters
-    ----------
-    sample
-        Sample name
-    geojson_file
-        path to geojson
-
-    Returns
-    -------
-    None
-        if no thresholded images are found
-    1
-        if ok
-    '''
-
-    images, channels = interface.load_dir_images(sample, 'img_thre')
-    if len(images) == 0: return None
-
-    img_size = Image.fromarray(images[0]).size
-    mask = make_mask(geojson_file, img_size)
-
-    result = []
-    for i, img in enumerate(tqdm(images, desc = 'Analysing images', postfix=False)):
-        img = img / 255
-
-        mask_positive = np.logical_and(mask, img > 0)
-
-        positive_pixels = img[mask_positive]
-        all_pixels = img[mask]
-
-        mean_positive = np.mean(positive_pixels)
-        area_positive = np.sum(mask_positive)
-
-        mean_all = np.mean(all_pixels)
-        area_all = np.sum(mask)
-        
-        positive_fraction = float(area_positive)/float(area_all)
-
-        summary_dict = {
-            "Channel": channels[i],    
-            "Positive Area" : area_positive,
-            "Positive Mean" : mean_positive,
-            "Total Area": area_all,
-            "Total Mean" : mean_all, 
-            "Positive Fraction" : positive_fraction
-        }
-
-        result.append(summary_dict)
-
-    result_df = pd.DataFrame(result)
-    result_df.to_csv(f'samples/{sample}/analysis.csv',index=False)
-
-    return 1
 
 
 def show_napari(images, channels):
@@ -343,39 +103,10 @@ def create_cmap(c):
     return new_colormap
 
 
-def threshold_napari(img, channel):
-    color = Color()
-    viewer = napari.Viewer()
-    viewer.add_image(img, name = channel)
-    print(f'{color.CYAN}Opening napari. Close napari window to continue...{color.ENDC}')
-    napari.run()
-
-    contrast = viewer.layers[channel].contrast_limits
-    input(f'{color.GREEN}The selected contrast limits are: {contrast}. Press Enter to continue...')
-    return contrast
-
-
-def apply_contrast(sample, images, channels, df):
-    for i, img in enumerate(tqdm(images, desc = 'Contrasting images', postfix=False)):
-        limits =  df.loc[df['Channel'] == channels[i], 'Cont.'].values[0]
-
-        img = img / 255
-        bot_limit = limits[0] / 255
-        top_limit = limits[1] / 255
-
-        my_function = lambda x, a, b: (x - a) / (b - a)
-        img = my_function(img, bot_limit, top_limit)
-        img = np.where(img > 0, img, 0)
-        img = np.where(img < 1, img, 1)
-
-        result = Image.fromarray(np.array(np.round(255.0 * img), dtype = np.uint8))
-        result.save(os.path.join(f'samples/{sample}/img_cont', channels[i] + '.png'), quality = 100)
-
-
 
 def view_histogram(images, channels, geojson_file):
     img_size = Image.fromarray(images[0]).size
-    mask = make_mask(geojson_file, img_size)
+    mask = make_mask(geojson_file, img_size) # make_mask() removed
 
     sns.set_theme(style="darkgrid")
     
@@ -424,53 +155,6 @@ def view_histogram(images, channels, geojson_file):
     plt.xticks(rotation = 45)
     plt.subplots_adjust(hspace=.02)
     plt.show()
-
-
-def segment_fibers(sample, img, geojson_file):
-
-    print('Segmenting fibers. This can take some minutes...')
-
-    # Convert To grayscale
-    #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = img
-
-    # Reconstruct
-    inverted = np.invert(gray)
-    seed = np.copy(inverted)
-    seed = np.where(inverted > 0, inverted.max(), 0)
-    mask = inverted
-    filled = reconstruction(seed, mask, method='erosion')
-    filled = np.invert(np.array(filled, dtype='uint8'))
-
-    # Threshold and apply ROI
-    thresh = cv2.threshold(filled, np.mean(filled), 255, cv2.THRESH_BINARY_INV)[1]
-    thresh = apply_ROI(geojson_file, [thresh])[0]
-
-    # Remove noisy pixels
-    kernel = np.ones((4, 4), np.uint8)
-    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations = 1)
-
-    # Erode to clean edges
-    kernel = np.array([
-        [0,1,1,0],
-        [1,1,1,1],
-        [1,1,1,1],
-        [0,1,1,0]
-    ], np.uint8)
-    erode = cv2.erode(opening, kernel, iterations=2)
-
-    # Distance transform and peaks
-    D = ndimage.distance_transform_edt(erode)
-    localMax = peak_local_max(D, indices=False, min_distance=20, labels=erode)
-
-    # Watershed
-    markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
-    labels = watershed(-D, markers, mask=thresh)
-
-    # Save
-    np.savez_compressed(f'samples/{sample}/fiber_segmentation.npz', labels)
-
-    show_napari_segmentation(img, labels)
 
 
 def show_napari_segmentation(img, labels):

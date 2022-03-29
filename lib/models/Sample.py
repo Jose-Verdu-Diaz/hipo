@@ -402,3 +402,15 @@ class Sample:
                 result.append(c.analyse(self.mask))
         result_df = pd.DataFrame(result)
         result_df.to_csv(f'samples/{self.name}/analysis.csv', index=False)
+
+
+    def segment_fibers(self): 
+        for c in self.channels:
+            if c.name == 'Tm(169)':
+                if isinstance(getattr(c, 'image_thre'), np.ndarray):
+                    labels = c.segment_fibers(self.mask)
+                    break
+                else:
+                    return None
+        np.savez_compressed(f'samples/{self.name}/fiber_segmentation.npz', labels)
+        return 1
