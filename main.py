@@ -146,6 +146,8 @@ if __name__ == '__main__':
                                         'mask': opt[4],
                                     }
                                     state.show_napari(display)
+                                    sys.stdout.flush()
+                                    os.execv(sys.executable, ['python'] + sys.argv)
 
 
                             #elif opt == 7:

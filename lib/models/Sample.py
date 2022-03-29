@@ -1,5 +1,8 @@
 import os
+import gc
+import sys
 import json
+import napari
 import numpy as np
 import pandas as pd
 import pickle as pkl
@@ -300,9 +303,7 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, im_type = 'image', function = 'display', opt = 0):
-        import napari
-        
+    def show_napari(self, im_type = 'image', function = 'display', opt = 0):       
         viewer = napari.Viewer()
 
         # Open napari to obtain a threshold for a single image
@@ -388,3 +389,4 @@ class Sample:
         elif function == 'display':
             for l in layers: del(l)
             del(layers)
+            gc.collect()
