@@ -1,9 +1,5 @@
 import os
-import sys
 import json
-import lzma
-from unicodedata import name
-import napari
 import numpy as np
 import pandas as pd
 import pickle as pkl
@@ -15,6 +11,7 @@ from PIL import Image, ImageDraw
 from napari.types import ImageData
 from napari_brightness_contrast._dock_widget import BrightnessContrast
 
+import lib.utils as utils
 from lib.models.Colors import Color
 import lib.consistency as consistency
 from lib.models.Channel import Channel
@@ -304,6 +301,8 @@ class Sample:
 ####################################################################
 
     def show_napari(self, im_type = 'image', function = 'display', opt = 0):
+        import napari
+        
         viewer = napari.Viewer()
 
         # Open napari to obtain a threshold for a single image
@@ -358,21 +357,12 @@ class Sample:
                 if im_type[imt]:
                     if imt == 'mask':
                         layers.append(viewer.add_image(self.mask, name = 'Mask'))
-                    else:
-                        images, names = [], []
-                        for c in self.channels:
-                            # Set up data. Create empty images for missing channels (we need
-                            # all input data to have the same shape)
-                            if isinstance(getattr(c, imt), np.ndarray):
-                                images.append(getattr(c, imt))
-                                names.append(c.name)
-                            else:
-                                images.append(np.zeros(shape = self.img_size))
-                                names.append('NaN')                                
-
-                        layers.append(viewer.add_image(np.stack(images), name = imt))
+                    else:                              
+                        layers.append(viewer.add_image(np.stack([getattr(c, imt) if isinstance(getattr(c, imt), np.ndarray) else np.zeros(shape = self.img_size) for c in self.channels ]), name = imt))
                         layers[-1].metadata['type'] = imt
-                        layers[-1].metadata['ch_names'] = names
+                        layers[-1].metadata['ch_names'] = [c.name if isinstance(getattr(c, imt), np.ndarray) else 'NaN' for c in self.channels]
+                        #del(images)
+                        #del(names)
 
                         @viewer.dims.events.current_step.connect
                         def _on_change(event):
@@ -385,8 +375,6 @@ class Sample:
 
         napari.run()
 
-        del(viewer)
-
         # Return threshold
         if function == 'threshold':
             self.channels[opt].th = layer.metadata['threshold']
@@ -398,4 +386,5 @@ class Sample:
             return self
 
         elif function == 'display':
+            for l in layers: del(l)
             del(layers)

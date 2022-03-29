@@ -21,6 +21,7 @@ input_text
 
 import os
 import sys
+import pandas as pd
 from tabulate import tabulate
 
 from lib.models.Colors import Color
@@ -107,7 +108,9 @@ def print_menu(options):
         if len(options[k]) > max_len: max_len = len(options[k])
 
     for k in options:
-        if type(k) == str: print(f'\n{clr.PURPLE}{options[k].ljust(max_len + 4, "#")}{clr.ENDC}')
+        if type(k) == str: 
+            if k == 'D': print(f'\n{clr.RED}{clr.BOLD}{options[k].ljust(max_len + 4, "#")}{clr.ENDC}')
+            else: print(f'\n{clr.PURPLE}{options[k].ljust(max_len + 4, "#")}{clr.ENDC}')
         else: print (f'{k} - {options[k]}')
 
 
@@ -369,3 +372,32 @@ def input_df_toggle(sample, df, cancel = True, display = [], checks = []):
             input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             input(e)
             continue
+
+
+def memory_usage(local_vars, global_vars):
+    print('Displaying local variables...')
+    var_names, var_sizes= [], []
+    for var, obj in local_vars:
+        var_names.append(var)
+        var_sizes.append(sys.getsizeof(obj))
+
+    df = pd.DataFrame(
+            list(zip(var_names, var_sizes)),
+            columns =['Var', 'Size']
+        ).sort_values(['Size'], ascending=False).reset_index(drop=True)
+    print(tabulate(df, headers = 'keys', tablefmt = 'github'))
+
+
+    print('Displaying global variables...')
+    var_names, var_sizes= [], []
+    for var, obj in global_vars:
+        var_names.append(var)
+        var_sizes.append(sys.getsizeof(obj))
+
+    df = pd.DataFrame(
+            list(zip(var_names, var_sizes)),
+            columns =['Var', 'Size']
+        ).sort_values(['Size'], ascending=False).reset_index(drop=True)
+
+    print(tabulate(df, headers = 'keys', tablefmt = 'github'))
+    input('Press Enter to continue...')

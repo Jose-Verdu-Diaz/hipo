@@ -31,9 +31,23 @@ class State:
         dirs = sorted(os.listdir('samples'))
         self.samples = pd.DataFrame(list(zip(dirs)), columns=['Sample'])
 
+    def clear_current_sample(self):
+        self.current_sample = None
+        return self
+
 ####################################################################
 ############################## UTILS ###############################
 ####################################################################
+
+    def create_new(self, name):
+        clr = Color()
+        sample = Sample(name=name)
+        sample.make_dir_structure()
+        self.set_samples()
+        print(f'\n{clr.GREEN}Sample created successfully!{clr.ENDC}')
+        input(f'\n{clr.YELLOW}Add sample files in {clr.UNDERLINE}samples/{name}/input{clr.ENDC}{clr.YELLOW}. Press Enter to continue...{clr.ENDC}')
+        return self
+
 
     def tabulate_sample(self):
         return self.current_sample.tabulate()
