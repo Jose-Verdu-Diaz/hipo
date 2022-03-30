@@ -14,7 +14,6 @@ from PIL import Image, ImageDraw
 from napari.types import ImageData
 from napari_brightness_contrast._dock_widget import BrightnessContrast
 
-import lib.utils as utils
 from lib.models.Colors import Color
 import lib.consistency as consistency
 from lib.models.Channel import Channel
@@ -29,7 +28,7 @@ class Sample:
         self.channels = channels
         self.summary = summary
         self.mask = mask
-
+        self.fiber_labels = None
         self.df = None
         self.img_size = None
 
@@ -133,6 +132,15 @@ class Sample:
         return self
 
 
+    def load_fiber_labels(self):
+        clr = Color()
+        print(f'{clr.GREY}Loading fiber lables...{clr.ENDC}')
+        if os.path.isfile(f'samples/{self.name}/fiber_labels.npz'):
+            self.fiber_labels = np.load(f'samples/{self.name}/fiber_labels.npz')['arr_0']
+        else: return None
+        return self
+
+
     def save_channels_images(self, im_type = None):
         '''Saves channel images in compressed numpy binary files (.npz)
 
@@ -201,6 +209,9 @@ class Sample:
             for c in tqdm(self.channels, desc = f'{clr.GREY}Dumping channel images', postfix=clr.ENDC): c = c.dump_images()
         return self
 
+    def dump_fiber_labels(self):
+        self.fiber_labels = None
+        return self
 
     def update_df(self):
         '''Generate a table with the information of a sample
@@ -303,7 +314,8 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, im_type = 'image', function = 'display', opt = 0):       
+    def show_napari(self, im_type = 'image', function = 'display', opt = 0):
+        clr = Color()  
         viewer = napari.Viewer()
 
         # Open napari to obtain a threshold for a single image
@@ -371,9 +383,21 @@ class Sample:
                             for l in layers:
                                 if l.name != 'Mask':
                                     l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
+
+
+        elif function == 'fiber_labels':
+            for c in self.channels:
+                if c.name == 'Tm(169)':
+                    if isinstance(getattr(c, 'image_cont'), np.ndarray): break
+                    else: return None
+
+            viewer.add_image(c.image_cont, name = 'Image')
+            viewer.add_labels(self.fiber_labels, name = 'Fibers')
+                 
         else:
             return None
 
+        print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
         napari.run()
 
         # Return threshold
@@ -390,6 +414,9 @@ class Sample:
             for l in layers: del(l)
             del(layers)
             gc.collect()
+
+        elif function == 'fiber_labels': 
+            return 1
 
 ####################################################################
 ############################ ANALYSIS ##############################
@@ -412,5 +439,5 @@ class Sample:
                     break
                 else:
                     return None
-        np.savez_compressed(f'samples/{self.name}/fiber_segmentation.npz', labels)
+        np.savez_compressed(f'samples/{self.name}/fiber_labels.npz', labels)
         return 1

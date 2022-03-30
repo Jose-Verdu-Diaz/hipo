@@ -43,15 +43,17 @@ if __name__ == '__main__':
     SAMPLE_OPTIONS = {
         0: 'Back',
         'a': 'Image Processing ',
-           1:  'Apply ROI and Normalize',
-           2:  'Modify Contrast',
-           3:  'Modify Threshold',
+           1: 'Apply ROI and Normalize',
+           2: 'Modify Contrast',
+           3: 'Modify Threshold',
         'b': 'Analyze ',
-           4:  'Perform Analysis',
-        'c': 'Visualize ',    
-           5:  'View Images',
-        'd': 'Fiber Segmentation',
-           6: 'Segment fibers',
+           4: 'Perform Analysis',
+        'c': 'Fiber Segmentation',
+           5: 'Segment fibers',
+        'd': 'Visualize ',    
+           6: 'Show Images',
+           7: 'Show Segmentation'
+
     }
 
 
@@ -97,7 +99,8 @@ if __name__ == '__main__':
                                 break
 
 
-                            elif opt == 1: state.normalize()
+                            elif opt == 1: 
+                                state.normalize()
 
 
                             elif opt == 2:
@@ -112,10 +115,15 @@ if __name__ == '__main__':
                                 else: state.threshold(opt)
 
 
-                            elif opt == 4: state.analyse()
-                            
+                            elif opt == 4: 
+                                state.analyse()
+
 
                             elif opt == 5: 
+                                state.segment_fibers()                       
+
+
+                            elif opt == 6: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
                                 else:
@@ -131,8 +139,8 @@ if __name__ == '__main__':
                                     os.execv(sys.executable, ['python'] + sys.argv)
 
 
-                            elif opt == 6:
-                                state.segment_fibers()
+                            elif opt == 7:
+                                state.show_segmentation()
 
                             #elif opt == x:
                             #    selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
@@ -176,6 +184,9 @@ if __name__ == '__main__':
                             #    else:
                             #        input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
 
+                            #####################################################
+                            ################### DEBUG OPTIONS ###################
+                            #####################################################
 
                             elif opt == 100 and state.debug:
                                 objgraph.show_most_common_types()
@@ -206,6 +217,10 @@ if __name__ == '__main__':
                 if name == None: pass
                 else: state = state.create_new(name)
 
+
+            #####################################################
+            ################### DEBUG OPTIONS ###################
+            #####################################################
 
             elif opt == 100 and state.debug:
                 objgraph.show_most_common_types()

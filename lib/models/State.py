@@ -21,7 +21,8 @@ class State:
 ####################################################################
     
     def load_sample(self, name):
-        print('Loading sample, this can take some seconds...')
+        clr = Color()
+        print(f'{clr.CYAN}Loading sample, this can take some seconds...{clr.ENDC}')
         self.current_sample = Sample(name = name)
         res, self.current_sample =  self.current_sample.load()
         if res == 0: return 0
@@ -34,6 +35,11 @@ class State:
     def clear_current_sample(self):
         self.current_sample = None
         return self
+
+    def dump(self):
+        self.current_sample = self.current_sample.dump_channels_images()
+        self.current_sample = self.current_sample.dump_fiber_labels()
+
 
 ####################################################################
 ############################## UTILS ###############################
@@ -68,7 +74,7 @@ class State:
         self.current_sample.load_channels_images(im_type='image')
         self.current_sample = self.current_sample.normalize()
         self.current_sample.save_channels_images(im_type='image_norm')
-        self.current_sample = self.current_sample.dump_channels_images()     
+        self.dump()  
         input(f'\n{clr.GREEN}Images normalized successfully! Press Enter to continue...{clr.ENDC}')
 
     
@@ -81,7 +87,6 @@ class State:
         self.current_sample.load_channels_images(im_type='image_norm')
         self.current_sample.load_channels_images(im_type='image_cont')
         if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
-            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                 self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
             self.current_sample = self.current_sample.contrast(opt = opt)
@@ -91,7 +96,7 @@ class State:
             input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs to be normalized first{clr.ENDC}')
             return
 
-        self.current_sample = self.current_sample.dump_channels_images()
+        self.dump() 
         input(f'\n{clr.GREEN}Contrast applied successfully! Press Enter to continue...{clr.ENDC}')
 
 
@@ -104,7 +109,6 @@ class State:
         self.current_sample.load_channels_images(im_type='image_cont')
         self.current_sample.load_channels_images(im_type='image_thre')
         if isinstance(self.current_sample.channels[opt].image_cont, np.ndarray):
-            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                 self.current_sample = self.current_sample.show_napari(function='threshold', opt = opt)
             self.current_sample = self.current_sample.threshold(opt = opt)
@@ -114,7 +118,7 @@ class State:
             input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs a contrast modification first{clr.ENDC}')
             return
 
-        self.current_sample = self.current_sample.dump_channels_images()
+        self.dump() 
         input(f'\n{clr.GREEN}Threshold applied successfully! Press Enter to continue...{clr.ENDC}')
 
 ####################################################################
@@ -128,12 +132,29 @@ class State:
             if mode[imt] and imt != 'mask': 
                 res = self.current_sample.load_channels_images(im_type = imt)
                 if res == None:
-                    input(f'{clr.RED}File for {imt} does not exist. Press Enter to continue...{clr.ENDC}')
+                    input(f'{clr.RED}File {imt}.npz does not exist. Press Enter to continue...{clr.ENDC}')
                     return                
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             self.current_sample.show_napari(im_type = mode, function = 'display')
-        self.current_sample = self.current_sample.dump_channels_images() 
+        self.dump() 
         gc.collect()
+
+
+    def show_segmentation(self):
+        clr = Color()
+        res = self.current_sample.load_channels_images(im_type = 'image_cont')
+        if res == None:
+            input(f'{clr.RED}File image_cont.npz does not exist. Press Enter to continue...{clr.ENDC}')
+            return
+        res = self.current_sample.load_fiber_labels()
+        if res == None:
+            input(f'{clr.RED}File fiber_labels.npz does not exist, segment fibers first. Press Enter to continue...{clr.ENDC}')
+            return
+        with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+            res = self.current_sample.show_napari(function='fiber_labels')
+        if res == None:
+            input(f'{clr.RED}Channel  Tm(169) needs a contrast modification first. Press Enter to continue...{clr.ENDC}')
+            return            
 
 
 ####################################################################
@@ -145,10 +166,10 @@ class State:
         print(f'\n{clr.CYAN}Analyzing, this might take some seconds...{clr.ENDC}')
         res = self.current_sample.load_channels_images(im_type = 'image_thre')
         if res == None:
-            input(f'{clr.RED}File image_thre does not exist, threshold some images first. Press Enter to continue...{clr.ENDC}')
+            input(f'{clr.RED}File image_thre.npz does not exist, threshold some images first. Press Enter to continue...{clr.ENDC}')
             return
         self.current_sample.analyse()
-        self.current_sample = self.current_sample.dump_channels_images()
+        self.dump() 
         print(f'\n{clr.GREEN}Images analyzed successfully! Press Enter to continue...{clr.ENDC}')
         input(f'{clr.GREEN}Output at samples/{self.current_sample.name}/analysis.csv Press Enter to continue...{clr.ENDC}')
 
@@ -158,11 +179,11 @@ class State:
         print(f'\n{clr.CYAN}Segmenting, this might take some seconds...{clr.ENDC}')
         res = self.current_sample.load_channels_images(im_type = 'image_thre')
         if res == None:
-            input(f'{clr.RED}File image_thre does not exist, threshold channel Tm(169) first. Press Enter to continue...{clr.ENDC}')
+            input(f'{clr.RED}File image_thre.npz does not exist, threshold channel Tm(169) first. Press Enter to continue...{clr.ENDC}')
             return
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             res = self.current_sample.segment_fibers()
-        self.current_sample = self.current_sample.dump_channels_images()
+        self.dump() 
         if res == None:
             input(f'{clr.RED}Channel Tm(169) has to be thresholded first. Press Enter to continue...{clr.ENDC}')
         else:

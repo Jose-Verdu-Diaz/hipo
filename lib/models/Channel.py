@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
-from tqdm import tqdm
 from scipy import ndimage
-from PIL import Image, ImageDraw
 from skimage.segmentation import watershed
 from skimage.feature import peak_local_max
 from skimage.morphology import reconstruction
@@ -110,25 +108,20 @@ class Channel:
 
     def segment_fibers(self, mask):
 
-        gray = np.array(self.image_thre * 255, dtype='uint8')
+        img = np.array(self.image_thre * 255, dtype='uint8')
 
-        # Reconstruct
-        inverted = np.invert(gray)
+        inverted = np.invert(img)
         seed = np.copy(inverted)
         seed = np.where(inverted > 0, inverted.max(), 0)
-        mask = inverted
-        filled = reconstruction(seed, mask, method='erosion')
+        filled = reconstruction(seed, inverted, method='erosion')
         filled = np.invert(np.array(filled, dtype='uint8'))
 
-        # Threshold and apply ROI
-        thresh = cv2.threshold(filled, np.mean(filled), 255, cv2.THRESH_BINARY_INV)[1]
-        thresh = self.apply_mask(mask, img = thresh)
+        thresh = cv2.threshold(filled, 0, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = self.apply_mask(mask, img=thresh)
 
-        # Remove noisy pixels
         kernel = np.ones((4, 4), np.uint8)
         opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations = 1)
 
-        # Erode to clean edges
         kernel = np.array([
             [0,1,1,0],
             [1,1,1,1],
@@ -137,11 +130,9 @@ class Channel:
         ], np.uint8)
         erode = cv2.erode(opening, kernel, iterations=2)
 
-        # Distance transform and peaks
         D = ndimage.distance_transform_edt(erode)
         localMax = peak_local_max(D, indices=False, min_distance=20, labels=erode)
-
-        # Watershed
+        
         markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
         labels = watershed(-D, markers, mask=thresh)
 
