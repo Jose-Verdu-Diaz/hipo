@@ -2,7 +2,9 @@ import os
 import gc
 import numpy as np
 import pandas as pd
+import tkinter as tk
 import tabulate as tblt
+from tkinter import filedialog
 
 import lib.utils as utils
 from lib.models.Sample import Sample
@@ -39,6 +41,21 @@ class State:
     def dump(self):
         self.current_sample = self.current_sample.dump_channels_images()
         self.current_sample = self.current_sample.dump_fiber_labels()
+
+
+    def import_labels(self):
+        clr = Color()
+        root = tk.Tk()
+        root.withdraw()
+        path = filedialog.askopenfilename()
+        if path.endswith('.tiff'): res = self.current_sample.import_labels(path=path, ftype='tiff')
+        elif path.endswith('.npz'): res = self.current_sample.import_labels(path=path, ftype='npz')
+        else:
+            input(f'{clr.RED}File type not recognised. Press Enter to continue...{clr.ENDC}')
+        if res == None: input(f'{clr.RED}Labels shape do not match image shape. Press Enter to continue...{clr.ENDC}')
+        else: input(f'{clr.GREEN}Labels imported successfully! Press Enter to continue...{clr.ENDC}')
+        self.dump() 
+        
 
 
 ####################################################################
@@ -80,15 +97,23 @@ class State:
     
     def contrast(self, opt):
         clr = Color()
-        if not os.path.isfile(f'samples/{self.current_sample.name}/image_norm.npz'):
+
+        res = self.current_sample.load_channels_images(im_type='image_norm')
+        if res == None:
             input(f'{clr.RED}Images need to be normalized first. Press Enter to continue...{clr.ENDC}')
             return
 
-        self.current_sample.load_channels_images(im_type='image_norm')
         self.current_sample.load_channels_images(im_type='image_cont')
         if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
-            with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-                self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
+
+            if str(input('Use napari for selecting a percentile? (y/n)')) == 'y':
+                with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+                    self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
+            else:
+                low_p = float(input('Select a lower quantile: '))
+                top_p = float(input('Select a top quantile: '))
+                self.current_sample.channels[opt].contrast_limits = (low_p, top_p)
+
             self.current_sample = self.current_sample.contrast(opt = opt)
             self.current_sample.save_channels_images(im_type='image_cont')
             self.current_sample.update_df()

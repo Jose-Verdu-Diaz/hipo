@@ -141,6 +141,21 @@ class Sample:
         return self
 
 
+    def import_labels(self, path, ftype):
+        clr = Color()
+        print(f'{clr.GREY}Importing lables...{clr.ENDC}')
+        if ftype == 'tiff':
+            labels = tf.TiffFile(path).asarray()
+        elif ftype == 'npz':
+            labels = np.load(path)['arr_0']
+
+        if labels.shape == self.img_size:
+            self.fiber_labels = labels
+            np.savez_compressed(f'samples/{self.name}/fiber_labels.npz', self.fiber_labels)
+            return self
+        else: return None
+        
+
     def save_channels_images(self, im_type = None):
         '''Saves channel images in compressed numpy binary files (.npz)
 

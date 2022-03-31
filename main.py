@@ -50,9 +50,10 @@ if __name__ == '__main__':
            4: 'Perform Analysis',
         'c': 'Fiber Segmentation',
            5: 'Segment fibers',
+           6: 'Import Labels',
         'd': 'Visualize ',    
-           6: 'Show Images',
-           7: 'Show Segmentation'
+           7: 'Show Images',
+           8: 'Show Segmentation'
 
     }
 
@@ -120,10 +121,14 @@ if __name__ == '__main__':
 
 
                             elif opt == 5: 
-                                state.segment_fibers()                       
+                                state.segment_fibers()   
 
 
                             elif opt == 6: 
+                                state.import_labels()                     
+
+
+                            elif opt == 7: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
                                 else:
@@ -139,7 +144,7 @@ if __name__ == '__main__':
                                     os.execv(sys.executable, ['python'] + sys.argv)
 
 
-                            elif opt == 7:
+                            elif opt == 8:
                                 state.show_segmentation()
 
                             #elif opt == x:
