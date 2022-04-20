@@ -48,10 +48,9 @@ def main(args):
            6: 'Import Labels',
         'd': 'Visualize ',    
            7: 'Show Images',
-           8: 'Show Segmentation'
-
+           8: 'Show Segmentation',
+           9: 'Show Histograms'
     }
-
 
 
     if state.debug: 
@@ -75,8 +74,10 @@ def main(args):
         opt = utils.input_menu_option(MENU_OPTIONS, cancel = False)
         if opt == None: continue
         else: 
+            # Exit
             if opt == 0: sys.exit()
 
+            # Browse samples
             elif opt == 1:
 
                 while True:
@@ -95,34 +96,37 @@ def main(args):
                                 break
 
 
-                            elif opt == 1: 
-                                state.normalize()
+                            # Apply ROI and Normalize
+                            elif opt == 1: state.normalize()
 
 
+                            # Modify Contrast
                             elif opt == 2:
                                 opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
                                 if opt == None: continue
                                 else: state.contrast(opt)
 
 
+                            # Modify Threshold
                             elif opt == 3:
                                 opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
                                 if opt == None: continue
                                 else: state.threshold(opt)
 
 
-                            elif opt == 4: 
-                                state.analyse()
+                            # Perform Analysis
+                            elif opt == 4: state.analyse()
 
 
-                            elif opt == 5: 
-                                state.segment_fibers()   
+                            # Segment fibers
+                            elif opt == 5: state.segment_fibers()   
 
 
-                            elif opt == 6: 
-                                state.import_labels()                     
+                            # Import Labels
+                            elif opt == 6: state.import_labels()                     
 
 
+                            # Show Images
                             elif opt == 7: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
@@ -135,36 +139,14 @@ def main(args):
                                         'mask': opt[4],
                                     }
                                     state.show_napari(display)
+                                    # garbage collector not working with napari, restart hipo to clean memory
                                     sys.stdout.flush()
                                     os.execv(sys.executable, ['python'] + sys.argv)
 
 
-                            elif opt == 8:
-                                state.show_segmentation()
+                            # Show Segmentation
+                            elif opt == 8: state.show_segmentation()
 
-
-                            #elif opt == x:
-                            #    selected_images = utils.input_df_toggle(sample, df)
-                            #    if selected_images == None: continue
-                            #    else:
-                            #        images_norm, channels = interface.load_dir_images(sample, 'img_norm', img = selected_images)
-                            #        image.view_histogram(images_norm, channels, geojson_file)
-
-
-                            #elif opt == x:
-                            #    selected_images = utils.input_df_toggle(sample, df) # Must add consistency check
-                            #    if selected_images == None: continue
-                            #    else:
-                            #        images_norm, channels = interface.load_dir_images(sample, 'img_cont', img = selected_images)
-                            #        image.view_histogram(images_norm, channels, geojson_file)
-
-
-                            #elif opt == x:
-                            #    selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
-                            #    if selected_images == None: continue
-                            #    else:
-                            #        images_norm, channels = interface.load_dir_images(sample, 'img_thre', img = selected_images)
-                            #        image.view_histogram(images_norm, channels, geojson_file)
 
                             #####################################################
                             ################### DEBUG OPTIONS ###################
@@ -227,11 +209,10 @@ def main(args):
                 print('UNEXPECTED OPTION')
                 input('\nPress Enter to continue...')
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true', help='Toggle debug mode)')
     args = parser.parse_args()
-
     main(args)
 
