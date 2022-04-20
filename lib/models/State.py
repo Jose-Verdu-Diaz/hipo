@@ -106,12 +106,12 @@ class State:
         self.current_sample.load_channels_images(im_type='image_cont')
         if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
 
-            if str(input('Use napari for selecting a percentile? (y/n)')) == 'y':
+            if utils.input_yes_no(txt='Use napari for selecting a percentile?'):
                 with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                     self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
             else:
-                low_p = float(input('Select a lower quantile: '))
-                top_p = float(input('Select a top quantile: '))
+                low_p = utils.input_number('Select a lower quantile (between 0 and 100)', cancel = False, range = (0,100), type = 'float')
+                top_p = utils.input_number(f'Select a upper quantile (between {low_p} and 100)', cancel = False, range = (low_p,100), type = 'float')
                 self.current_sample.channels[opt].contrast_limits = (low_p, top_p)
 
             self.current_sample = self.current_sample.contrast(opt = opt)

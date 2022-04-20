@@ -18,12 +18,7 @@ from lib.models.State import State
 import lib.consistency as consistency
 
 
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--debug', action='store_true', help='Toggle debug mode)')
-    args = parser.parse_args()
-
+def main(args):
     state = State(debug=args.debug)
 
     utils.print_title(state.debug)
@@ -147,13 +142,6 @@ if __name__ == '__main__':
                             elif opt == 8:
                                 state.show_segmentation()
 
-                            #elif opt == x:
-                            #    selected_images = utils.input_df_toggle(sample, df, checks = [consistency.check_existing_threshold])
-                            #    if selected_images == None: continue
-                            #    else:
-                            #        images_norm, channels = interface.load_dir_images(sample, 'img_thre', img = selected_images)
-                            #        image.show_napari(images_norm, channels)
-
 
                             #elif opt == x:
                             #    selected_images = utils.input_df_toggle(sample, df)
@@ -177,17 +165,6 @@ if __name__ == '__main__':
                             #    else:
                             #        images_norm, channels = interface.load_dir_images(sample, 'img_thre', img = selected_images)
                             #        image.view_histogram(images_norm, channels, geojson_file)
-
-
-                            #elif opt == x:
-                            #    name = utils.input_text(f'{color.RED}{color.BOLD}YOU ARE ABOUT TO DELETE THIS SAMPLE, DATA WILL BE LOST, ENTER NAME OF THE SAMPLE TO CONFIRM{color.ENDC}', display=[table])
-                            #    if name == None:
-                            #        continue
-                            #    elif name == sample:
-                            #        interface.delete_sample(name)
-                            #        break
-                            #    else:
-                            #        input(f'{color.RED}The input does not match the sample name. Press Enter to continue...{color.ENDC}')
 
                             #####################################################
                             ################### DEBUG OPTIONS ###################
@@ -249,3 +226,12 @@ if __name__ == '__main__':
             else: 
                 print('UNEXPECTED OPTION')
                 input('\nPress Enter to continue...')
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='store_true', help='Toggle debug mode)')
+    args = parser.parse_args()
+
+    main(args)
+
