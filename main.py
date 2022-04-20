@@ -4,7 +4,7 @@ Author: José Verdú Díaz
 
 This is the entry point of the application. The objective is
 to keep this module as simple as possible, using it as a menu
-system and delegating all other tasks to the other modules.
+system and delegating all other tasks to the the State object.
 '''
 
 import os

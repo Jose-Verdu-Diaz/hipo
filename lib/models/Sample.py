@@ -183,27 +183,6 @@ class Sample:
 
 
     def parse_tiff(self, tiff_path, summary_path):
-        '''Parses a hyperion tiff file with multiple images
-
-        Parameters
-        ----------
-        tiff_path
-            Path of tiff file
-        summary_path
-            Path to summary file
-
-        Returns
-        -------
-        tiff_slices
-            Numpy array of images
-        channels
-            List of channels
-        labels
-            List of labels
-        summary_df
-            Pandas DataFrame with the data of the summary file
-        '''
-
         tiff_slices = tf.TiffFile(tiff_path).asarray()
         channels, labels = [], []
 
@@ -229,16 +208,6 @@ class Sample:
         return self
 
     def update_df(self):
-        '''Generate a table with the information of a sample
-
-        Returns
-        -------
-        table
-            Printable string table with the information of the sample and a header
-        df
-            Pandas DataFrame containing information of the sample
-        '''
-
         if self.channels != None:
             clr = Color()
 
@@ -278,20 +247,6 @@ class Sample:
 ####################################################################
 
     def make_mask(self, geojson_file):
-        '''Creates mask images from coordinates tuples list
-
-        Parameters
-        ----------
-        geojson_file
-            path to geojson
-        size
-            Size of the mask
-
-        Returns
-        -------
-            Numpy array representing the mask
-        '''
-
         with open(geojson_file) as f: annotation_data = json.load(f)
 
         black = Image.new('1', Image.fromarray(self.channels[0].image).size)
