@@ -10,11 +10,13 @@ from lib.models.Colors import Color
 
 class Channel:
 
-    def __init__(self, name=None, label=None, image=None, th=None, contrast_limits=None):
+    def __init__(self, name=None, label=None, image=None, th=None, contrast_limit=None):
         self.name = name
         self.label = label
-        self.th = th
-        self.contrast_limits = contrast_limits
+        self.th = th # Threshold of norm image inside range [0, 1]
+        self.th_value = None # Threshold of raw image inside range [0, inf]
+        self.contrast_limit = contrast_limit # Percentile contrast limit inside range [0, 100]
+        self.max_value = None # Contrast limit inside range [0, inf]
 
         self.image = image
         self.image_norm = None
@@ -58,19 +60,19 @@ class Channel:
 
     def normalize(self, mask):
         masked = self.apply_mask(mask)
-        max_val = masked.max()
-        img_normalized = np.minimum(masked / max_val, 1.0)
-        self.image_norm = np.array(np.round(255.0 * img_normalized), dtype = np.uint8)
+        self.max_value = masked.max()
+        img_normalized = np.minimum(masked / self.max_value, 1.0)
+        self.image_norm = np.array(np.round(255.0 * img_normalized), dtype = np.float32)
         return self
 
 
     def contrast(self):
         clr = Color()
         print(f'{clr.GREY}Applying contrast on channel {self.name}{clr.ENDC}')
-        quant_lower = np.quantile(self.image_norm, self.contrast_limits[0] / 100)
-        quant_upper = np.quantile(self.image_norm, self.contrast_limits[1] / 100)
+        #quant_lower = np.quantile(self.image_norm, self.contrast_limits[0] / 100)
+        quant_upper = np.quantile(self.image_norm, self.contrast_limit / 100)
         update_contrast = lambda x, a, b: (x - a) / (b - a)
-        self.image_cont = update_contrast(self.image_norm, quant_lower, quant_upper)
+        self.image_cont = update_contrast(self.image_norm, 0, quant_upper)
         self.image_cont = np.where(self.image_cont > 0, self.image_cont, 0)
         self.image_cont = np.where(self.image_cont < 1, self.image_cont, 1)
         return self
@@ -78,6 +80,7 @@ class Channel:
 
     def threshold(self):
         clr = Color()
+        self.th_value = self.th * self.max_value
         print(f'{clr.GREY}Applying threshold on channel {self.name}{clr.ENDC}')
         self.image_thre = np.where(self.image_cont >= self.th, self.image_cont, 0)
         return self
@@ -87,9 +90,9 @@ class Channel:
 ####################################################################
 
     def analyse(self, mask):
-        mask_positive = np.logical_and(mask, self.image_thre > 0)
-        positive_pixels = self.image_thre[mask_positive]
-        all_pixels = self.image_thre[mask]
+        mask_positive = np.logical_and(mask, self.image >= self.th_value)
+        positive_pixels = self.image[mask_positive]
+        all_pixels = self.image[mask]
         mean_positive = np.mean(positive_pixels)
         area_positive = np.sum(mask_positive)
         mean_all = np.mean(all_pixels)

@@ -64,11 +64,15 @@ class State:
 
     def create_new(self, name):
         clr = Color()
-        sample = Sample(name=name)
-        sample.make_dir_structure()
-        self.set_samples()
-        print(f'\n{clr.GREEN}Sample created successfully!{clr.ENDC}')
-        input(f'\n{clr.YELLOW}Add sample files in {clr.UNDERLINE}samples/{name}/input{clr.ENDC}{clr.YELLOW}. Press Enter to continue...{clr.ENDC}')
+
+        if name in self.samples['Sample'].to_list():
+            input(f'\n{clr.RED}A sample with the same name already exists. Press Enter to continue...{clr.ENDC}')
+        else:
+            sample = Sample(name=name)
+            sample.make_dir_structure()
+            self.set_samples()
+            print(f'\n{clr.GREEN}Sample created successfully!{clr.ENDC}')
+            input(f'\n{clr.YELLOW}Add sample files in {clr.UNDERLINE}samples/{name}/input{clr.ENDC}{clr.YELLOW}. Press Enter to continue...{clr.ENDC}')
         return self
 
 
@@ -110,9 +114,8 @@ class State:
                 with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                     self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
             else:
-                low_p = utils.input_number('Select a lower quantile (between 0 and 100)', cancel = False, range = (0,100), type = 'float')
-                top_p = utils.input_number(f'Select a upper quantile (between {low_p} and 100)', cancel = False, range = (low_p,100), type = 'float')
-                self.current_sample.channels[opt].contrast_limits = (low_p, top_p)
+                top_p = utils.input_number(f'Select a quantile (between {0} and 100)', cancel = False, range = (0, 100), type = 'float')
+                self.current_sample.channels[opt].contrast_limit = top_p
 
             self.current_sample = self.current_sample.contrast(opt = opt)
             self.current_sample.save_channels_images(im_type='image_cont')
@@ -189,6 +192,7 @@ class State:
     def analyse(self):
         clr = Color()
         print(f'\n{clr.CYAN}Analyzing, this might take some seconds...{clr.ENDC}')
+        res = self.current_sample.load_channels_images(im_type = 'image')
         res = self.current_sample.load_channels_images(im_type = 'image_thre')
         if res == None:
             input(f'{clr.RED}File image_thre.npz does not exist, threshold some images first. Press Enter to continue...{clr.ENDC}')

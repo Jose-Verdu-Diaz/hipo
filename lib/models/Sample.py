@@ -220,7 +220,7 @@ class Sample:
                 names.append(c.name)
                 labels.append(c.label)
                 thresholds.append('-' if c.th == None else c.th)
-                contrasts.append('-' if c.contrast_limits == None else c.contrast_limits)
+                contrasts.append('-' if c.contrast_limit == None else c.contrast_limit)
 
             self.df = pd.DataFrame(
                     list(zip(names, labels, pixel_min, pixel_max, thresholds, contrasts)),
@@ -315,12 +315,12 @@ class Sample:
             # Store new percentile values on update
             layer.metadata = {
                 'percentile_upper': bc.spinner_upper_percentile.value(),
-                'percentile_lower': bc.spinner_lower_percentile.value()
+                #'percentile_lower': bc.spinner_lower_percentile.value()
             }
             def update(event):
                 layer.metadata = {
                     'percentile_upper': bc.spinner_upper_percentile.value(),
-                    'percentile_lower': bc.spinner_lower_percentile.value()
+                    #'percentile_lower': bc.spinner_lower_percentile.value()
                 }
             
             layer.events.connect(callback=update)
@@ -377,7 +377,8 @@ class Sample:
 
         # Return contrast
         elif function == 'contrast':
-            self.channels[opt].contrast_limits = (layer.metadata['percentile_lower'], layer.metadata['percentile_upper'])
+            #self.channels[opt].contrast_limit = (layer.metadata['percentile_lower'], layer.metadata['percentile_upper'])
+            self.channels[opt].contrast_limit = layer.metadata['percentile_upper']
             return self
 
         elif function == 'display':

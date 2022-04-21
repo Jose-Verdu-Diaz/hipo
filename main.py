@@ -19,6 +19,8 @@ import lib.consistency as consistency
 
 
 def main(args):
+    if not os.path.exists('samples'): os.mkdir('samples')
+
     state = State(debug=args.debug)
 
     utils.print_title(state.debug)
@@ -65,9 +67,6 @@ def main(args):
         4: 'Mask'
     }
 
-
-
-    if not os.path.exists('samples'): os.mkdir('samples')
 
     while True:
 
@@ -175,11 +174,7 @@ def main(args):
                                 pass
 
 
-            elif opt == 2:
-                name = utils.input_text('Enter new sample name', checks = [consistency.check_repeated_sample_name])
-
-                if name == None: pass
-                else: state = state.create_new(name)
+            elif opt == 2: state = state.create_new(utils.input_text('Enter new sample name'))
 
 
             #####################################################

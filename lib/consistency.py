@@ -7,8 +7,6 @@ Author: José Verdú Díaz
 
 Methods
 -------
-check_repeated_sample_name
-    Check if the sample name already exists
 '''
 
 import os
