@@ -65,12 +65,13 @@ class Channel:
         area_all = np.sum(mask)
         positive_fraction = float(area_positive)/float(area_all)
         summary_dict = {
-            "Channel": self.name,    
-            "Positive Area" : area_positive,
-            "Positive Mean" : mean_positive,
-            "Total Area": area_all,
-            "Total Mean" : mean_all, 
-            "Positive Fraction" : positive_fraction
+            'Channel': self.name,
+            'Threshold': self.th,  
+            'Positive Area' : area_positive,
+            'Positive Mean' : mean_positive,
+            'Total Area': area_all,
+            'Total Mean': mean_all, 
+           ' Positive Fraction': positive_fraction
         }
         return summary_dict
 

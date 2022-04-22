@@ -38,18 +38,17 @@ def main(args):
     }
 
     SAMPLE_OPTIONS = {
-        0: 'Back',
-        'a': 'Image Processing ',
-            3: 'Modify Threshold',
-        'b': 'Analyze ',
-            4: 'Perform Analysis',
-        'c': 'Fiber Segmentation',
-            5: 'Segment fibers',
-            6: 'Import Labels',
-        'd': 'Visualize ',    
-            7: 'Show Images',
-            8: 'Show Segmentation',
-            9: 'Show Histograms'
+        0: 'Back',           
+        'a': 'Analyze ',
+            1: 'Modify Threshold',
+            2: 'Perform Analysis',
+        'b': 'Fiber Segmentation',
+            3: 'Segment fibers',
+            4: 'Import Labels',
+        'c': 'Visualize ',    
+            5: 'Show Images',
+            6: 'Show Segmentation',
+            7: 'Show Histograms'
     }
 
 
@@ -59,10 +58,7 @@ def main(args):
 
     VISUALIZE_OPTIONS = {
         0: 'Raw',
-        1: 'Normalized',
-        2: 'Contrast',
-        3: 'Threshold',
-        4: 'Mask'
+        1: 'Mask'
     }
 
 
@@ -94,35 +90,32 @@ def main(args):
 
 
                             # Modify Threshold
-                            elif opt == 3:
+                            elif opt == 1:
                                 opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
                                 if opt == None: continue
                                 else: state.threshold(opt)
 
 
                             # Perform Analysis
-                            elif opt == 4: state.analyse()
+                            elif opt == 2: state.analyse()
 
 
                             # Segment fibers
-                            elif opt == 5: state.segment_fibers()   
+                            elif opt == 3: state.segment_fibers()   
 
 
                             # Import Labels
-                            elif opt == 6: state.import_labels()                     
+                            elif opt == 4: state.import_labels()                     
 
 
                             # Show Images
-                            elif opt == 7: 
+                            elif opt == 5: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
                                 else:
                                     display = {
                                         'image': opt[0],
-                                        'image_norm': opt[1],
-                                        'image_cont': opt[2],
-                                        'image_thre': opt[3],
-                                        'mask': opt[4],
+                                        'mask': opt[1]
                                     }
                                     state.show_napari(display)
                                     # garbage collector not working with napari, restart hipo to clean memory
@@ -131,7 +124,7 @@ def main(args):
 
 
                             # Show Segmentation
-                            elif opt == 8: state.show_segmentation()
+                            elif opt == 6: state.show_segmentation()
 
 
                             #####################################################

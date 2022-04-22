@@ -151,9 +151,8 @@ class State:
         clr = Color()
         print(f'\n{clr.CYAN}Analyzing, this might take some seconds...{clr.ENDC}')
         res = self.current_sample.load_channels_images(im_type = 'image')
-        res = self.current_sample.load_channels_images(im_type = 'image_thre')
         if res == None:
-            input(f'{clr.RED}File image_thre.npz does not exist, threshold some images first. Press Enter to continue...{clr.ENDC}')
+            input(f'{clr.RED}File image.npz does not exist. Press Enter to continue...{clr.ENDC}')
             return
         self.current_sample.analyse()
         self.dump() 
