@@ -214,17 +214,16 @@ class Sample:
             pixel_min = self.summary['MinValue'].tolist()
             pixel_max = self.summary['MaxValue'].tolist()
 
-            names, labels, thresholds, contrasts= [], [], [], []
+            names, labels, thresholds= [], [], []
 
             for c in self.channels:
                 names.append(c.name)
                 labels.append(c.label)
                 thresholds.append('-' if c.th == None else c.th)
-                contrasts.append('-' if c.contrast_limit == None else c.contrast_limit)
 
             self.df = pd.DataFrame(
-                    list(zip(names, labels, pixel_min, pixel_max, thresholds, contrasts)),
-                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.', 'Cont.']
+                    list(zip(names, labels, pixel_min, pixel_max, thresholds)),
+                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.']
                 )
 
             self.save()
@@ -264,17 +263,6 @@ class Sample:
 
         self.mask = np.array(black)
 
-
-    def normalize(self):
-        clr = Color()
-        for c in tqdm(self.channels, desc = f'{clr.GREY}Normalizing images', postfix=clr.ENDC): c = c.normalize(self.mask)
-        return self
-
-
-    def contrast(self, opt = 0):
-        self.channels[opt] = self.channels[opt].contrast()
-        return self
-
     
     def threshold(self, opt = 0):
         self.channels[opt] = self.channels[opt].threshold()
@@ -290,40 +278,43 @@ class Sample:
 
         # Open napari to obtain a threshold for a single image
         if function == 'threshold':
-            img = self.channels[opt].image_cont
+            img = self.channels[opt].apply_mask(self.mask)
             layer = viewer.add_image(img)
-            layer.metadata['threshold'] = 0
 
-            @magicgui(
-                auto_call=True,
-                th={'widget_type': 'FloatSlider', 'max': 1},
-                layout='horizontal'
-            )
-            def threshold(data: ImageData, th: float = 0) -> ImageData:
-                layer.metadata['threshold'] = th
-                return np.where(data > th, data, 0)
-
-            viewer.window.add_dock_widget(threshold, area='bottom')
-
-        # Open napari to obtain a contrast for a single image
-        elif function == 'contrast':
-            layer = viewer.add_image(self.channels[opt].image_norm)
-            
             bc = BrightnessContrast(viewer)
             viewer.window.add_dock_widget(bc)
 
             # Store new percentile values on update
             layer.metadata = {
-                'percentile_upper': bc.spinner_upper_percentile.value(),
-                #'percentile_lower': bc.spinner_lower_percentile.value()
+                'percentile_upper': bc.spinner_upper_percentile.value()
             }
             def update(event):
                 layer.metadata = {
-                    'percentile_upper': bc.spinner_upper_percentile.value(),
-                    #'percentile_lower': bc.spinner_lower_percentile.value()
+                    'percentile_upper': bc.spinner_upper_percentile.value()
                 }
-            
             layer.events.connect(callback=update)
+
+            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
+            napari.run()
+
+            viewer = napari.Viewer()
+
+            percentile_upper = layer.metadata['percentile_upper']
+            value_upper = np.quantile(img, percentile_upper / 100)
+            img = np.where(img < value_upper, img, value_upper)
+            layer = viewer.add_image(img, contrast_limits=[0, value_upper])
+
+            @magicgui(
+                auto_call=True,
+                th={'widget_type': 'FloatSlider', 'max': value_upper},
+                layout='horizontal'
+            )
+            def threshold(data: ImageData, th: float = 0) -> ImageData:
+                layer.metadata['threshold'] = th
+                return np.where(data > th, data, 0)
+            viewer.window.add_dock_widget(threshold, area='bottom')
+
+            viewer.layers['threshold result'].contrast_limits = [0, value_upper]
 
         # Open napari to display a stack of images
         elif function == 'display':
@@ -373,12 +364,6 @@ class Sample:
         # Return threshold
         if function == 'threshold':
             self.channels[opt].th = layer.metadata['threshold']
-            return self
-
-        # Return contrast
-        elif function == 'contrast':
-            #self.channels[opt].contrast_limit = (layer.metadata['percentile_lower'], layer.metadata['percentile_upper'])
-            self.channels[opt].contrast_limit = layer.metadata['percentile_upper']
             return self
 
         elif function == 'display':

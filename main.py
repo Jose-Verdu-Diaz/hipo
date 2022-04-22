@@ -40,18 +40,16 @@ def main(args):
     SAMPLE_OPTIONS = {
         0: 'Back',
         'a': 'Image Processing ',
-           1: 'Apply ROI and Normalize',
-           2: 'Modify Contrast',
-           3: 'Modify Threshold',
+            3: 'Modify Threshold',
         'b': 'Analyze ',
-           4: 'Perform Analysis',
+            4: 'Perform Analysis',
         'c': 'Fiber Segmentation',
-           5: 'Segment fibers',
-           6: 'Import Labels',
+            5: 'Segment fibers',
+            6: 'Import Labels',
         'd': 'Visualize ',    
-           7: 'Show Images',
-           8: 'Show Segmentation',
-           9: 'Show Histograms'
+            7: 'Show Images',
+            8: 'Show Segmentation',
+            9: 'Show Histograms'
     }
 
 
@@ -93,17 +91,6 @@ def main(args):
                             if opt == 0:
                                 state = state.clear_current_sample()
                                 break
-
-
-                            # Apply ROI and Normalize
-                            elif opt == 1: state.normalize()
-
-
-                            # Modify Contrast
-                            elif opt == 2:
-                                opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
-                                if opt == None: continue
-                                else: state.contrast(opt)
 
 
                             # Modify Threshold

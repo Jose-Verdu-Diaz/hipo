@@ -89,65 +89,23 @@ class State:
 ######################### IMAGE PROCESSING #########################
 ####################################################################
 
-    def normalize(self):
-        clr = Color()
-        print(f'\n{clr.CYAN}Normalizing, this might take some seconds...{clr.ENDC}')
-        self.current_sample.load_channels_images(im_type='image')
-        self.current_sample = self.current_sample.normalize()
-        self.current_sample.save_channels_images(im_type='image_norm')
-        self.dump()  
-        input(f'\n{clr.GREEN}Images normalized successfully! Press Enter to continue...{clr.ENDC}')
-
-    
-    def contrast(self, opt):
-        clr = Color()
-
-        res = self.current_sample.load_channels_images(im_type='image_norm')
-        if res == None:
-            input(f'{clr.RED}Images need to be normalized first. Press Enter to continue...{clr.ENDC}')
-            return
-
-        self.current_sample.load_channels_images(im_type='image_cont')
-        if isinstance(self.current_sample.channels[opt].image_norm, np.ndarray):
-
-            if utils.input_yes_no(txt='Use napari for selecting a percentile?'):
-                with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-                    self.current_sample = self.current_sample.show_napari(function='contrast', opt = opt)
-            else:
-                top_p = utils.input_number(f'Select a quantile (between {0} and 100)', cancel = False, range = (0, 100), type = 'float')
-                self.current_sample.channels[opt].contrast_limit = top_p
-
-            self.current_sample = self.current_sample.contrast(opt = opt)
-            self.current_sample.save_channels_images(im_type='image_cont')
-            self.current_sample.update_df()
-        else: 
-            input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs to be normalized first{clr.ENDC}')
-            return
-
-        self.dump() 
-        input(f'\n{clr.GREEN}Contrast applied successfully! Press Enter to continue...{clr.ENDC}')
-
 
     def threshold(self, opt):
         clr = Color()
-        if not os.path.isfile(f'samples/{self.current_sample.name}/image_cont.npz'):
-            input(f'{clr.RED}The file image_cont.npz does not exist. Apply a contrast to some images first. Press Enter to continue...{clr.ENDC}')
+        if not os.path.isfile(f'samples/{self.current_sample.name}/image.npz'):
+            input(f'{clr.RED}The file image.npz does not exist. Press Enter to continue...{clr.ENDC}')
             return
 
-        self.current_sample.load_channels_images(im_type='image_cont')
-        self.current_sample.load_channels_images(im_type='image_thre')
-        if isinstance(self.current_sample.channels[opt].image_cont, np.ndarray):
+        self.current_sample.load_channels_images(im_type='image')
+        if isinstance(self.current_sample.channels[opt].image, np.ndarray):
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                 self.current_sample = self.current_sample.show_napari(function='threshold', opt = opt)
-            self.current_sample = self.current_sample.threshold(opt = opt)
-            self.current_sample.save_channels_images(im_type='image_thre')
             self.current_sample.update_df()
         else: 
-            input(f'{clr.RED}Channel {self.current_sample.channels[opt].name} needs a contrast modification first{clr.ENDC}')
+            input(f'{clr.RED}Image not found for channel {self.current_sample.channels[opt].name}{clr.ENDC}')
             return
-
         self.dump() 
-        input(f'\n{clr.GREEN}Threshold applied successfully! Press Enter to continue...{clr.ENDC}')
+        input(f'\n{clr.GREEN}Threshold modified successfully! Press Enter to continue...{clr.ENDC}')
 
 ####################################################################
 ########################## VISUALIZATION ###########################
