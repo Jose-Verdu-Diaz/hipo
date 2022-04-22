@@ -121,14 +121,18 @@ class Sample:
                 return 1
 
 
-    def load_channels_images(self, im_type = 'image'):
+    def load_channels_images(self, im_type = 'image', opt = None):
         clr = Color()
         if os.path.isfile(f'samples/{self.name}/{im_type}.npz'):
             img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
         else: return None
-        for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
-            if c.name in img_stack.keys():
-                c = c.load_images(im_type=im_type, img=img_stack[c.name])        
+        if isinstance(opt, int): 
+            print(f'{clr.GREY}Loading {im_type}...{clr.ENDC}')
+            self.channels[opt] = self.channels[opt].load_images(im_type=im_type, img=img_stack[self.channels[opt].name])   
+        else:     
+            for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
+                if c.name in img_stack.keys():
+                    c = c.load_images(im_type=im_type, img=img_stack[c.name])        
         return self
 
 

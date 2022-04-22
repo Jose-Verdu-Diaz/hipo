@@ -96,7 +96,7 @@ class State:
             input(f'{clr.RED}The file image.npz does not exist. Press Enter to continue...{clr.ENDC}')
             return
 
-        self.current_sample.load_channels_images(im_type='image')
+        self.current_sample.load_channels_images(im_type='image', opt=opt)
         if isinstance(self.current_sample.channels[opt].image, np.ndarray):
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                 self.current_sample = self.current_sample.show_napari(function='threshold', opt = opt)
