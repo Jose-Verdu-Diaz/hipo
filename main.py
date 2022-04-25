@@ -43,12 +43,10 @@ def main(args):
             1: 'Modify Threshold',
             2: 'Perform Analysis',
         'b': 'Fiber Segmentation',
-            3: 'Segment fibers',
-            4: 'Import Labels',
+            3: 'Import Labels',
         'c': 'Visualize ',    
-            5: 'Show Images',
-            6: 'Show Segmentation',
-            7: 'Show Histograms'
+            4: 'Show Images',
+            5: 'Show Segmentation'
     }
 
 
@@ -101,15 +99,15 @@ def main(args):
 
 
                             # Segment fibers
-                            elif opt == 3: state.segment_fibers()   
+                            #elif opt == 3: state.segment_fibers()   
 
 
                             # Import Labels
-                            elif opt == 4: state.import_labels()                     
+                            elif opt == 3: state.import_labels()                     
 
 
                             # Show Images
-                            elif opt == 5: 
+                            elif opt == 4: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
                                 else:
@@ -124,7 +122,7 @@ def main(args):
 
 
                             # Show Segmentation
-                            elif opt == 6: state.show_segmentation()
+                            elif opt == 5: state.show_segmentation()
 
 
                             #####################################################
