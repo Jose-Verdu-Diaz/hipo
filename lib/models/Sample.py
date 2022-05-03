@@ -290,11 +290,11 @@ class Sample:
 
             # Store new percentile values on update
             layer.metadata = {
-                'percentile_upper': bc.spinner_upper_percentile.value()
+                'contrast_upper': layer.contrast_limits[1]
             }
             def update(event):
                 layer.metadata = {
-                    'percentile_upper': bc.spinner_upper_percentile.value()
+                    'contrast_upper': layer.contrast_limits[1]
                 }
             layer.events.connect(callback=update)
 
@@ -303,8 +303,7 @@ class Sample:
 
             viewer = napari.Viewer()
 
-            percentile_upper = layer.metadata['percentile_upper']
-            value_upper = np.quantile(img, percentile_upper / 100)
+            value_upper = layer.metadata['contrast_upper']
             img = np.where(img < value_upper, img, value_upper)
             layer = viewer.add_image(img, contrast_limits=[0, value_upper])
 
