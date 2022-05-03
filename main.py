@@ -40,13 +40,15 @@ def main(args):
     SAMPLE_OPTIONS = {
         0: 'Back',           
         'a': 'Analyze ',
-            1: 'Modify Threshold',
+            1: 'Change Threshold',
             2: 'Perform Analysis',
         'b': 'Fiber Segmentation',
             3: 'Import Labels',
         'c': 'Visualize ',    
             4: 'Show Images',
-            5: 'Show Segmentation'
+            5: 'Show Segmentation',
+        'd': 'Edit',
+            6: 'Change Name'
     }
 
 
@@ -125,6 +127,10 @@ def main(args):
                             elif opt == 5: state.show_segmentation()
 
 
+                            # Show Segmentation
+                            elif opt == 6: state.change_name(utils.input_text('Enter new sample name'))
+
+
                             #####################################################
                             ################### DEBUG OPTIONS ###################
                             #####################################################
@@ -152,7 +158,8 @@ def main(args):
                                 pass
 
 
-            elif opt == 2: state = state.create_new(utils.input_text('Enter new sample name'))
+            elif opt == 2: 
+                state = state.create_new(utils.input_text('Enter new sample name'))
 
 
             #####################################################

@@ -97,13 +97,15 @@ class State:
             return
 
         self.current_sample.load_channels_images(im_type='image', opt=opt)
-        if isinstance(self.current_sample.channels[opt].image, np.ndarray):
+        if utils.input_yes_no(txt='Use napari for selecting a percentile?'):
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
                 self.current_sample = self.current_sample.show_napari(function='threshold', opt = opt)
-            self.current_sample.update_df()
-        else: 
-            input(f'{clr.RED}Image not found for channel {self.current_sample.channels[opt].name}{clr.ENDC}')
-            return
+        else:
+            max = self.current_sample.channels[opt].apply_mask(self.current_sample.mask).max()
+            th = utils.input_number(f'Enter a threshold (between 0 and {max})', cancel = False, range = (0, max), type = 'float')
+            self.current_sample.channels[opt].th = th
+
+        self.current_sample.update_df()
         self.dump() 
         input(f'\n{clr.GREEN}Threshold modified successfully! Press Enter to continue...{clr.ENDC}')
 
@@ -142,7 +144,6 @@ class State:
             input(f'{clr.RED}Channel  Tm(169) needs a contrast modification first. Press Enter to continue...{clr.ENDC}')
             return            
 
-
 ####################################################################
 ############################ ANALYSIS ##############################
 ####################################################################
@@ -174,3 +175,21 @@ class State:
             input(f'{clr.RED}Channel Tm(169) has to be thresholded first. Press Enter to continue...{clr.ENDC}')
         else:
             input(f'\n{clr.GREEN}Fibers segmented successfully! Press Enter to continue...{clr.ENDC}')
+
+####################################################################
+############################## EDIT ################################
+####################################################################
+
+    def change_name(self, name):
+        clr = Color()
+
+        if name in self.samples['Sample'].to_list():
+            input(f'\n{clr.RED}A sample with the same name already exists. Press Enter to continue...{clr.ENDC}')
+        else:
+            sample = Sample(name=name)
+            os.rename(f'samples/{self.current_sample.name}', f'samples/{name}')
+            self.current_sample.name = name
+            self.current_sample.save()
+            self.set_samples()
+            input(f'\n{clr.GREEN}Sample created successfully! Press Enter to continue...{clr.ENDC}')
+        return self
