@@ -18,6 +18,7 @@ from lib.models.State import State
 import lib.consistency as consistency
 
 
+
 def main(args):
     if not os.path.exists('samples'): os.mkdir('samples')
 
