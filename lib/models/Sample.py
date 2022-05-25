@@ -121,14 +121,18 @@ class Sample:
                 return 1
 
 
-    def load_channels_images(self, im_type = 'image'):
+    def load_channels_images(self, im_type = 'image', opt = None):
         clr = Color()
         if os.path.isfile(f'samples/{self.name}/{im_type}.npz'):
             img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
         else: return None
-        for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
-            if c.name in img_stack.keys():
-                c = c.load_images(im_type=im_type, img=img_stack[c.name])        
+        if isinstance(opt, int): 
+            print(f'{clr.GREY}Loading {im_type}...{clr.ENDC}')
+            self.channels[opt] = self.channels[opt].load_images(im_type=im_type, img=img_stack[self.channels[opt].name])   
+        else:     
+            for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
+                if c.name in img_stack.keys():
+                    c = c.load_images(im_type=im_type, img=img_stack[c.name])        
         return self
 
 
@@ -214,17 +218,16 @@ class Sample:
             pixel_min = self.summary['MinValue'].tolist()
             pixel_max = self.summary['MaxValue'].tolist()
 
-            names, labels, thresholds, contrasts= [], [], [], []
+            names, labels, thresholds= [], [], []
 
             for c in self.channels:
                 names.append(c.name)
                 labels.append(c.label)
                 thresholds.append('-' if c.th == None else c.th)
-                contrasts.append('-' if c.contrast_limit == None else c.contrast_limit)
 
             self.df = pd.DataFrame(
-                    list(zip(names, labels, pixel_min, pixel_max, thresholds, contrasts)),
-                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.', 'Cont.']
+                    list(zip(names, labels, pixel_min, pixel_max, thresholds)),
+                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.']
                 )
 
             self.save()
@@ -264,17 +267,6 @@ class Sample:
 
         self.mask = np.array(black)
 
-
-    def normalize(self):
-        clr = Color()
-        for c in tqdm(self.channels, desc = f'{clr.GREY}Normalizing images', postfix=clr.ENDC): c = c.normalize(self.mask)
-        return self
-
-
-    def contrast(self, opt = 0):
-        self.channels[opt] = self.channels[opt].contrast()
-        return self
-
     
     def threshold(self, opt = 0):
         self.channels[opt] = self.channels[opt].threshold()
@@ -290,40 +282,42 @@ class Sample:
 
         # Open napari to obtain a threshold for a single image
         if function == 'threshold':
-            img = self.channels[opt].image_cont
+            img = self.channels[opt].apply_mask(self.mask)
             layer = viewer.add_image(img)
-            layer.metadata['threshold'] = 0
 
-            @magicgui(
-                auto_call=True,
-                th={'widget_type': 'FloatSlider', 'max': 1},
-                layout='horizontal'
-            )
-            def threshold(data: ImageData, th: float = 0) -> ImageData:
-                layer.metadata['threshold'] = th
-                return np.where(data > th, data, 0)
-
-            viewer.window.add_dock_widget(threshold, area='bottom')
-
-        # Open napari to obtain a contrast for a single image
-        elif function == 'contrast':
-            layer = viewer.add_image(self.channels[opt].image_norm)
-            
             bc = BrightnessContrast(viewer)
             viewer.window.add_dock_widget(bc)
 
             # Store new percentile values on update
             layer.metadata = {
-                'percentile_upper': bc.spinner_upper_percentile.value(),
-                #'percentile_lower': bc.spinner_lower_percentile.value()
+                'contrast_upper': layer.contrast_limits[1]
             }
             def update(event):
                 layer.metadata = {
-                    'percentile_upper': bc.spinner_upper_percentile.value(),
-                    #'percentile_lower': bc.spinner_lower_percentile.value()
+                    'contrast_upper': layer.contrast_limits[1]
                 }
-            
             layer.events.connect(callback=update)
+
+            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
+            napari.run()
+
+            viewer = napari.Viewer()
+
+            value_upper = layer.metadata['contrast_upper']
+            img = np.where(img < value_upper, img, value_upper)
+            layer = viewer.add_image(img, contrast_limits=[0, value_upper])
+
+            @magicgui(
+                auto_call=True,
+                th={'widget_type': 'FloatSlider', 'max': value_upper},
+                layout='horizontal'
+            )
+            def threshold(data: ImageData, th: float = 0) -> ImageData:
+                layer.metadata['threshold'] = th
+                return np.where(data > th, data, 0)
+            viewer.window.add_dock_widget(threshold, area='bottom')
+
+            viewer.layers['threshold result'].contrast_limits = [0, value_upper]
 
         # Open napari to display a stack of images
         elif function == 'display':
@@ -375,12 +369,6 @@ class Sample:
             self.channels[opt].th = layer.metadata['threshold']
             return self
 
-        # Return contrast
-        elif function == 'contrast':
-            #self.channels[opt].contrast_limit = (layer.metadata['percentile_lower'], layer.metadata['percentile_upper'])
-            self.channels[opt].contrast_limit = layer.metadata['percentile_upper']
-            return self
-
         elif function == 'display':
             for l in layers: del(l)
             del(layers)
@@ -396,7 +384,7 @@ class Sample:
     def analyse(self):
         result = []
         for c in self.channels:
-            if isinstance(getattr(c, 'image_thre'), np.ndarray):
+            if isinstance(getattr(c, 'image'), np.ndarray) and c.th != None:
                 result.append(c.analyse(self.mask))
         result_df = pd.DataFrame(result)
         result_df.to_csv(f'samples/{self.name}/analysis.csv', index=False)

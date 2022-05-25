@@ -18,6 +18,7 @@ from lib.models.State import State
 import lib.consistency as consistency
 
 
+
 def main(args):
     if not os.path.exists('samples'): os.mkdir('samples')
 
@@ -38,20 +39,17 @@ def main(args):
     }
 
     SAMPLE_OPTIONS = {
-        0: 'Back',
-        'a': 'Image Processing ',
-           1: 'Apply ROI and Normalize',
-           2: 'Modify Contrast',
-           3: 'Modify Threshold',
-        'b': 'Analyze ',
-           4: 'Perform Analysis',
-        'c': 'Fiber Segmentation',
-           5: 'Segment fibers',
-           6: 'Import Labels',
-        'd': 'Visualize ',    
-           7: 'Show Images',
-           8: 'Show Segmentation',
-           9: 'Show Histograms'
+        0: 'Back',           
+        'a': 'Analyze ',
+            1: 'Change Threshold',
+            2: 'Perform Analysis',
+        'b': 'Fiber Segmentation',
+            3: 'Import Labels',
+        'c': 'Visualize ',    
+            4: 'Show Images',
+            5: 'Show Segmentation',
+        'd': 'Edit',
+            6: 'Change Name'
     }
 
 
@@ -61,10 +59,7 @@ def main(args):
 
     VISUALIZE_OPTIONS = {
         0: 'Raw',
-        1: 'Normalized',
-        2: 'Contrast',
-        3: 'Threshold',
-        4: 'Mask'
+        1: 'Mask'
     }
 
 
@@ -95,47 +90,33 @@ def main(args):
                                 break
 
 
-                            # Apply ROI and Normalize
-                            elif opt == 1: state.normalize()
-
-
-                            # Modify Contrast
-                            elif opt == 2:
-                                opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
-                                if opt == None: continue
-                                else: state.contrast(opt)
-
-
                             # Modify Threshold
-                            elif opt == 3:
+                            elif opt == 1:
                                 opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
                                 if opt == None: continue
                                 else: state.threshold(opt)
 
 
                             # Perform Analysis
-                            elif opt == 4: state.analyse()
+                            elif opt == 2: state.analyse()
 
 
                             # Segment fibers
-                            elif opt == 5: state.segment_fibers()   
+                            #elif opt == 3: state.segment_fibers()   
 
 
                             # Import Labels
-                            elif opt == 6: state.import_labels()                     
+                            elif opt == 3: state.import_labels()                     
 
 
                             # Show Images
-                            elif opt == 7: 
+                            elif opt == 4: 
                                 opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
                                 if opt == None: continue
                                 else:
                                     display = {
                                         'image': opt[0],
-                                        'image_norm': opt[1],
-                                        'image_cont': opt[2],
-                                        'image_thre': opt[3],
-                                        'mask': opt[4],
+                                        'mask': opt[1]
                                     }
                                     state.show_napari(display)
                                     # garbage collector not working with napari, restart hipo to clean memory
@@ -144,7 +125,11 @@ def main(args):
 
 
                             # Show Segmentation
-                            elif opt == 8: state.show_segmentation()
+                            elif opt == 5: state.show_segmentation()
+
+
+                            # Show Segmentation
+                            elif opt == 6: state.change_name(utils.input_text('Enter new sample name'))
 
 
                             #####################################################
@@ -174,7 +159,8 @@ def main(args):
                                 pass
 
 
-            elif opt == 2: state = state.create_new(utils.input_text('Enter new sample name'))
+            elif opt == 2: 
+                state = state.create_new(utils.input_text('Enter new sample name'))
 
 
             #####################################################
