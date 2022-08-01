@@ -42,7 +42,7 @@ def main(args):
         0: 'Back',           
         'a': 'Analyze ',
             1: 'Change Threshold',
-            2: 'Perform Analysis',
+            2: 'Analyze',
         'b': 'Fiber Segmentation',
             3: 'Import Labels',
         'c': 'Visualize ',    
@@ -159,8 +159,10 @@ def main(args):
                                 pass
 
 
-            elif opt == 2: 
-                state = state.create_new(utils.input_text('Enter new sample name'))
+            elif opt == 2:
+                res = utils.input_text('Enter new sample name')
+                if res == None: continue
+                state = state.create_new(res)
 
 
             #####################################################

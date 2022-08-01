@@ -351,11 +351,11 @@ class Sample:
 
         elif function == 'fiber_labels':
             for c in self.channels:
-                if c.name == 'Tm(169)':
-                    if isinstance(getattr(c, 'image_cont'), np.ndarray): break
+                if c.name == 'Sm(149)':
+                    if isinstance(getattr(c, 'image'), np.ndarray): break
                     else: return None
 
-            viewer.add_image(c.image_cont, name = 'Image')
+            viewer.add_image(c.image, name = 'Image')
             viewer.add_labels(self.fiber_labels, name = 'Fibers')
                  
         else:
