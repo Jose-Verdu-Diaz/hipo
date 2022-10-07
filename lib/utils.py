@@ -145,13 +145,14 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
             else: prompt = '\nSelect an option: '
             opt = input(prompt)
 
-            if  opt == 'c': return None
-            else: opt = int(opt)
+            if cancel and opt == 'c': return None
+            else: 
+                if opt.isdigit(): opt = int(opt)
 
             if opt not in list(options.keys()): input(f'{color.RED}Option doesn\'t exist! Press enter to continue...{color.ENDC}')
             else: return opt
         except: 
-            input(f'{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
+            input(f'\n{color.RED}Invalid option! Press enter to continue...{color.ENDC}')
             continue
 
 
