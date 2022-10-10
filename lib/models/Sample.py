@@ -82,28 +82,6 @@ class Sample:
                     return 0
 
             while True: # Is his really needed???
-                #path = f'samples/{self.name}/input'
-
-                #try: 
-                #    result = consistency.check_input_files(self.name)
-                #    if not result is None: raise result
-
-                #except Exception as e: 
-                #    input(f'{clr.RED}{e} Press Enter to continue...{clr.ENDC}')
-                #    return 0           
-
-                #files = os.listdir(path)
-
-                #geojson_file, txt_file, tiff_file = '','',''
-
-                #for f in files:
-                #    path = f'samples/{self.name}/input/{f}'
-                #    if f.endswith('.txt'): txt_file = path
-                #    elif f.endswith('.tiff'): tiff_file = path
-                #    elif f.endswith('.geojson'): geojson_file = path
-
-                #images, channels, labels, summary = self.parse_tiff(tiff_file, txt_file)
-
                 images, channels, labels, summary = self.parse_tiff(tiff_path, txt_path)
 
                 self.img_size = images[0].shape # We assume the same size for all input images
@@ -120,7 +98,6 @@ class Sample:
                     self.channels.append(Channel(name=c, label=df['Label'].to_list()[i], image=df['Image'].to_list()[i]))
 
                 self.save_channels_images(im_type='image')
-                #self.make_mask(geojson_file)
                 self.make_mask(geojson_path)   
                 self.save()
                 self.update_df()
