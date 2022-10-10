@@ -22,11 +22,11 @@ class State:
 ################### LOADING AND SAVING FUNCTIONS ###################
 ####################################################################
     
-    def load_sample(self, name):
+    def load_sample(self, name, txt_path=None, geojson_path=None, tiff_path=None):
         clr = Color()
         print(f'{clr.CYAN}Loading sample, this can take some seconds...{clr.ENDC}')
         self.current_sample = Sample(name = name)
-        res, self.current_sample =  self.current_sample.load()
+        res, self.current_sample =  self.current_sample.load(txt_path, geojson_path, tiff_path)
         if res == 0: return 0
 
 
@@ -72,7 +72,20 @@ class State:
             sample.make_dir_structure()
             self.set_samples()
             print(f'\n{clr.GREEN}Sample created successfully!{clr.ENDC}')
-            input(f'\n{clr.YELLOW}Add sample files in {clr.UNDERLINE}samples/{name}/input{clr.ENDC}{clr.YELLOW}. Press Enter to continue...{clr.ENDC}')
+
+            root = tk.Tk()
+            root.withdraw()
+            print(f'\n{clr.YELLOW}Select the summary (.txt) file{clr.ENDC}')
+            txt_path = filedialog.askopenfilename(filetypes=[('text file', '*.txt')])
+            print(f'\n{clr.YELLOW}Select the roi (.geojson) file{clr.ENDC}')
+            geojson_path = filedialog.askopenfilename(filetypes=[('roi file', '*.geojson')])
+            print(f'\n{clr.YELLOW}Select the image (.tiff) file{clr.ENDC}')
+            tiff_path = filedialog.askopenfilename(filetypes=[('image file', '*.tiff')])
+
+            self.load_sample(name, txt_path, geojson_path, tiff_path)
+            self.dump()
+
+            #input(f'\n{clr.YELLOW}Add sample files in {clr.UNDERLINE}samples/{name}/input{clr.ENDC}{clr.YELLOW}. Press Enter to continue...{clr.ENDC}')
         return self
 
 

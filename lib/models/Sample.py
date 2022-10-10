@@ -65,40 +65,46 @@ class Sample:
         with open(f'{path}/sample.pkl', 'wb') as file: pkl.dump(self, file)
 
     
-    def load(self):
+    def load(self, txt_path=None, geojson_path=None, tiff_path=None):
         path = f'samples/{self.name}'
         with open(f'{path}/sample.pkl', 'rb') as file: self = pkl.load(file)
-        res = self.create_channels()
+        res = self.create_channels(txt_path, geojson_path, tiff_path)
 
         return res, self
 
     
-    def create_channels(self):
+    def create_channels(self, txt_path=None, geojson_path=None, tiff_path=None):
         if self.channels == None:
             clr = Color()
 
-            while True:
-                path = f'samples/{self.name}/input'
+            if txt_path == None or geojson_path == None or tiff_path == None:
+                    input(f'{clr.RED}No input files found. Press Enter to continue...{clr.ENDC}')
+                    return 0
 
-                try: 
-                    result = consistency.check_input_files(self.name)
-                    if not result is None: raise result
+            while True: # Is his really needed???
+                #path = f'samples/{self.name}/input'
 
-                except Exception as e: 
-                    input(f'{clr.RED}{e} Press Enter to continue...{clr.ENDC}')
-                    return 0           
+                #try: 
+                #    result = consistency.check_input_files(self.name)
+                #    if not result is None: raise result
 
-                files = os.listdir(path)
+                #except Exception as e: 
+                #    input(f'{clr.RED}{e} Press Enter to continue...{clr.ENDC}')
+                #    return 0           
 
-                geojson_file, txt_file, tiff_file = '','',''
+                #files = os.listdir(path)
 
-                for f in files:
-                    path = f'samples/{self.name}/input/{f}'
-                    if f.endswith('.txt'): txt_file = path
-                    elif f.endswith('.tiff'): tiff_file = path
-                    elif f.endswith('.geojson'): geojson_file = path
+                #geojson_file, txt_file, tiff_file = '','',''
 
-                images, channels, labels, summary = self.parse_tiff(tiff_file, txt_file)
+                #for f in files:
+                #    path = f'samples/{self.name}/input/{f}'
+                #    if f.endswith('.txt'): txt_file = path
+                #    elif f.endswith('.tiff'): tiff_file = path
+                #    elif f.endswith('.geojson'): geojson_file = path
+
+                #images, channels, labels, summary = self.parse_tiff(tiff_file, txt_file)
+
+                images, channels, labels, summary = self.parse_tiff(tiff_path, txt_path)
 
                 self.img_size = images[0].shape # We assume the same size for all input images
 
@@ -114,7 +120,8 @@ class Sample:
                     self.channels.append(Channel(name=c, label=df['Label'].to_list()[i], image=df['Image'].to_list()[i]))
 
                 self.save_channels_images(im_type='image')
-                self.make_mask(geojson_file)      
+                #self.make_mask(geojson_file)
+                self.make_mask(geojson_path)   
                 self.save()
                 self.update_df()
 
