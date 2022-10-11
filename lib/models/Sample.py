@@ -1,3 +1,4 @@
+from genericpath import isdir
 import os
 import gc
 import sys
@@ -12,6 +13,7 @@ import tabulate as tblt
 from magicgui import magicgui
 from PIL import Image, ImageDraw
 from napari.types import ImageData
+from datetime import datetime as dtm
 from napari_brightness_contrast._dock_widget import BrightnessContrast
 
 from lib.models.Colors import Color
@@ -125,7 +127,7 @@ class Sample:
 
     def load_fiber_labels(self):
         clr = Color()
-        print(f'{clr.GREY}Loading fiber lables...{clr.ENDC}')
+        print(f'{clr.GREY}Loading fiber labels...{clr.ENDC}')
         if os.path.isfile(f'samples/{self.name}/fiber_labels.npz'):
             self.fiber_labels = np.load(f'samples/{self.name}/fiber_labels.npz')['arr_0']
         else: return None
@@ -361,17 +363,16 @@ class Sample:
                 elif opt == 'l': layers.append(viewer.add_labels(self.fiber_labels, name = 'Fiber Labels', opacity=0.25, blending='additive'))
                 else:                              
                     layers.append(viewer.add_image(self.channels[opt].image, name = self.channels[opt].label, blending='additive'))
-                    #layers[-1].metadata['type'] = opt
-                    #layers[-1].metadata['ch_names'] = [c.name if isinstance(getattr(c, opt), np.ndarray) else 'NaN' for c in self.channels]
-                    #del(images)
-                    #del(names)
 
-                    #@viewer.dims.events.current_step.connect
-                    #def _on_change(event):
-                    #    idx = event.value[0]
-                    #    for l in layers:
-                    #        if l.name != 'Mask':
-                    #            l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
+            @magicgui(
+                call_button='Screenshot',
+                spn={'widget_type': 'FloatSpinBox', 'min': 1, 'max': 10},
+                layout='horizontal'
+            )
+            def screenshot(spn: float):
+                if not os.path.isdir(f'samples/{self.name}/screenshots'): os.makedirs(f'samples/{self.name}/screenshots')
+                viewer.screenshot(path=f'samples/{self.name}/screenshots/{dtm.now().strftime("%Y-%m-%d-%H-%M-%S")}.tiff', scale=spn)
+            viewer.window.add_dock_widget(screenshot, area='bottom')
 
                  
         else:
