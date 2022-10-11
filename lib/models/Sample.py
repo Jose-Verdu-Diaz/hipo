@@ -1,4 +1,3 @@
-from genericpath import isdir
 import os
 import gc
 import sys
@@ -17,7 +16,6 @@ from datetime import datetime as dtm
 from napari_brightness_contrast._dock_widget import BrightnessContrast
 
 from lib.models.Colors import Color
-import lib.consistency as consistency
 from lib.models.Channel import Channel
 
 

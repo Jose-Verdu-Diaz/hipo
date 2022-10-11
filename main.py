@@ -110,7 +110,7 @@ def main(args):
 
                 # Segment Point-Like Elements
                 elif opt == 4:
-                    pass
+                    input(f'{clr.RED}Work in progress, this will be released in a future update...{clr.ENDC}')
 
 
                 # Show Images
