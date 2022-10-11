@@ -138,30 +138,18 @@ class State:
             return                
         
         if options['m']: channels.append('m')
-        #if options['l']: channels.append('l')
+        if options['l']: 
+            channels.append('l')
+            res = self.current_sample.load_fiber_labels()
+            if res == None:
+                input(f'{clr.RED}File fiber_labels.npz does not exist, segment fibers first. Press Enter to continue...{clr.ENDC}')
+                return
 
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             self.current_sample.show_napari(options = channels, function = 'display')
 
         self.dump() 
-        gc.collect()
-
-
-    def show_segmentation(self):
-        clr = Color()
-        res = self.current_sample.load_channels_images(im_type = 'image', opt=44) # 44 is the id of Laminin
-        if res == None:
-            input(f'{clr.RED}File image.npz does not exist. Press Enter to continue...{clr.ENDC}')
-            return
-        res = self.current_sample.load_fiber_labels()
-        if res == None:
-            input(f'{clr.RED}File fiber_labels.npz does not exist, segment fibers first. Press Enter to continue...{clr.ENDC}')
-            return
-        with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-            res = self.current_sample.show_napari(function='fiber_labels')
-        if res == None:
-            input(f'{clr.RED}Channel Sm(149) does not exist. Press Enter to continue...{clr.ENDC}')
-            return            
+        gc.collect()         
 
 ####################################################################
 ############################ ANALYSIS ##############################

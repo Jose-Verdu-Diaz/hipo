@@ -357,7 +357,8 @@ class Sample:
             #if type(im_type) != dict: im_type = {im_type: True}
             layers = []
             for opt in options:
-                if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.5, blending='additive'))
+                if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.25, blending='additive'))
+                elif opt == 'l': layers.append(viewer.add_labels(self.fiber_labels, name = 'Fiber Labels', opacity=0.25, blending='additive'))
                 else:                              
                     layers.append(viewer.add_image(self.channels[opt].image, name = self.channels[opt].label, blending='additive'))
                     #layers[-1].metadata['type'] = opt
@@ -372,15 +373,6 @@ class Sample:
                     #        if l.name != 'Mask':
                     #            l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
 
-
-        elif function == 'fiber_labels':
-            for c in self.channels:
-                if c.name == 'Sm(149)':
-                    if isinstance(getattr(c, 'image'), np.ndarray): break
-                    else: return None
-
-            viewer.add_image(c.image, name = 'Image')
-            viewer.add_labels(self.fiber_labels, name = 'Fibers')
                  
         else:
             return None
@@ -397,9 +389,6 @@ class Sample:
             for l in layers: del(l)
             del(layers)
             gc.collect()
-
-        elif function == 'fiber_labels': 
-            return 1
 
 
 ####################################################################

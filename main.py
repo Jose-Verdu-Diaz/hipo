@@ -50,9 +50,8 @@ def main(args):
             4: 'Segment Dot-Like Elements',
         'c': 'Visualize ',    
             5: 'Show Images',
-            6: 'Show Segmentation',
         'd': 'Edit',
-            7: 'Change Name'
+            6: 'Change Name'
     }
 
 
@@ -134,9 +133,9 @@ def main(args):
                     options['m'], options['l'] = False, False
 
                     extra_opt = '| (c)ancel | (s)how | (m)ask | (l)abels |\n\n'
-                    options = utils.input_menu_toggle(options=options, display=[extra_opt + state.tabulate_sample(header=False)])
+                    options = utils.input_menu_toggle(options=options, untoggable=2, display=[extra_opt + state.tabulate_sample(header=False)])
 
-                    if opt == None: continue
+                    if options == None: continue
                     else:
                         state.show_napari(options)
 
@@ -145,12 +144,8 @@ def main(args):
                         os.execv(sys.executable, ['python'] + sys.argv)            
 
 
-                # Show Segmentation
-                elif opt == 6: state.show_segmentation()
-
-
-                # Show Segmentation
-                elif opt == 7: state.change_name(utils.input_text('Enter new sample name'))
+                # Change Name
+                elif opt == 6: state.change_name(utils.input_text('Enter new sample name'))
 
 
                 else:

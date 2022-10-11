@@ -157,7 +157,7 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
             continue
 
 
-def input_menu_toggle(options, cancel = True, display = []):
+def input_menu_toggle(options, cancel=True, untoggable=0, display=[]):
     '''Make the user select an option from a menu
 
     Parameters
@@ -168,6 +168,8 @@ def input_menu_toggle(options, cancel = True, display = []):
         additional options must be appended at the end
     cancel, optional
         Add a cancel option, by default True
+    untoggable, optional,
+        Int indicating the amount of non-toggable options in the 1st row.
     display, optional
         List of strings to print between the title and the menu, by default []
         The last element must correspond to the toggable options, where:
@@ -204,7 +206,7 @@ def input_menu_toggle(options, cancel = True, display = []):
                 # Select Toggable options of first line
                 first = lines[0].split('|')
                 first = [f for f in first if f]
-                _first = first[2:]
+                _first = first[untoggable:]
                 _first.reverse()
 
                 # Color if toggle
