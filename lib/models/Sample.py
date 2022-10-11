@@ -105,14 +105,17 @@ class Sample:
                 return 1
 
 
-    def load_channels_images(self, im_type = 'image', opt = None):
+    def load_channels_images(self, im_type = 'image', options = None):
         clr = Color()
         if os.path.isfile(f'samples/{self.name}/{im_type}.npz'):
             img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
         else: return None
-        if isinstance(opt, int): 
+        if isinstance(options, int): 
             print(f'{clr.GREY}Loading {im_type}...{clr.ENDC}')
-            self.channels[opt] = self.channels[opt].load_images(im_type=im_type, img=img_stack[self.channels[opt].name])   
+            self.channels[options] = self.channels[options].load_images(im_type=im_type, img=img_stack[self.channels[options].name])
+        if isinstance(options, list): 
+            for opt in tqdm(options, desc = f'{clr.GREY}Loading selected channels', postfix=clr.ENDC):
+                self.channels[opt] = self.channels[opt].load_images(im_type=im_type, img=img_stack[self.channels[opt].name]) 
         else:     
             for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
                 if c.name in img_stack.keys():
@@ -222,11 +225,11 @@ class Sample:
 ############################## UTILS ###############################
 ####################################################################
 
-    def tabulate(self):
+    def tabulate(self, header=True):
         if isinstance(self.df, pd.DataFrame):
             clr = Color()
             table = tblt.tabulate(self.df, headers = 'keys', tablefmt = 'github')
-            table = f'{clr.BOLD}{clr.UNDERLINE}Displaying sample:{clr.ENDC} {self.name}\n\n{table}'
+            if header: table = f'{clr.BOLD}{clr.UNDERLINE}Displaying sample:{clr.ENDC} {self.name}\n\n{table}'
             return table
 
 ####################################################################
@@ -260,13 +263,52 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, im_type = 'image', function = 'display', opt = 0):
+    def napari_display(self, im_type = 'image'):
+        clr = Color()  
+        viewer = napari.Viewer()
+
+        NAMES = {
+            'image': 'Raw',
+            'image_norm': 'Norm.',
+            'image_cont': 'Cont.',
+            'image_thre': 'Thre.'
+        }
+
+        if type(im_type) != dict: im_type = {im_type: True}
+        layers = []
+        for i, imt in enumerate(im_type):
+            if im_type[imt]:
+                if imt == 'mask':
+                    layers.append(viewer.add_image(self.mask, name = 'Mask'))
+                else:                              
+                    layers.append(viewer.add_image(np.stack([getattr(c, imt) if isinstance(getattr(c, imt), np.ndarray) else np.zeros(shape = self.img_size) for c in self.channels ]), name = imt))
+                    layers[-1].metadata['type'] = imt
+                    layers[-1].metadata['ch_names'] = [c.name if isinstance(getattr(c, imt), np.ndarray) else 'NaN' for c in self.channels]
+                    #del(images)
+                    #del(names)
+
+                    @viewer.dims.events.current_step.connect
+                    def _on_change(event):
+                        idx = event.value[0]
+                        for l in layers:
+                            if l.name != 'Mask':
+                                l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
+
+        print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
+        napari.run()
+
+        for l in layers: del(l)
+        del(layers)
+        gc.collect()
+
+
+    def show_napari(self, im_type = 'image', function = 'display', options = 0):
         clr = Color()  
         viewer = napari.Viewer()
 
         # Open napari to obtain a threshold for a single image
         if function == 'threshold':
-            img = self.channels[opt].apply_mask(self.mask)
+            img = self.channels[options].apply_mask(self.mask)
             layer = viewer.add_image(img)
 
             bc = BrightnessContrast(viewer)
@@ -312,25 +354,23 @@ class Sample:
                 'image_thre': 'Thre.'
             }
 
-            if type(im_type) != dict: im_type = {im_type: True}
+            #if type(im_type) != dict: im_type = {im_type: True}
             layers = []
-            for i, imt in enumerate(im_type):
-                if im_type[imt]:
-                    if imt == 'mask':
-                        layers.append(viewer.add_image(self.mask, name = 'Mask'))
-                    else:                              
-                        layers.append(viewer.add_image(np.stack([getattr(c, imt) if isinstance(getattr(c, imt), np.ndarray) else np.zeros(shape = self.img_size) for c in self.channels ]), name = imt))
-                        layers[-1].metadata['type'] = imt
-                        layers[-1].metadata['ch_names'] = [c.name if isinstance(getattr(c, imt), np.ndarray) else 'NaN' for c in self.channels]
-                        #del(images)
-                        #del(names)
+            for opt in options:
+                if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.5, blending='additive'))
+                else:                              
+                    layers.append(viewer.add_image(self.channels[opt].image, name = self.channels[opt].label, blending='additive'))
+                    #layers[-1].metadata['type'] = opt
+                    #layers[-1].metadata['ch_names'] = [c.name if isinstance(getattr(c, opt), np.ndarray) else 'NaN' for c in self.channels]
+                    #del(images)
+                    #del(names)
 
-                        @viewer.dims.events.current_step.connect
-                        def _on_change(event):
-                            idx = event.value[0]
-                            for l in layers:
-                                if l.name != 'Mask':
-                                    l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
+                    #@viewer.dims.events.current_step.connect
+                    #def _on_change(event):
+                    #    idx = event.value[0]
+                    #    for l in layers:
+                    #        if l.name != 'Mask':
+                    #            l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
 
 
         elif function == 'fiber_labels':
@@ -350,7 +390,7 @@ class Sample:
 
         # Return threshold
         if function == 'threshold':
-            self.channels[opt].th = layer.metadata['threshold']
+            self.channels[options].th = layer.metadata['threshold']
             return self
 
         elif function == 'display':
@@ -360,6 +400,7 @@ class Sample:
 
         elif function == 'fiber_labels': 
             return 1
+
 
 ####################################################################
 ############################ ANALYSIS ##############################

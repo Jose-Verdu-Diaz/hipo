@@ -110,22 +110,39 @@ def main(args):
 
 
                 # Segment Point-Like Elements
-                elif opt == 4: pass
+                elif opt == 4:
+                    pass
 
 
                 # Show Images
                 elif opt == 5: 
-                    opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
+                    #opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
+                    #if opt == None: continue
+                    #else:
+                    #    display = {
+                    #        'image': opt[0],
+                    #        'mask': opt[1]
+                    #    }
+                    #    state.show_napari(display)
+
+                        #state.napari_display(display)
+                        # garbage collector not working with napari, restart hipo to clean memory
+                    #    sys.stdout.flush()
+                    #    os.execv(sys.executable, ['python'] + sys.argv)
+
+                    options = dict(zip(list(state.current_sample.df.index), [False for _ in range (len(state.current_sample.df))]))
+                    options['m'], options['l'] = False, False
+
+                    extra_opt = '| (c)ancel | (s)how | (m)ask | (l)abels |\n\n'
+                    options = utils.input_menu_toggle(options=options, display=[extra_opt + state.tabulate_sample(header=False)])
+
                     if opt == None: continue
                     else:
-                        display = {
-                            'image': opt[0],
-                            'mask': opt[1]
-                        }
-                        state.show_napari(display)
-                        # garbage collector not working with napari, restart hipo to clean memory
+                        state.show_napari(options)
+
+                        #garbage collector not working with napari, restart hipo to clean memory
                         sys.stdout.flush()
-                        os.execv(sys.executable, ['python'] + sys.argv)
+                        os.execv(sys.executable, ['python'] + sys.argv)            
 
 
                 # Show Segmentation

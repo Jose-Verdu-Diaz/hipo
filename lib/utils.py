@@ -19,6 +19,7 @@ input_text
     Make the user enter a string
 '''
 
+from curses.ascii import isdigit
 import os
 import sys
 import pandas as pd
@@ -156,49 +157,85 @@ def input_menu_option(options, cancel = True, display = [], show_menu = True):
             continue
 
 
-def input_menu_toggle(options, cancel = True, display = [], show_menu = True):
+def input_menu_toggle(options, cancel = True, display = []):
     '''Make the user select an option from a menu
 
     Parameters
     ----------
     options
         Dictionary of options where the key is the option number and value 
-        is the option name
+        is a bool. The first options must be the channels fro ma sample, and
+        additional options must be appended at the end
     cancel, optional
         Add a cancel option, by default True
     display, optional
         List of strings to print between the title and the menu, by default []
-    show_menu, optional
-        Print the menu uptions, by default True
+        The last element must correspond to the toggable options, where:
+            1rst row is: '| non-toggable | non-toggable | toggable | ... | toggable |'
+            2nd row is an empty line (newline escape character)
+            3rd row is the header of a table
+            4th row is the separator is the separator between header and elements
+            5th to Nth elements are toggable options on the table
+            
+            Example:
+                |  (c)ancel  |  (s)how  |  (m)ask  |  (l)abels  |
+
+                |    | Channel   | Label             |
+                |----|-----------|-------------------|
+                |  0 | BCKG(190) | 190BCKG           |
+                |  1 | Ba(138)   | 138Ba             |
+                |  2 | Bi(209)   | 209Bi             |
 
     Returns
     -------
-        None if cancel is True and the user inputs 'c'
-        Integer with the input of the user otherwise
+        None if cancel is True and the user inputs 'c' (cancel)
+        Dictionary of toggled options if the user inputs 's' (show)
     '''
 
     clr = Color()
-    toggle = [False for i in options]
-    options_toggle = options.copy()
     while True:
+        _display = display.copy()
         clear()
-        for d in display: print(f'{d}\n')
+        for i, d in enumerate(_display):
+            if i == len(_display) - 1:
+                # Divide lines
+                lines = d.split('\n')
 
-        if show_menu: print_menu(options_toggle)
+                # Select Toggable options of first line
+                first = lines[0].split('|')
+                first = [f for f in first if f]
+                _first = first[2:]
+                _first.reverse()
+
+                # Color if toggle
+                for j, f in enumerate(_first):
+                    key = f.split('(')[1].split(')')[0]
+                    k = len(first) - j - 1
+                    if options[key]: first[k] = f'{clr.GREEN}{f}{clr.ENDC}'
+                    else: first[k] = f'{clr.GREY}{f}{clr.ENDC}'
+                lines[0] = f'| {" | ".join(first)} |'
+
+                # Color if channel toggled
+                for j, l in enumerate(lines[4:]):
+                    if options[j]: lines[j + 4] = l.replace('|', f'{clr.ENDC}|{clr.GREEN}') + clr.ENDC
+                    else: lines[j + 4] = l.replace('|', f'{clr.ENDC}|{clr.GREY}') + clr.ENDC
+
+                print('\n'.join(lines))
+
+            else: print(f'{d}\n')
 
         try:
-            if cancel: prompt = '\nSelect an option to toggle or "y" to proceed (\'c\' to cancel): '
-            else: prompt = '\nSelect an option to toggle or "y" to proceed: '
+            if cancel: prompt = '\nSelect an option (\'c\' to cancel): '
+            else: prompt = '\nSelect an option: '
             opt = input(prompt)
 
             if opt == 'c': return None
-            elif opt == 'y': return toggle
-            else: opt = int(opt)
+            elif opt == 's': return options
+            elif opt.isdigit(): opt = int(opt)
 
             if opt not in list(options.keys()): input(f'{clr.RED}Option doesn\'t exist! Press enter to continue...{clr.ENDC}')
             else: 
-                toggle[opt] = not toggle[opt]
-                options_toggle[opt] = f'{clr.GREEN}{options[opt]}{clr.ENDC}' if toggle[opt] else options[opt]            
+                options[opt] = not options[opt]
 
         except: 
             input(f'{clr.RED}Invalid option! Press enter to continue...{clr.ENDC}')

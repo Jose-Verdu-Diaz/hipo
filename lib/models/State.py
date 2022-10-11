@@ -89,8 +89,8 @@ class State:
         return self
 
 
-    def tabulate_sample(self):
-        return self.current_sample.tabulate()
+    def tabulate_sample(self, header=True):
+        return self.current_sample.tabulate(header)
 
 
     def list_samples(self):
@@ -126,17 +126,23 @@ class State:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, mode):
+    def show_napari(self, options):
         clr = Color()
-        if type(mode) != dict: mode = {mode: True}
-        for i, imt in enumerate(mode):
-            if mode[imt] and imt != 'mask': 
-                res = self.current_sample.load_channels_images(im_type = imt)
-                if res == None:
-                    input(f'{clr.RED}File {imt}.npz does not exist. Press Enter to continue...{clr.ENDC}')
-                    return                
+
+        channels = []
+        for opt in options: 
+            if options[opt] and opt not in ['m', 'l']: channels.append(opt)
+        res = self.current_sample.load_channels_images(options = opt)
+        if res == None:
+            input(f'{clr.RED}File {opt}.npz does not exist. Press Enter to continue...{clr.ENDC}')
+            return                
+        
+        if options['m']: channels.append('m')
+        #if options['l']: channels.append('l')
+
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-            self.current_sample.show_napari(im_type = mode, function = 'display')
+            self.current_sample.show_napari(options = channels, function = 'display')
+
         self.dump() 
         gc.collect()
 
