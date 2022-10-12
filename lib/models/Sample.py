@@ -263,36 +263,26 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def napari_display(self, im_type = 'image'):
+    def napari_display(self, options = 0):
         clr = Color()  
         viewer = napari.Viewer()
 
-        NAMES = {
-            'image': 'Raw',
-            'image_norm': 'Norm.',
-            'image_cont': 'Cont.',
-            'image_thre': 'Thre.'
-        }
-
-        if type(im_type) != dict: im_type = {im_type: True}
         layers = []
-        for i, imt in enumerate(im_type):
-            if im_type[imt]:
-                if imt == 'mask':
-                    layers.append(viewer.add_image(self.mask, name = 'Mask'))
-                else:                              
-                    layers.append(viewer.add_image(np.stack([getattr(c, imt) if isinstance(getattr(c, imt), np.ndarray) else np.zeros(shape = self.img_size) for c in self.channels ]), name = imt))
-                    layers[-1].metadata['type'] = imt
-                    layers[-1].metadata['ch_names'] = [c.name if isinstance(getattr(c, imt), np.ndarray) else 'NaN' for c in self.channels]
-                    #del(images)
-                    #del(names)
+        for opt in options:
+            if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.25, blending='additive'))
+            elif opt == 'l': layers.append(viewer.add_labels(self.fiber_labels, name = 'Fiber Labels', opacity=0.25, blending='additive'))
+            else:                              
+                layers.append(viewer.add_image(self.channels[opt].image, name = self.channels[opt].label, blending='additive'))
 
-                    @viewer.dims.events.current_step.connect
-                    def _on_change(event):
-                        idx = event.value[0]
-                        for l in layers:
-                            if l.name != 'Mask':
-                                l.name = f'{NAMES[l.metadata["type"]]}-{l.metadata["ch_names"][idx]}'
+        @magicgui(
+            call_button='Screenshot',
+            spn={'widget_type': 'FloatSpinBox', 'min': 1, 'max': 10, 'label': 'Scale'},
+            layout='horizontal'
+        )
+        def screenshot(spn: float):
+            if not os.path.isdir(f'samples/{self.name}/screenshots'): os.makedirs(f'samples/{self.name}/screenshots')
+            viewer.screenshot(path=f'samples/{self.name}/screenshots/{dtm.now().strftime("%Y-%m-%d-%H-%M-%S")}.tiff', scale=spn)
+        viewer.window.add_dock_widget(screenshot, area='bottom')
 
         print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
         napari.run()
@@ -347,14 +337,6 @@ class Sample:
 
         # Open napari to display a stack of images
         elif function == 'display':
-            NAMES = {
-                'image': 'Raw',
-                'image_norm': 'Norm.',
-                'image_cont': 'Cont.',
-                'image_thre': 'Thre.'
-            }
-
-            #if type(im_type) != dict: im_type = {im_type: True}
             layers = []
             for opt in options:
                 if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.25, blending='additive'))

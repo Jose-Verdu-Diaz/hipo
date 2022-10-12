@@ -115,20 +115,6 @@ def main(args):
 
                 # Show Images
                 elif opt == 5: 
-                    #opt = utils.input_menu_toggle(VISUALIZE_OPTIONS)
-                    #if opt == None: continue
-                    #else:
-                    #    display = {
-                    #        'image': opt[0],
-                    #        'mask': opt[1]
-                    #    }
-                    #    state.show_napari(display)
-
-                        #state.napari_display(display)
-                        # garbage collector not working with napari, restart hipo to clean memory
-                    #    sys.stdout.flush()
-                    #    os.execv(sys.executable, ['python'] + sys.argv)
-
                     options = dict(zip(list(state.current_sample.df.index), [False for _ in range (len(state.current_sample.df))]))
                     options['m'], options['l'] = False, False
 
@@ -139,7 +125,7 @@ def main(args):
                     else:
                         state.show_napari(options)
 
-                        #garbage collector not working with napari, restart hipo to clean memory
+                        # Memory leak related with napari or Qt, restart hipo to clean memory
                         sys.stdout.flush()
                         os.execv(sys.executable, ['python'] + sys.argv)            
 

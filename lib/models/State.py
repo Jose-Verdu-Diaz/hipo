@@ -132,11 +132,11 @@ class State:
         channels = []
         for opt in options: 
             if options[opt] and opt not in ['m', 'l']: channels.append(opt)
-        res = self.current_sample.load_channels_images(options = opt)
-        if res == None:
-            input(f'{clr.RED}File {opt}.npz does not exist. Press Enter to continue...{clr.ENDC}')
-            return                
-        
+        if len(channels) > 0: 
+            res = self.current_sample.load_channels_images(options = channels)
+            if res == None:
+                input(f'{clr.RED}File {opt}.npz does not exist. Press Enter to continue...{clr.ENDC}')
+                return                     
         if options['m']: channels.append('m')
         if options['l']: 
             channels.append('l')
@@ -146,7 +146,7 @@ class State:
                 return
 
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-            self.current_sample.show_napari(options = channels, function = 'display')
+            self.current_sample.napari_display(options = channels)
 
         self.dump() 
         gc.collect()         
