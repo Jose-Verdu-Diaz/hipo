@@ -21,8 +21,8 @@ class Channel:
 ################### LOADING AND SAVING FUNCTIONS ###################
 ####################################################################
 
-    def save(self, sample):
-        np.savez_compressed(f'samples/{sample}/{self.name}.npz', self.image_norm)
+    #def save(self, sample):
+    #    np.savez_compressed(f'samples/{sample}/{self.name}.npz', self.image_norm)
 
     
     def load_images(self, im_type = 'image', img = None):
@@ -38,9 +38,6 @@ class Channel:
             Channel
         '''
         self.image = None
-        self.image_norm = None
-        self.image_cont = None
-        self.image_thre = None
         return self 
 
 ####################################################################
@@ -75,7 +72,7 @@ class Channel:
         }
         return summary_dict
 
-
+    '''
     def segment_fibers(self, mask):
 
         img = np.array(self.image_thre * 255, dtype='uint8')
@@ -107,3 +104,4 @@ class Channel:
         labels = watershed(-D, markers, mask=thresh)
 
         return labels
+    '''

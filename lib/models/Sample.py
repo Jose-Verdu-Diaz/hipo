@@ -110,13 +110,14 @@ class Sample:
         if os.path.isfile(f'samples/{self.name}/{im_type}.npz'):
             img_stack = np.load(f'samples/{self.name}/{im_type}.npz')
         else: return None
+
         if isinstance(options, int): 
             print(f'{clr.GREY}Loading {im_type}...{clr.ENDC}')
             self.channels[options] = self.channels[options].load_images(im_type=im_type, img=img_stack[self.channels[options].name])
-        if isinstance(options, list): 
+        elif isinstance(options, list): 
             for opt in tqdm(options, desc = f'{clr.GREY}Loading selected channels', postfix=clr.ENDC):
                 self.channels[opt] = self.channels[opt].load_images(im_type=im_type, img=img_stack[self.channels[opt].name]) 
-        else:     
+        else:
             for c in tqdm(self.channels, desc = f'{clr.GREY}Loading {im_type}', postfix=clr.ENDC):
                 if c.name in img_stack.keys():
                     c = c.load_images(im_type=im_type, img=img_stack[c.name])        
@@ -263,7 +264,7 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def napari_display(self, options = 0):
+    def napari_display(self, options: list = []):
         clr = Color()  
         viewer = napari.Viewer()
 
@@ -292,84 +293,35 @@ class Sample:
         gc.collect()
 
 
-    def show_napari(self, im_type = 'image', function = 'display', options = 0):
+    def show_napari(self, options: list = []):
         clr = Color()  
         viewer = napari.Viewer()
 
-        # Open napari to obtain a threshold for a single image
-        if function == 'threshold':
-            img = self.channels[options].apply_mask(self.mask)
-            layer = viewer.add_image(img)
+        img_masked = self.channels[options[0]].apply_mask(self.mask)
+        layer = viewer.add_image(img_masked, name=self.channels[options[0]].label, contrast_limits=[0, img_masked.max()])
 
-            bc = BrightnessContrast(viewer)
-            viewer.window.add_dock_widget(bc)
+        @magicgui(
+            auto_call=True,
+            p={'widget_type': 'FloatSlider', 'max': 100, 'min': 70, 'step': 1, 'label': 'Percentile'},
+            a={'widget_type': 'SpinBox', 'max': img_masked.max(), 'min': 0, 'label': 'Absolute'},
+            mode={'choices': ['percentile', 'absolute']},
+            layout='horizontal'
+        )
+        def threshold(data: ImageData, p: float, a: int, mode='percentile') -> ImageData:
+            if mode == 'percentile':
+                th = np.percentile(data, p)
+            elif mode == 'absolute': th = a
+            layer.metadata['threshold'] = str(th)
+            return np.where(data < th, 0, data)
 
-            # Store new percentile values on update
-            layer.metadata = {
-                'contrast_upper': layer.contrast_limits[1]
-            }
-            def update(event):
-                layer.metadata = {
-                    'contrast_upper': layer.contrast_limits[1]
-                }
-            layer.events.connect(callback=update)
-
-            print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
-            napari.run()
-
-            viewer = napari.Viewer()
-
-            value_upper = layer.metadata['contrast_upper']
-            img = np.where(img < value_upper, img, value_upper)
-            layer = viewer.add_image(img, contrast_limits=[0, value_upper])
-
-            @magicgui(
-                auto_call=True,
-                th={'widget_type': 'FloatSlider', 'max': value_upper},
-                layout='horizontal'
-            )
-            def threshold(data: ImageData, th: float = 0) -> ImageData:
-                layer.metadata['threshold'] = th
-                return np.where(data > th, data, 0)
-            viewer.window.add_dock_widget(threshold, area='bottom')
-
-            viewer.layers['threshold result'].contrast_limits = [0, value_upper]
-
-        # Open napari to display a stack of images
-        elif function == 'display':
-            layers = []
-            for opt in options:
-                if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.25, blending='additive'))
-                elif opt == 'l': layers.append(viewer.add_labels(self.fiber_labels, name = 'Fiber Labels', opacity=0.25, blending='additive'))
-                else:                              
-                    layers.append(viewer.add_image(self.channels[opt].image, name = self.channels[opt].label, blending='additive'))
-
-            @magicgui(
-                call_button='Screenshot',
-                spn={'widget_type': 'FloatSpinBox', 'min': 1, 'max': 10},
-                layout='horizontal'
-            )
-            def screenshot(spn: float):
-                if not os.path.isdir(f'samples/{self.name}/screenshots'): os.makedirs(f'samples/{self.name}/screenshots')
-                viewer.screenshot(path=f'samples/{self.name}/screenshots/{dtm.now().strftime("%Y-%m-%d-%H-%M-%S")}.tiff', scale=spn)
-            viewer.window.add_dock_widget(screenshot, area='bottom')
-
-                 
-        else:
-            return None
-
+        viewer.window.add_dock_widget(threshold, area='bottom')
+        
         print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
         napari.run()
 
-        # Return threshold
-        if function == 'threshold':
-            self.channels[options].th = layer.metadata['threshold']
-            return self
-
-        elif function == 'display':
-            for l in layers: del(l)
-            del(layers)
-            gc.collect()
+        self.channels[options[0]].th = layer.metadata['threshold']
+        return self
+        
 
 
 ####################################################################

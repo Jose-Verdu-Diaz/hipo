@@ -103,16 +103,16 @@ class State:
 ####################################################################
 
 
-    def threshold(self, opt):
+    def threshold(self, opt: int):
         clr = Color()
         if not os.path.isfile(f'samples/{self.current_sample.name}/image.npz'):
             input(f'{clr.RED}The file image.npz does not exist. Press Enter to continue...{clr.ENDC}')
             return
 
-        self.current_sample.load_channels_images(im_type='image', opt=opt)
+        self.current_sample.load_channels_images(im_type='image', options=opt)
         if utils.input_yes_no(txt='Use napari for selecting a percentile?'):
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-                self.current_sample = self.current_sample.show_napari(function='threshold', opt = opt)
+                self.current_sample = self.current_sample.show_napari(options = [opt])
         else:
             max = self.current_sample.channels[opt].apply_mask(self.current_sample.mask).max()
             th = utils.input_number(f'Enter a threshold (between 0 and {max})', cancel = False, range = (0, max), type = 'float')
@@ -126,7 +126,7 @@ class State:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def show_napari(self, options):
+    def show_napari(self, options: dict):
         clr = Color()
 
         channels = []
