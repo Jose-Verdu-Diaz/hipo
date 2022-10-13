@@ -1,3 +1,4 @@
+from genericpath import isfile
 import os
 import gc
 import numpy as np
@@ -68,11 +69,6 @@ class State:
         if name in self.samples['Sample'].to_list():
             input(f'\n{clr.RED}A sample with the same name already exists. Press Enter to continue...{clr.ENDC}')
         else:
-            sample = Sample(name=name)
-            sample.make_dir_structure()
-            self.set_samples()
-            print(f'\n{clr.GREEN}Sample created successfully!{clr.ENDC}')
-
             root = tk.Tk()
             root.withdraw()
             print(f'\n{clr.YELLOW}Select the summary (.txt) file{clr.ENDC}')
@@ -81,6 +77,16 @@ class State:
             geojson_path = filedialog.askopenfilename(filetypes=[('roi file', '*.geojson')])
             print(f'\n{clr.YELLOW}Select the image (.tiff) file{clr.ENDC}')
             tiff_path = filedialog.askopenfilename(filetypes=[('image file', '*.tiff')])
+
+            if os.path.isfile(txt_path) and os.path.isfile(geojson_path) and os.path.isfile(tiff_path): pass
+            else: 
+                input(f'\n{clr.RED}There was a problem loading the input files. Press Enter to continue...{clr.ENDC}')
+                return self
+
+            sample = Sample(name=name)
+            sample.make_dir_structure()
+            self.set_samples()
+            print(f'\n{clr.GREEN}Sample created successfully!{clr.ENDC}')
 
             self.load_sample(name, txt_path, geojson_path, tiff_path)
             self.dump()
@@ -112,7 +118,7 @@ class State:
         self.current_sample.load_channels_images(im_type='image', options=opt)
         if utils.input_yes_no(txt='Use napari for selecting a percentile?'):
             with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-                self.current_sample = self.current_sample.show_napari(options = [opt])
+                self.current_sample = self.current_sample.napari_display(options = [opt], mask=True, threshold=True)
         else:
             max = self.current_sample.channels[opt].apply_mask(self.current_sample.mask).max()
             th = utils.input_number(f'Enter a threshold (between 0 and {max})', cancel = False, range = (0, max), type = 'float')
@@ -136,17 +142,19 @@ class State:
             res = self.current_sample.load_channels_images(options = channels)
             if res == None:
                 input(f'{clr.RED}File {opt}.npz does not exist. Press Enter to continue...{clr.ENDC}')
-                return                     
+                self.dump() 
+                return
         if options['m']: channels.append('m')
         if options['l']: 
             channels.append('l')
             res = self.current_sample.load_fiber_labels()
             if res == None:
                 input(f'{clr.RED}File fiber_labels.npz does not exist, segment fibers first. Press Enter to continue...{clr.ENDC}')
+                self.dump() 
                 return
 
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-            self.current_sample.napari_display(options = channels)
+            self.current_sample.napari_display(options = channels, screenshot=True)
 
         self.dump() 
         gc.collect()         

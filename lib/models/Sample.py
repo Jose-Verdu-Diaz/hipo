@@ -255,6 +255,10 @@ class Sample:
 
         self.mask = np.array(black)
 
+
+    def apply_mask(self, mask, img):
+        return np.where(mask, img, 0)
+
     
     def threshold(self, opt = 0):
         self.channels[opt] = self.channels[opt].threshold()
@@ -264,62 +268,79 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def napari_display(self, options: list = []):
-        clr = Color()  
+    def napari_display(self, options: list=[], mask=False, threshold=False, screenshot=False):
+        '''Shows images in napari and performs screenshotting and thresholding
+
+        Parameters
+        ----------
+        options, optional
+            List of images to show, by default []
+            Channel images are represented by its index (int) in slef.channels
+            The mask image is represented by the string 'm'
+            The fiber labels image is represented by the string 'l'
+        mask, optional
+            Apply the mask to the images, by default False
+        threshold, optional
+            Show the threshold selector and return a threshold, by default False
+            If True, only one image can be selected ( len(options)==1 )
+        '''
+
+        clr = Color()
+
+        if threshold and not len(options) == 1 and not isinstance(options[0], int):
+            input(f'{clr.RED}Only one channel can be selected if threshold=True. Press Enter to continue...{clr.ENDC}')
+            return self
+
         viewer = napari.Viewer()
 
         layers = []
         for opt in options:
             if opt == 'm': layers.append(viewer.add_image(self.mask, name = 'Mask', opacity=0.25, blending='additive'))
-            elif opt == 'l': layers.append(viewer.add_labels(self.fiber_labels, name = 'Fiber Labels', opacity=0.25, blending='additive'))
-            else:                              
-                layers.append(viewer.add_image(self.channels[opt].image, name = self.channels[opt].label, blending='additive'))
+            elif opt == 'l':
+                if mask: l = self.apply_mask(mask=self.mask, img=self.fiber_labels)
+                else: l = self.fiber_labels
+                layers.append(viewer.add_labels(l, name = 'Fiber Labels', opacity=0.25, blending='additive'))
+            else:
+                if mask: l = self.channels[opt].apply_mask(self.mask)
+                else: l = self.channels[opt].image                           
+                layers.append(viewer.add_image(l, name = self.channels[opt].label, blending='additive', contrast_limits=[0, l.max()]))
 
-        @magicgui(
-            call_button='Screenshot',
-            spn={'widget_type': 'FloatSpinBox', 'min': 1, 'max': 10, 'label': 'Scale'},
-            layout='horizontal'
-        )
-        def screenshot(spn: float):
-            if not os.path.isdir(f'samples/{self.name}/screenshots'): os.makedirs(f'samples/{self.name}/screenshots')
-            viewer.screenshot(path=f'samples/{self.name}/screenshots/{dtm.now().strftime("%Y-%m-%d-%H-%M-%S")}.tiff', scale=spn)
-        viewer.window.add_dock_widget(screenshot, area='bottom')
+        if screenshot:
+            @magicgui(
+                call_button='Screenshot',
+                spn={'widget_type': 'FloatSpinBox', 'min': 1, 'max': 10, 'label': 'Scale'},
+                layout='horizontal'
+            )
+            def screenshot(spn: float):
+                if not os.path.isdir(f'samples/{self.name}/screenshots'): os.makedirs(f'samples/{self.name}/screenshots')
+                viewer.screenshot(path=f'samples/{self.name}/screenshots/{dtm.now().strftime("%Y-%m-%d-%H-%M-%S")}.tiff', scale=spn)
+            viewer.window.add_dock_widget(screenshot, area='bottom')
+
+        if threshold:
+            @magicgui(
+                auto_call=True,
+                p={'widget_type': 'FloatSlider', 'max': 100, 'min': 70, 'step': 1, 'label': 'Percentile'},
+                a={'widget_type': 'SpinBox', 'max': layers[0].data.max(), 'min': 0, 'label': 'Absolute'},
+                mode={'choices': ['percentile', 'absolute']},
+                layout='horizontal'
+            )
+            def threshold(data: ImageData, p: float, a: int, mode='percentile') -> ImageData:
+                if mode == 'percentile':
+                    th = np.percentile(data, p)
+                elif mode == 'absolute': th = a
+                layers[0].metadata['threshold'] = str(th)
+                return np.where(data < th, 0, data)
+            viewer.window.add_dock_widget(threshold, area='bottom')
 
         print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
         napari.run()
+
+        if threshold: self.channels[options[0]].th = layers[0].metadata['threshold']
 
         for l in layers: del(l)
         del(layers)
         gc.collect()
 
-
-    def show_napari(self, options: list = []):
-        clr = Color()  
-        viewer = napari.Viewer()
-
-        img_masked = self.channels[options[0]].apply_mask(self.mask)
-        layer = viewer.add_image(img_masked, name=self.channels[options[0]].label, contrast_limits=[0, img_masked.max()])
-
-        @magicgui(
-            auto_call=True,
-            p={'widget_type': 'FloatSlider', 'max': 100, 'min': 70, 'step': 1, 'label': 'Percentile'},
-            a={'widget_type': 'SpinBox', 'max': img_masked.max(), 'min': 0, 'label': 'Absolute'},
-            mode={'choices': ['percentile', 'absolute']},
-            layout='horizontal'
-        )
-        def threshold(data: ImageData, p: float, a: int, mode='percentile') -> ImageData:
-            if mode == 'percentile':
-                th = np.percentile(data, p)
-            elif mode == 'absolute': th = a
-            layer.metadata['threshold'] = str(th)
-            return np.where(data < th, 0, data)
-
-        viewer.window.add_dock_widget(threshold, area='bottom')
-        
-        print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
-        napari.run()
-
-        self.channels[options[0]].th = layer.metadata['threshold']
         return self
         
 
