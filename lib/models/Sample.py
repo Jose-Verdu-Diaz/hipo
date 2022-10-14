@@ -1,7 +1,8 @@
+from curses.ascii import isdigit
 import os
 import gc
-import sys
 import json
+from turtle import color
 import napari
 import numpy as np
 import pandas as pd
@@ -11,9 +12,10 @@ import tifffile as tf
 import tabulate as tblt
 from magicgui import magicgui
 from PIL import Image, ImageDraw
-from napari.types import ImageData
 from datetime import datetime as dtm
-from napari_brightness_contrast._dock_widget import BrightnessContrast
+from skimage.filters._gaussian import gaussian
+from napari.types import ImageData, LayerDataTuple
+from skimage.filters.thresholding import threshold_yen, threshold_otsu
 
 from lib.models.Colors import Color
 from lib.models.Channel import Channel
@@ -268,7 +270,7 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def napari_display(self, options: list=[], mask=False, threshold=False, screenshot=False):
+    def napari_display(self, options: list=[], mask=False, threshold=False, screenshot=False, point_segm=False):
         '''Shows images in napari and performs screenshotting and thresholding
 
         Parameters
@@ -287,7 +289,7 @@ class Sample:
 
         clr = Color()
 
-        if threshold and not len(options) == 1 and not isinstance(options[0], int):
+        if (threshold or point_segm) and not len(options) == 1 and not isinstance(options[0], int):
             input(f'{clr.RED}Only one channel can be selected if threshold=True. Press Enter to continue...{clr.ENDC}')
             return self
 
@@ -304,6 +306,9 @@ class Sample:
                 if mask: l = self.channels[opt].apply_mask(self.mask)
                 else: l = self.channels[opt].image                           
                 layers.append(viewer.add_image(l, name = self.channels[opt].label, blending='additive', contrast_limits=[0, l.max()]))
+                if hasattr(self.channels[opt], 'points') and not self.channels[opt].points == None:
+                    l = self.channels[opt].points
+                    layers.append(viewer.add_points(l, name = f'{self.channels[opt].label} Points', face_color='red', edge_color='red', opacity=0.3))
 
         if screenshot:
             @magicgui(
@@ -332,10 +337,31 @@ class Sample:
                 return np.where(data < th, 0, data)
             viewer.window.add_dock_widget(threshold, area='bottom')
 
+        if point_segm:
+            @magicgui(
+                auto_call=True,
+                p={'widget_type': 'FloatSlider', 'max': 100, 'min': 97, 'step': 0.1, 'label': 'Percentile'},
+                s={'widget_type': 'FloatSlider', 'max': 3, 'min': 0, 'label': 'Sigma'},
+                mode={'choices': ['None', 'Otsu']},
+                layout='horizontal'
+            )
+            def cont_blur_thresh(data: ImageData, p: float, s: float, mode='None') -> LayerDataTuple:
+                u = np.percentile(data, p)
+                _data = data / u
+                _data = np.where(_data < 1, _data, 1)
+                _data = np.array(_data * 255, dtype='uint8')
+                _data = gaussian(_data, sigma=s)
+                if mode == 'None': res = _data
+                if mode == 'Otsu': res = _data > threshold_otsu(_data)
+                return (res, {'name': 'Result', 'contrast_limits': [0, res.max()]})
+            viewer.window.add_dock_widget(cont_blur_thresh, area='bottom')
+
+
         print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
         napari.run()
 
         if threshold: self.channels[options[0]].th = layers[0].metadata['threshold']
+        if point_segm: return viewer.layers['Result'].data
 
         for l in layers: del(l)
         del(layers)

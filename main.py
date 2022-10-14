@@ -110,7 +110,9 @@ def main(args):
 
                 # Segment Point-Like Elements
                 elif opt == 4:
-                    input(f'{clr.RED}Work in progress, this will be released in a future update...{clr.ENDC}')
+                    opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
+                    if opt == None: continue
+                    else: state.point_segm(opt)
 
 
                 # Show Images

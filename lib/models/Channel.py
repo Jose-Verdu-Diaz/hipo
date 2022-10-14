@@ -10,10 +10,11 @@ from lib.models.Colors import Color
 
 class Channel:
 
-    def __init__(self, name=None, label=None, image=None, th=None):
+    def __init__(self, name=None, label=None, th=None, points=None, image=None):
         self.name = name
         self.label = label
         self.th = th
+        self.points = points
 
         self.image = image
 

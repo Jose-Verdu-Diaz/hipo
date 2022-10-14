@@ -8,8 +8,10 @@ import tabulate as tblt
 from tkinter import filedialog
 
 import lib.utils as utils
-from lib.models.Sample import Sample
 from lib.models.Colors import Color
+from lib.image import segment_points
+from lib.models.Sample import Sample
+
 
 class State:
     def __init__(self, debug=False):
@@ -108,6 +110,26 @@ class State:
 ######################### IMAGE PROCESSING #########################
 ####################################################################
 
+    def point_segm(self, opt:int):
+        clr = Color()
+        if not os.path.isfile(f'samples/{self.current_sample.name}/image.npz'):
+            input(f'{clr.RED}The file image.npz does not exist. Press Enter to continue...{clr.ENDC}')
+            return
+
+        self.current_sample.load_channels_images(im_type='image', options=opt)
+        with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+            res = self.current_sample.napari_display(options = [opt], point_segm=True, mask=True)
+
+        good_contours, total_mask, points = segment_points(img=res, test=False, size=(15,300))
+        self.current_sample.channels[opt].points = points
+
+        with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+            res = self.current_sample.napari_display(options = [opt], mask=True)
+
+        self.current_sample.save()
+        self.dump()
+
+
 
     def threshold(self, opt: int):
         clr = Color()
@@ -185,6 +207,7 @@ class State:
             return
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             res = self.current_sample.segment_fibers()
+
         self.dump() 
         if res == None:
             input(f'{clr.RED}Channel Tm(169) has to be thresholded first. Press Enter to continue...{clr.ENDC}')
