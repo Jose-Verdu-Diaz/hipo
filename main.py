@@ -129,7 +129,7 @@ def main(args):
 
                         # Memory leak related with napari or Qt, restart hipo to clean memory
                         sys.stdout.flush()
-                        os.execv(sys.executable, ['python'] + sys.argv)            
+                        os.execv(sys.executable, ['python'] + sys.argv)
 
 
                 # Change Name

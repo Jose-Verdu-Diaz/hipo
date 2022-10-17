@@ -1,8 +1,6 @@
-from curses.ascii import isdigit
 import os
 import gc
 import json
-from turtle import color
 import napari
 import numpy as np
 import pandas as pd
@@ -11,11 +9,12 @@ from tqdm import tqdm
 import tifffile as tf
 import tabulate as tblt
 from magicgui import magicgui
+from napari.layers import Points
 from PIL import Image, ImageDraw
 from datetime import datetime as dtm
 from skimage.filters._gaussian import gaussian
 from napari.types import ImageData, LayerDataTuple
-from skimage.filters.thresholding import threshold_yen, threshold_otsu
+from skimage.filters.thresholding import threshold_otsu
 
 from lib.models.Colors import Color
 from lib.models.Channel import Channel
@@ -50,6 +49,10 @@ class Sample:
 
         self.save()
 
+    def save_points(self, opt:int=None):
+        if isinstance(opt, int) and hasattr(self.channels[opt], 'points') and not self.channels[opt].points.empty:
+            os.makedirs(f'samples/{self.name}/points/', exist_ok=True)
+            self.channels[opt].points.to_csv(f'samples/{self.name}/points/{self.name}_{self.channels[opt].label}_points.csv')
 
     def save(self):
         '''Stores a pickle file with the Sample object
@@ -208,16 +211,17 @@ class Sample:
             pixel_min = self.summary['MinValue'].tolist()
             pixel_max = self.summary['MaxValue'].tolist()
 
-            names, labels, thresholds= [], [], []
+            names, labels, thresholds, points = [], [], [], []
 
             for c in self.channels:
                 names.append(c.name)
                 labels.append(c.label)
                 thresholds.append('-' if c.th == None else c.th)
+                points.append('-' if not hasattr(c, 'points') or c.points.empty else len(c.points))
 
             self.df = pd.DataFrame(
-                    list(zip(names, labels, pixel_min, pixel_max, thresholds)),
-                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.']
+                    list(zip(names, labels, pixel_min, pixel_max, thresholds, points)),
+                    columns =['Channel', 'Label', 'Min', 'Max', 'Th.', '# points']
                 )
 
             self.save()
@@ -270,7 +274,7 @@ class Sample:
 ########################## VISUALIZATION ###########################
 ####################################################################
 
-    def napari_display(self, options: list=[], mask=False, threshold=False, screenshot=False, point_segm=False):
+    def napari_display(self, options: list=[], mask=False, threshold=False, screenshot=False, point_segm=False, point_filter=False):
         '''Shows images in napari and performs screenshotting and thresholding
 
         Parameters
@@ -289,7 +293,7 @@ class Sample:
 
         clr = Color()
 
-        if (threshold or point_segm) and not len(options) == 1 and not isinstance(options[0], int):
+        if (threshold or point_segm or point_filter) and not len(options) == 1 and not isinstance(options[0], int):
             input(f'{clr.RED}Only one channel can be selected if threshold=True. Press Enter to continue...{clr.ENDC}')
             return self
 
@@ -306,9 +310,12 @@ class Sample:
                 if mask: l = self.channels[opt].apply_mask(self.mask)
                 else: l = self.channels[opt].image                           
                 layers.append(viewer.add_image(l, name = self.channels[opt].label, blending='additive', contrast_limits=[0, l.max()]))
-                if hasattr(self.channels[opt], 'points') and not self.channels[opt].points == None:
-                    l = self.channels[opt].points
-                    layers.append(viewer.add_points(l, name = f'{self.channels[opt].label} Points', face_color='red', edge_color='red', opacity=0.3))
+                # use hasattr for compatibility with older HIPO versions
+                if hasattr(self.channels[opt], 'points') and not self.channels[opt].points.empty:
+                    df = self.channels[opt].points
+                    l = [[x, y] for x, y in zip(list(df['axis-0']), list(df['axis-1']))]
+                    a =  list(df['area'])
+                    layers.append(viewer.add_points(l, features={'area':a}, name = f'{self.channels[opt].label} Points', face_color='red', edge_color='red', opacity=0.5))
 
         if screenshot:
             @magicgui(
@@ -355,6 +362,24 @@ class Sample:
                 if mode == 'Otsu': res = _data > threshold_otsu(_data)
                 return (res, {'name': 'Result', 'contrast_limits': [0, res.max()]})
             viewer.window.add_dock_widget(cont_blur_thresh, area='bottom')
+
+
+        if point_filter:
+            # Waiting for magic gui to implement a range slider. Use 2 sliders for the moment
+            # https://forum.image.sc/t/getting-a-range-slider-on-napari/51728
+            @magicgui(
+                auto_call=True,
+                min={'widget_type': 'Slider', 'max': 100, 'min': 0, 'step': 1, 'label': 'Min. Area'},
+                max={'widget_type': 'Slider', 'max': 100, 'min': 0, 'step': 1, 'label': 'Max. Area'},
+                layout='horizontal'
+            )
+            def filter_area(layer: Points, min: int, max: int) -> LayerDataTuple:
+                a_min = np.percentile(list(layer.features['area']), min)
+                a_max = np.percentile(list(layer.features['area']), max)
+                idx = layer.features.index[(layer.features['area'] >= a_min) & (layer.features['area'] <= a_max)].tolist()
+                res = layer.data[idx]
+                return (res, {'name': 'Result', 'symbol': 'cross', 'face_color': 'blue', 'edge_color': 'transparent'}, 'points')
+            viewer.window.add_dock_widget(filter_area, area='bottom')
 
 
         print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')

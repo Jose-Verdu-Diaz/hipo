@@ -1,16 +1,16 @@
-from genericpath import isfile
 import os
 import gc
-import numpy as np
 import pandas as pd
 import tkinter as tk
+import seaborn as sns
 import tabulate as tblt
 from tkinter import filedialog
+import matplotlib.pyplot as plt
 
 import lib.utils as utils
 from lib.models.Colors import Color
-from lib.image import segment_points
 from lib.models.Sample import Sample
+from lib.image import segment_points
 
 
 class State:
@@ -93,7 +93,6 @@ class State:
             self.load_sample(name, txt_path, geojson_path, tiff_path)
             self.dump()
 
-            #input(f'\n{clr.YELLOW}Add sample files in {clr.UNDERLINE}samples/{name}/input{clr.ENDC}{clr.YELLOW}. Press Enter to continue...{clr.ENDC}')
         return self
 
 
@@ -118,14 +117,22 @@ class State:
 
         self.current_sample.load_channels_images(im_type='image', options=opt)
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-            res = self.current_sample.napari_display(options = [opt], point_segm=True, mask=True)
+            img = self.current_sample.napari_display(options = [opt], point_segm=True, mask=True)
 
-        good_contours, total_mask, points = segment_points(img=res, test=False, size=(15,300))
-        self.current_sample.channels[opt].points = points
+        points = segment_points(img)
+        x = [p[0] for p in points]
+        y = [p[1] for p in points]
+        a = [p[2] for p in points]
+        self.current_sample.channels[opt].points = pd.DataFrame(list(zip(range(len(x)), x, y, a)), columns=['index', 'axis-0', 'axis-1', 'area'])
 
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-            res = self.current_sample.napari_display(options = [opt], mask=True)
+            res = self.current_sample.napari_display(options = [opt], mask=True, point_filter=True)
 
+        #with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
+        #    res = self.current_sample.napari_display(options = [opt], mask=True)
+
+        self.current_sample.update_df()
+        self.current_sample.save_points(opt)
         self.current_sample.save()
         self.dump()
 
