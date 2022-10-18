@@ -128,8 +128,11 @@ class State:
         with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
             res = self.current_sample.napari_display(options = [opt], mask=True, point_filter=True)
 
-        #with utils.suppress_output(suppress_stdout=not self.debug, suppress_stderr=not self.debug):
-        #    res = self.current_sample.napari_display(options = [opt], mask=True)
+        x = [p[0] for p in res.data]
+        y = [p[1] for p in res.data]
+        a = list(res.features['area'])
+
+        self.current_sample.channels[opt].points = pd.DataFrame(list(zip(range(len(x)), x, y, a)), columns=['index', 'axis-0', 'axis-1', 'area'])    
 
         self.current_sample.update_df()
         self.current_sample.save_points(opt)

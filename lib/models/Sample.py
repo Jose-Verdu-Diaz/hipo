@@ -378,7 +378,19 @@ class Sample:
                 a_max = np.percentile(list(layer.features['area']), max)
                 idx = layer.features.index[(layer.features['area'] >= a_min) & (layer.features['area'] <= a_max)].tolist()
                 res = layer.data[idx]
-                return (res, {'name': 'Result', 'symbol': 'cross', 'face_color': 'blue', 'edge_color': 'transparent'}, 'points')
+                return (
+                        res, 
+                        {
+                            'name': 'Result', 
+                            'symbol': 'cross', 
+                            'face_color': 'blue', 
+                            'edge_color': 'transparent',
+                            'features': {
+                                'area': list(layer.features[(layer.features['area'] >= a_min) & (layer.features['area'] <= a_max)])
+                            }
+                        }, 
+                        'points'
+                    )
             viewer.window.add_dock_widget(filter_area, area='bottom')
 
 
@@ -386,7 +398,9 @@ class Sample:
         napari.run()
 
         if threshold: self.channels[options[0]].th = layers[0].metadata['threshold']
-        if point_segm: return viewer.layers['Result'].data
+        elif point_segm: return viewer.layers['Result'].data
+        elif point_filter: return viewer.layers['Result']
+
 
         for l in layers: del(l)
         del(layers)

@@ -8,8 +8,9 @@ def segment_points(img, size=(None, None), ratio=(None, None)):
     contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     filtered = []
-    for cnt in tqdm(contours, desc='Filtering Contours: '):
+    for cnt in tqdm(contours, desc='Finding Contours: '):
         area = cv2.contourArea(cnt)
+        if area == 0: continue
         x,y,w,h = cv2.boundingRect(cnt)
         aspect_ratio = float(w)/h
 
@@ -20,15 +21,13 @@ def segment_points(img, size=(None, None), ratio=(None, None)):
         else: filtered.append({'contour': cnt, 'area': area})
 
     points = []
-    for point in tqdm(filtered, desc='Creating Visualization: '):
+    for point in tqdm(filtered, desc='Creating Points: '):
         M = cv2.moments(point['contour'])
-        if M["m00"] == 0: continue
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
         a = point['area']
         points.append([cY, cX, a])
 
-
     print(f'Contours Found: {len(contours)}')
-    print(f'Contours After Filtering: {len(points)}')
+    print(f'Centroids Found: {len(points)}')
     return points

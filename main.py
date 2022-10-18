@@ -50,8 +50,8 @@ def main(args):
             4: 'Segment Dot-Like Elements',
         'c': 'Visualize ',    
             5: 'Show Images',
-        'd': 'Edit',
-            6: 'Change Name'
+        #'d': 'Edit',
+        #    6: 'Change Name'
     }
 
 
@@ -112,7 +112,11 @@ def main(args):
                 elif opt == 4:
                     opt = utils.input_menu_option(dict(zip(list(state.current_sample.df.index),list(state.current_sample.df['Channel']))), display = [state.tabulate_sample()], show_menu = False)
                     if opt == None: continue
-                    else: state.point_segm(opt)
+                    else: 
+                        state.point_segm(opt)
+                        #import pandas as pd
+                        #state.current_sample.channels[opt].points = pd.DataFrame()
+                        #state.current_sample.save()
 
 
                 # Show Images
@@ -133,7 +137,8 @@ def main(args):
 
 
                 # Change Name
-                elif opt == 6: state.change_name(utils.input_text('Enter new sample name'))
+                # BROKEN NEEDS FIX
+                #elif opt == 6: state.change_name(utils.input_text('Enter new sample name'))
 
 
                 else:
