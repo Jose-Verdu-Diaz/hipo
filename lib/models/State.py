@@ -139,6 +139,8 @@ class State:
         self.current_sample.save()
         self.dump()
 
+        input(f'\n{clr.GREEN}Points segmented successfully! Press Enter to continue...{clr.ENDC}')
+
 
 
     def threshold(self, opt: int):

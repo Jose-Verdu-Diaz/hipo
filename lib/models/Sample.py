@@ -369,8 +369,8 @@ class Sample:
             # https://forum.image.sc/t/getting-a-range-slider-on-napari/51728
             @magicgui(
                 auto_call=True,
-                min={'widget_type': 'Slider', 'max': 100, 'min': 0, 'step': 1, 'label': 'Min. Area'},
-                max={'widget_type': 'Slider', 'max': 100, 'min': 0, 'step': 1, 'label': 'Max. Area'},
+                min={'widget_type': 'Slider', 'max': 100, 'min': 0, 'value': 0, 'step': 1, 'label': 'Min. Area'},
+                max={'widget_type': 'Slider', 'max': 100, 'min': 0, 'value': 100, 'step': 1, 'label': 'Max. Area'},
                 layout='horizontal'
             )
             def filter_area(layer: Points, min: int, max: int) -> LayerDataTuple:
