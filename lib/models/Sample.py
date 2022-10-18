@@ -397,7 +397,7 @@ class Sample:
         print(f'{clr.CYAN}Opening Napari. Close Napari to continue...{clr.ENDC}')
         napari.run()
 
-        if threshold: self.channels[options[0]].th = layers[0].metadata['threshold']
+        if threshold: self.channels[options[0]].th = float(layers[0].metadata['threshold'])
         elif point_segm: return viewer.layers['Result'].data
         elif point_filter: return viewer.layers['Result']
 
