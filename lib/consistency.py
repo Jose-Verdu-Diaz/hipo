@@ -3,7 +3,7 @@
 This module contains some functions to perform consitency checks
 and avoid bugs.
 
-Author: José Verdú Díaz
+Author: José Verdú-Díaz
 
 Methods
 -------

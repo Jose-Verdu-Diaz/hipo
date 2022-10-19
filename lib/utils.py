@@ -3,7 +3,7 @@
 This module contains some auxiliary functions to read user input and 
 display data on the terminal
 
-Author: José Verdú Díaz
+Author: José Verdú-Díaz
 
 Methods
 -------
@@ -18,8 +18,6 @@ input_menu_option
 input_text
     Make the user enter a string
 """
-
-from curses.ascii import isdigit
 import os
 import sys
 import pandas as pd

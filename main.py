@@ -1,6 +1,6 @@
 """Tool for processing and analysing hyperion imaging.
 
-Author: José Verdú Díaz
+Author: José Verdú-Díaz
 
 This is the entry point of the application. The objective is
 to keep this module as simple as possible, using it as a menu
@@ -54,8 +54,6 @@ def main(args):
     if state.debug:
         MENU_OPTIONS.update(DEBUG_OPTIONS)
         SAMPLE_OPTIONS.update(DEBUG_OPTIONS)
-
-    VISUALIZE_OPTIONS = {0: "Raw", 1: "Mask"}
 
     while True:
         extra_opt = "(e)xit | (n)ew sample"

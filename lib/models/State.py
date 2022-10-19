@@ -1,11 +1,12 @@
+"""
+Author: José Verdú-Díaz
+"""
 import os
 import gc
 import pandas as pd
 import tkinter as tk
-import seaborn as sns
 import tabulate as tblt
 from tkinter import filedialog
-import matplotlib.pyplot as plt
 
 import lib.utils as utils
 from lib.models.Colors import Color

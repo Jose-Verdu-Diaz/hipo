@@ -1,3 +1,6 @@
+"""
+Author: José Verdú-Díaz
+"""
 import os
 import gc
 import json
