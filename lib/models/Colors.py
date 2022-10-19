@@ -5,6 +5,8 @@ obtain different terminal color codes
 
 Author: José Verdú-Díaz
 """
+
+
 class Color:
     def __init__(self):
         self.RED = "\033[31m"
