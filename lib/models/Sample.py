@@ -12,9 +12,9 @@ from tqdm import tqdm
 import tifffile as tf
 import tabulate as tblt
 from magicgui import magicgui
-from napari.layers import Points
 from PIL import Image, ImageDraw
 from datetime import datetime as dtm
+from napari.layers import Points, Image
 from skimage.filters._gaussian import gaussian
 from napari.types import ImageData, LayerDataTuple
 from skimage.filters.thresholding import threshold_otsu
@@ -323,6 +323,7 @@ class Sample:
         self,
         options: list = [],
         mask=False,
+        toggle_mask=False,
         threshold=False,
         screenshot=False,
         point_segm=False,
@@ -378,15 +379,21 @@ class Sample:
                 )
             else:
                 if mask:
+                    metadata = {"masked": True}
                     l = self.channels[opt].apply_mask(self.mask)
+
                 else:
+                    metadata = {"masked": False}
                     l = self.channels[opt].image
+
+                metadata["opt"] = opt
                 layers.append(
                     viewer.add_image(
                         l,
                         name=self.channels[opt].label,
                         blending="additive",
                         contrast_limits=[0, l.max()],
+                        metadata=metadata,
                     )
                 )
                 # use hasattr for compatibility with older HIPO versions
@@ -407,6 +414,42 @@ class Sample:
                             opacity=0.5,
                         )
                     )
+
+        if toggle_mask:
+
+            @magicgui(
+                call_button="Toggle Mask",
+                layout="horizontal",
+            )
+            def toggle_mask_img(layer: Image) -> LayerDataTuple:
+                if layer.name == "Mask":
+                    return
+
+                opt = layer.metadata["opt"]
+                masked = layer.metadata["masked"]
+
+                metadata = {"opt": opt}
+
+                if masked:
+                    res = self.channels[opt].image
+                    metadata["masked"] = False
+
+                else:
+                    res = self.apply_mask(
+                        mask=self.mask, img=self.channels[opt].apply_mask(self.mask)
+                    )
+                    metadata["masked"] = True
+
+                return (
+                    res,
+                    {
+                        "name": layer.name,
+                        "contrast_limits": [0, res.max()],
+                        "metadata": metadata,
+                    },
+                )
+
+            viewer.window.add_dock_widget(toggle_mask_img, area="bottom")
 
         if screenshot:
 

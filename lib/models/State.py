@@ -247,7 +247,9 @@ class State:
         with utils.suppress_output(
             suppress_stdout=not self.debug, suppress_stderr=not self.debug
         ):
-            self.current_sample.napari_display(options=channels, screenshot=True)
+            self.current_sample.napari_display(
+                options=channels, screenshot=True, toggle_mask=True
+            )
 
         self.dump()
         gc.collect()
