@@ -19,8 +19,8 @@ from skimage.filters._gaussian import gaussian
 from napari.types import ImageData, LayerDataTuple
 from skimage.filters.thresholding import threshold_otsu
 
-from lib.models.Colors import Color
 from lib.models.Channel import Channel
+from lib.models.Colors import Color, Colormap
 
 
 class Sample:
@@ -346,6 +346,7 @@ class Sample:
         """
 
         clr = Color()
+        cmap = Colormap()
 
         if (
             (threshold or point_segm or point_filter)
@@ -393,6 +394,7 @@ class Sample:
                         name=self.channels[opt].label,
                         blending="additive",
                         contrast_limits=[0, l.max()],
+                        colormap=cmap.next_cmap(),
                         metadata=metadata,
                     )
                 )
@@ -444,7 +446,7 @@ class Sample:
                     res,
                     {
                         "name": layer.name,
-                        "contrast_limits": [0, res.max()],
+                        # "contrast_limits": [0, res.max()],
                         "metadata": metadata,
                     },
                 )
