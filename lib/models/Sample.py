@@ -12,9 +12,10 @@ from tqdm import tqdm
 import tifffile as tf
 import tabulate as tblt
 from magicgui import magicgui
-from PIL import Image, ImageDraw
+from PIL import Image as PIL_Image
 from datetime import datetime as dtm
 from napari.layers import Points, Image
+from PIL import ImageDraw as PIL_ImageDraw
 from skimage.filters._gaussian import gaussian
 from napari.types import ImageData, LayerDataTuple
 from skimage.filters.thresholding import threshold_otsu
@@ -291,8 +292,8 @@ class Sample:
         with open(geojson_file) as f:
             annotation_data = json.load(f)
 
-        black = Image.new("1", Image.fromarray(self.channels[0].image).size)
-        imd = ImageDraw.Draw(black)
+        black = PIL_Image.new("1", PIL_Image.fromarray(self.channels[0].image).size)
+        imd = PIL_ImageDraw.Draw(black)
 
         for ann in annotation_data["features"]:
 
